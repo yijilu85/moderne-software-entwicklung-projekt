@@ -18,7 +18,7 @@
 - $ `git log` Zeigt den Verlauf an und noch mehr Infos wie z.B. Autoren
 - $ `git branch` Liste der verfügbaren Branches
 
-\codefragment git push 
+
 
 
 
