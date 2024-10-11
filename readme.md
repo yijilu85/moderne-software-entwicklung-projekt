@@ -1,17 +1,17 @@
 # Grundlagen Git Commands
 
 - **$ git init** Erstellung eines Git Repository/Projects
-- **$ git clone /..link../** Herunterladen bzw. Klonen Lokal ein Repository
-- **$ git add /..file../** Erstellung von Dateien
-- **$ git commit -a -m "message"** Hinzufügen von allen Dateien (-a) und einer Nachricht (-m "..")
+- **$ git clone /..link../** Herunterladen bzw. Klonen eines Repositorys
+- **$ git add /..file../** Fügt Dateien dem Staging Bereich hinzu
+- **$ git commit -m "message"** Hinzufügen/Speicherung der Änderungen mit einer Nachricht (-m "..")
 - **$ git push** Hochladen auf das Repository/Branch
 - **$ git pull** Herunterladen vom Repositorys/Branch
 - **$ git rm /..file../** löscht Dateien
 - **$ git branch /..Branch Name../** Erstellung eines Branches
-- **$ git checkout** Zum Main Branch wechseln
+- **$ git checkout** Branch wechseln
 - **$ git checkout -b /..Name../** Neuen Branch erstellen und dorthin wechseln
 - **$ git branch -d /..Name../** Bestimmten Branch löschen
-- **$git merge /..Branch name../** Fügt von einem anderen Branch den aktuellen zusammen
+- **$git merge /..Branch name../** Fügt Änderungen eines anderen Branches in den Aktuellen ein
 
 - **$ git help add** Öffnet die Dokumentation im Browser
 - **$ git status** Zeigt an, welche Dateien modizifiert wurden und welchen Status die besitzen
@@ -29,7 +29,7 @@ Vorausgesetzt wird ein bereits existierendes Repo.
 
 1. Öffne IntelliJ und klicke auf "New Project"
 2. Wähle "Project from Version Control"
-3. Link des Remote Repositorys Link im vorgesehen Feld eingeben
+3. Link des Remote Repositorys im vorgesehen Feld eingeben
 4. IntelliJ klont das Projekt selber und öffnet es automatisch
 
 Will man dennoch mit der Console arbeiten, werden die oben genannten Befehle und die Konsole benötigt.
