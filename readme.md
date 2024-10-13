@@ -169,10 +169,10 @@ Will man dennoch mit der Console arbeiten, werden die oben genannten Befehle und
 
 # Contributions:
 
-Git Repository Setup: Yi-Ji
-Versionskontrollsysteme: Mario
-Grundlagen Git Commands: Ruwim 
-Vorteile von Versionskontrolle: Stephan
-Best Practices im Workflow: Yi-Ji
-Git Integration in IntelliJ - Remote: Ruwim
-Git Integration in IntelliJ - Lokal: Ruwim
+- Git Repository Setup: Yi-Ji
+- Versionskontrollsysteme: Mario
+- Grundlagen Git Commands: Ruwim
+- Vorteile von Versionskontrolle: Stephan
+- Best Practices im Workflow: Yi-Ji
+- Git Integration in IntelliJ - Remote: Ruwim
+- Git Integration in IntelliJ - Lokal: Ruwim
