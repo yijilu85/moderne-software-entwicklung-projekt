@@ -1,7 +1,7 @@
 # Versionskontrollsysteme
 ## Geschichte und Entwicklung
 - erste Ansaetze 1962 in IEBUPDTE von IBM fuer OS/360
-    * erstes speziell dafuer entwickeltes Tool: [Source Code Control System](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/sccs.html)
+    * erstes speziell dafuer entwickeltes Tool: [Source Code Control System](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/sccs.html) (SCCS)
         - ebenfalls fuer OS/360
         - entwickelt von Bell Labs ab 1972
         - damals noch als System zur Versionskontrolle auf EINEM Rechner
