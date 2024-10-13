@@ -1,10 +1,11 @@
-## Inhalt
+# Inhalt
 
 - [Versionskontrollsysteme](#versionskontrollsysteme)
 - [Grundlagen Git Commands](#grundlagen-git-commands)
 - [Vorteile von Versionskontrolle](#vorteile-von-versionskontrolle)
 - [Best Practices im Workflow](#best-practices-im-workflow)
-- [Git Integration in IDEs](#git-integration-in-ides)
+- [Git Integration in IntelliJ - Remote](#git-integration-in-intellij---remote)
+- [Git Integration in IntelliJ - Lokal](#git-integration-in-intellij---lokal)
 
 # Versionskontrollsysteme
 ## Geschichte und Entwicklung
@@ -53,7 +54,7 @@
 - $ `git branch` Liste der verfügbaren Branches
 
 # Vorteile von Versionskontrolle
-## a. Kollaboration
+## Kollaboration
 
 Kollaboration oder Zusammenarbeit ist das gemeinsame Bemühen von mehreren Einzelpersonen oder Arbeitsgruppen, um eine Aufgabe zu bewältigen oder ein Projekt auszuführen.
 Hierbei können die Projektteams sowohl räumlich als auch organisatorisch getrennt sein.
@@ -91,50 +92,52 @@ Du erstellst einen Branch immer aus einem existierenden Branch. Normalerweise w�
 Da kannst dann in diesem Branch unabhängig von Änderungen arbeiten, die andere Personen im Repository machen.
 Ein Branch, den Du zur Erstellung einer Funktion aufbaust, wird häufig als Funktions-Branch oder Themen-Branch bezeichnet
 
-## b. Rollback
+## Rollback
 
 Als Rollback (vom englischen „roll back“ für „zurückrollen“ oder „zurückdrehen“) bezeichnet man in EDV-Systemen das „Zurücksetzen“ der einzelnen Verarbeitungsschritte einer Transaktion.
 Das System wird dadurch vollständig auf den Zustand vor dem Beginn der Transaktion zurückgeführt.
 Ein Rollback wird typischerweise im Fehlerfall angestoßen, falls beispielsweise ein Verarbeitungsschritt in der betreffenden Transaktion nicht korrekt durchgeführt werden kann.
 Im normalen Ablauf (ohne Fehlersituation) werden mit einem „Commit“ die Änderungen der Transaktion permanent gemacht.
-## c. History
+## History
 Eine History bietet die Möglichkeit den Überblick über diverse Versionsstände zu behalten und ihm Bedarfsfall zu vorherigen Versionen
 zurück zukehren, wenn es z.B. im Fehlerfall zu Problemen gekommen ist. Siehe hierzu auch unter dem Punkt b. Rollback.
 Zusätzlich ist auch ersichtlich durch wen eine Änderung herbeigeführt wurde, so dass im Fehlerfall auch eine schnellere Kommunikation
 stattfinden kann.
 
-### Verwenden von Branches
+# Best Practices im Workflow
+
+## Verwenden von Branches
 
 Jeder Entwickler sollte für neue Features oder Bugfixes einen eigenen Branch erstellen. Dies verhindert Konflikte oder
 Fehler im Main-Branch. Es gibt Namenskonventionen für Branches, wie z.B. `feature/branch1`, `bugfix/branch2`
 , `hotfix/branch2`.
 
-### Regelmäßiges Committen
+## Regelmäßiges Committen
 
 Kleine und häufige Commits sind leichter nachvollziehbar und bieten den Vorteil, dass ein Rollback einfacher
 durchzuführen ist, wenn einmal Fehler auftreten. Commit-Beschreibungen sollten präzise und informativ sein, um den Zweck
 der Änderungen verständlich zu machen.
 
-### Code Reviews und Pull Requests
+## Code Reviews und Pull Requests
 
 PRs sind der beste Weg, um Code in den Mainbranch zu integrieren. So können andere Teammitglieder den Code zu
 überprüfen (Code Review) und Feedback geben. Bevor ein Pull Request gemerged wird, sollte der PR von mindestens einem
 anderen Entwickler durchgeführt und approved werden. Dies verbessert die Code-Qualität und sorgt dafür, dass sich andere
 Entwickler auch mit dem Code der Anderen beschäftigen.
 
-### CI/CD-Integration
+## CI/CD-Integration
 
 Mit Continuous Integration (CI) sollte sichergestellt werden, dass alle Commits automatisch getestet werden. Tools wie
 Travis CI, GitHub Actions oder Jenkins lassen sich direkt in GitHub integrieren. Continuous Delivery (CD) sorgt dann
 dafür, dass neue Versionen automatisch deployed werden, sobald sie den Hauptbranch erreichen und alle Tests bestanden
 haben.
 
-### Sicherheitsaspekte beachten
+## Sicherheitsaspekte beachten
 
 Sensible Daten wie API-Schlüssel, Passwörter oder geheime Schlüssel sollten niemals im Repository gespeichert werden.
 Stattdessen sollten Umgebungsvariablen verwendet werden.
 
-### Git Ignore verwenden
+## Git Ignore verwenden
 
 Diese sensiblen Daten sollten in einer gitignore-Datei hinterlegt sein, damit sie nicht versehentlich in das Repository
 hochgeladen werden. Temporäre Dateien können so auch exkludiert werden.
