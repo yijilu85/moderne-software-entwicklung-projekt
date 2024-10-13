@@ -120,12 +120,12 @@ Will man dennoch mit der Console arbeiten, werden die oben genannten Befehle und
 4. Befehl "git init", um ein Lokales Repository anzulegen/initialisieren
 5. Falls nötig mit ".gitignore" eine .gitignore Datei hinzufügen
 
-Contributions:
+# Contributions:
 
 Git Repository Setup: Yi-Ji
 Versionskontrollsysteme: Mario
 Grundlagen Git Commands: Ruwim 
 Vorteile von Versionskontrolle: Stephan
 Best Practices im Workflow: Yi-Ji
-Git Integration in IntelliJ - Remote: 
+Git Integration in IntelliJ - Remote: Ruwim
 Git Integration in IntelliJ - Lokal: Ruwim
