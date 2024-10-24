@@ -6,3 +6,36 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+patientcare/HELP.md
+patientcare/target/
+patientcare/!.mvn/wrapper/maven-wrapper.jar
+patientcare/!**/src/main/**/target/
+patientcare/!**/src/test/**/target/
+patientcare/
+patientcare/### STS ###
+patientcare/.apt_generated
+patientcare/.classpath
+patientcare/.factorypath
+patientcare/.project
+patientcare/.settings
+patientcare/.springBeans
+patientcare/.sts4-cache
+patientcare/
+patientcare/### IntelliJ IDEA ###
+patientcare/.idea
+patientcare/*.iws
+patientcare/*.iml
+patientcare/*.ipr
+patientcare/
+patientcare/### NetBeans ###
+patientcare//nbproject/private/
+patientcare//nbbuild/
+patientcare//dist/
+patientcare//nbdist/
+patientcare//.nb-gradle/
+patientcare/build/
+patientcare/!**/src/main/**/build/
+patientcare/!**/src/test/**/build/
+patientcare/
+patientcare/### VS Code ###
+patientcare/.vscode/
