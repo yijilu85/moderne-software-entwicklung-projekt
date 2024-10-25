@@ -12,8 +12,8 @@ import java.util.Date;
 public class Note {
     private Date timestamp;
 
-    @OneToOne(mappedBy = "patient")
-    private Patient patient;
+//    @OneToOne(mappedBy = "patient")
+//    private Patient patient;
 
 //    @OneToOne(mappedBy = "doctor")
 //    private Doctor doctor;
