@@ -9,3 +9,37 @@
 .idea/*
 out/*
 .DS_Store
+# Logs
+.history/*
+patientcare-fe/.history
+patientcare-fe/logs
+patientcare-fe/*.log
+patientcare-fe/npm-debug.log*
+patientcare-fe/yarn-debug.log*
+patientcare-fe/yarn-error.log*
+patientcare-fe/pnpm-debug.log*
+patientcare-fe/lerna-debug.log*
+
+patientcare-fe/node_modules
+patientcare-fe/.DS_Store
+patientcare-fe/dist
+patientcare-fe/dist-ssr
+patientcare-fe/coverage
+patientcare-fe/*.local
+
+/cypress/videos/
+/cypress/screenshots/
+
+# Editor directories and files
+patientcare-fe/.vscode/*
+patientcare-fe/!.vscode/extensions.json
+patientcare-fe/.idea
+patientcare-fe/*.suo
+patientcare-fe/*.ntvs*
+patientcare-fe/*.njsproj
+patientcare-fe/*.sln
+patientcare-fe/*.sw?
+
+patientcare-fe/*.tsbuildinfo
+
+
