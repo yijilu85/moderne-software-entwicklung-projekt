@@ -14,7 +14,6 @@ import java.util.List;
 public class Note {
     private Date timestamp;
 
-
     @ManyToOne
     @JoinColumn(name = "patient")
     private Patient patient;
