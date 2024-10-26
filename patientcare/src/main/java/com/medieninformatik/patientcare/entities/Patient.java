@@ -2,6 +2,8 @@ package com.medieninformatik.patientcare.entities;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "patients")
 public class Patient {
@@ -10,11 +12,12 @@ public class Patient {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates the ID
     private Long id;
 
-    @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @Column(name = "last_name", nullable = false)
     private String lastName;
+
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    private List<Note> notes;
 
     // Default constructor
     public Patient() {
