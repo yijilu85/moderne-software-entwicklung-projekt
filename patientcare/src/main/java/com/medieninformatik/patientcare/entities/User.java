@@ -2,7 +2,7 @@ package com.medieninformatik.patientcare.entities;
 
 import jakarta.persistence.*;
 
-public interface User {
+public abstract class User {
 
 @Id
 @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates the ID

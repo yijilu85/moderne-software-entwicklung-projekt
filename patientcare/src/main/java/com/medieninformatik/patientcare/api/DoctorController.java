@@ -12,7 +12,7 @@ import java.util.Optional;
 @RequestMapping(path = "/doctors")
 public class DoctorController {
 
-private final DcotorService DoctorService;
+private final DoctorService doctorService;
 
 @Autowired
 public DoctorController(DoctorService doctorService) {
