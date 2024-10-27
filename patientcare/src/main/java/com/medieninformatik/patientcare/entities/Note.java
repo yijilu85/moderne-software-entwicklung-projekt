@@ -26,11 +26,9 @@ public class Note {
     @JsonIgnoreProperties("note")
     private List<File> files;
 
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates the ID
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     public void setId(Long id) {
         this.id = id;
     }
@@ -55,14 +53,6 @@ public class Note {
         this.patient = patient;
     }
 
-    //    public Doctor getDoctor() {
-//        return doctor;
-//    }
-//
-//    public void setDoctor(Doctor doctor) {
-//        this.doctor = doctor;
-//    }
-
     public List<File> getFiles(){
         return this.files;
     }
@@ -74,4 +64,14 @@ public class Note {
     public void removeFile(File file){
         this.files.remove(file);
     }
+
+    //    public Doctor getDoctor() {
+//        return doctor;
+//    }
+//
+//    public void setDoctor(Doctor doctor) {
+//        this.doctor = doctor;
+//    }
+
+
 }
