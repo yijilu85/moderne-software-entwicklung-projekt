@@ -18,9 +18,9 @@ public class Note {
     @JoinColumn(name = "patient")
     private Patient patient;
 
-//    @ManyToOne
-//    @JoinColumn(name = "doctor")
-//        private Doctor doctor;
+    @ManyToOne
+    @JoinColumn(name = "doctor")
+        private Doctor doctor;
 
     @OneToMany(mappedBy = "note", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("note")
@@ -65,13 +65,13 @@ public class Note {
         this.files.remove(file);
     }
 
-    //    public Doctor getDoctor() {
-//        return doctor;
-//    }
-//
-//    public void setDoctor(Doctor doctor) {
-//        this.doctor = doctor;
-//    }
+        public Doctor getDoctor() {
+        return doctor;
+   }
+
+    public void setDoctor(Doctor doctor) {
+        this.doctor = doctor;
+    }
 
 
 }
