@@ -2,11 +2,9 @@ package com.medieninformatik.patientcare.entities;
 
 import jakarta.persistence.*;
 
-import java.util.List;
-
 @Entity
-@Table(name = "patients")
-public class Patient
+@Table(name = "doctors")
+public class Doctor
 		extends User
 {
 
@@ -14,19 +12,19 @@ public class Patient
 @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates the ID
 private Long id;
 
-    private String firstName;
+@Column(name = "first_name", nullable = false)
+private String firstName;
 
-    private String lastName;
+@Column(name = "last_name", nullable = false)
+private String lastName;
 
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
-    private List<Note> notes;
-
-    // Default constructor
-    public Patient() {
-    }
+// Default constructor
+public Doctor()
+{
+}
 
 // Constructor with parameters
-public Patient(String firstName, String lastName)
+public Doctor(String firstName, String lastName)
 {
 	this.firstName = firstName;
 	this.lastName = lastName;
@@ -68,7 +66,7 @@ public void setLastName(String lastName)
 @Override
 public String toString()
 {
-	return "Patient{" +
+	return "Doctor{" +
 			"id=" + id +
 			", firstName='" + firstName + '\'' +
 			", lastName='" + lastName + '\'' +
