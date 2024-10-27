@@ -3,8 +3,8 @@ package com.medieninformatik.patientcare.entities;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "patients")
-public class Patient
+@Table(name = "doctors")
+public class Doctor
 		extends User
 {
 
@@ -19,12 +19,12 @@ private String firstName;
 private String lastName;
 
 // Default constructor
-public Patient()
+public Doctor()
 {
 }
 
 // Constructor with parameters
-public Patient(String firstName, String lastName)
+public Doctor(String firstName, String lastName)
 {
 	this.firstName = firstName;
 	this.lastName = lastName;
@@ -66,7 +66,7 @@ public void setLastName(String lastName)
 @Override
 public String toString()
 {
-	return "Patient{" +
+	return "Doctor{" +
 			"id=" + id +
 			", firstName='" + firstName + '\'' +
 			", lastName='" + lastName + '\'' +
