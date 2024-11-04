@@ -7,6 +7,7 @@ const ROOT_URL = "http://localhost";
 const SERVERPORT = 8080;
 
 const patients = ref<Patient[]>([]);
+
 onMounted(async () => {
   console.log("init patientlist");
   const res = await axios.get(`${ROOT_URL}:${SERVERPORT}/patients/1`);
