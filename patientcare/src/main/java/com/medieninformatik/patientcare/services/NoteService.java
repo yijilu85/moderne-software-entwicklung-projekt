@@ -1,10 +1,14 @@
 package com.medieninformatik.patientcare.services;
 
+import com.medieninformatik.patientcare.entities.Doctor;
+import com.medieninformatik.patientcare.entities.Note;
 import com.medieninformatik.patientcare.entities.Patient;
+import com.medieninformatik.patientcare.entities.User;
 import com.medieninformatik.patientcare.repo.PatientRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -25,4 +29,7 @@ public class NoteService {
         int sum = a +b;
         return sum;
     }
+
+//    public Note createNote(Patient patient, Doctor doctor, Date date, User creator) {
+//    }
 }
