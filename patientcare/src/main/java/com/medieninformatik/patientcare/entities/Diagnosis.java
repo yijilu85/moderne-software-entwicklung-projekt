@@ -23,26 +23,26 @@ public class Diagnosis {
 
     // Getter und Setter (optional, falls du sie benötigst)
     public Patient getPatient() {
-        return patient;
+        return this.patient;
     }
 
     public Doctor getDoctor() {
-        return doctor;
+        return this.doctor;
     }
 
     public User getCreator() {
-        return creator;
+        return this.creator;
     }
 
     public Date getDate() {
-        return date;
+        return this.date;
     }
 
     public String getIcdCode() {
-        return icdCode;
+        return this.icdCode;
     }
 
     public String getRecommendation() {
-        return recommendation;
+        return this.recommendation;
     }
 }

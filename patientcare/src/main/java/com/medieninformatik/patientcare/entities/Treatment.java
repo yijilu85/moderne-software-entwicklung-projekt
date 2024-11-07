@@ -23,26 +23,26 @@ public class Treatment {
 
     // Getter und Setter (optional, falls du sie benötigst)
     public Patient getPatient() {
-        return patient;
+        return this.patient;
     }
 
     public Doctor getDoctor() {
-        return doctor;
+        return this.doctor;
     }
 
     public User getCreator() {
-        return creator;
+        return this.creator;
     }
 
     public Date getDate() {
-        return date;
+        return this.date;
     }
 
     public Diagnosis getDiagnosis() {
-        return diagnosis;
+        return this.diagnosis;
     }
 
     public String getAction() {
-        return action;
+        return this.action;
     }
 }
