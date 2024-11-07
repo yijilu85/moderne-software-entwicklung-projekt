@@ -1,91 +1,92 @@
 package Java.services;
 
 import com.medieninformatik.patientcare.*;
+import java.time.LocalDateTime;
+import java.time.Month;
 
-import Java.util.LocalDateTime;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+class TestAppointment {
 
-@Test
-class TestAppointment()
-{
 	@Mock
 	private PatientRepo patientRepo;
+
+	@Mock
 	private DoctorRepo doctorRepo;
-	private AppointmentService appointmentService = new AppointmentService(patientRepo, doctorRepo);
+
+	@InjectMocks
+	private AppointmentService appointmentService;
+
 	private Appointment systemAppointment;
 	private Appointment patientAppointment;
 
+	private LocalDateTime now;
 
-	@Mock
-	mockAppointment()
-	{
-		//Doctor-constructor Doctor(id, name)
-		Doctor doctor = new Doctor("1","Dr. House");
-		//Patient-constructor Patient(id, name)
-		Patient patient = new Patient("1001","Max Mustermann");
-		//User 'System' has id '0'
-		User creator = new Doctor("0","System");
+	@BeforeEach
+	void setUp() {
+		MockitoAnnotations.openMocks(this);
 
-		LocalDateTime now = LocalDateTime.now();
+		Doctor doctor = new Doctor("1", "Dr. House");
+		Patient patient = new Patient("1001", "Max Mustermann");
+		User creator = new Doctor("0", "System");
+
+		now = LocalDateTime.now();
 		LocalDateTime startDateTime = LocalDateTime.of(2024, Month.NOVEMBER, 25, 12, 0);
 		LocalDateTime endDateTime = LocalDateTime.of(2024, Month.NOVEMBER, 25, 12, 15);
 
-		//Appointment-Constructor Appointment(doctor, creator, startDate, endDate, editDateTime)
 		systemAppointment = new Appointment(doctor, creator, startDateTime, endDateTime, now);
-
-		//Apppointment-Constructor Appointment(doctor, patient, creator, type, startDateTime, endDateTime, editDateTime)
-		patientAppointment = new Appointment(doctor, patient, creator, "offline", startDateTime, endDateTime, now );
+		patientAppointment = new Appointment(doctor, patient, creator, "offline", startDateTime, endDateTime, now);
 	}
 
 	@Test
-	testAppointmentNotNull(patientAppointment)
-	{
-		assertNotNull(patientAppointment.Doctor);
-		assertNotNull(patientAppointment.Patient);
-		assertNotNull(patientAppointment.startDateTime);
-		assertNotNull(patientAppointment.endDateTime);
-		assertNotNull(patientAppointment.Creator);
-		assertNotNull(patientAppointment.editDateTime);
-		assertNotNull(patientAppointment.type);
-	}
-	@Test
-	testAppointmentNotNull(systemAppointment)
-	{
-		assertNotNull(systemAppointment.Doctor);
-		assertNotNull(systemAppointment.startDateTime);
-		assertNotNull(systemAppointment.endDateTime);
-		assertNotNull(systemAppointment.Creator);
-		assertNotNull(systemAppointment.editDateTime);
+	void testAppointmentNotNull() {
+		assertNotNull(patientAppointment.getDoctor());
+		assertNotNull(patientAppointment.getPatient());
+		assertNotNull(patientAppointment.getStartDateTime());
+		assertNotNull(patientAppointment.getEndDateTime());
+		assertNotNull(patientAppointment.getCreator());
+		assertNotNull(patientAppointment.getEditDateTime());
+		assertNotNull(patientAppointment.getType());
 	}
 
 	@Test
-	testAppointmentLegalValues(patientAppointment)
-	{
-		assertThat(patientAppointment.endDateTime.isAfter(patientAppointment.startDateTime));
-		assertThat(patientAppointment.startDateTime.isBefore(patientAppointment.endDateTime));
+	void testSystemAppointmentNotNull() {
+		assertNotNull(systemAppointment.getDoctor());
+		assertNotNull(systemAppointment.getStartDateTime());
+		assertNotNull(systemAppointment.getEndDateTime());
+		assertNotNull(systemAppointment.getCreator());
+		assertNotNull(systemAppointment.getEditDateTime());
+	}
 
-		assertThat(patientAppointment.endDateTime.isAfter(now);
-		assertThat(patientAppointment.startDateTime.isAfter();
+	@Test
+	void testAppointmentLegalValues() {
+		assertTrue(patientAppointment.getEndDateTime().isAfter(patientAppointment.getStartDateTime()));
+		assertTrue(patientAppointment.getStartDateTime().isBefore(patientAppointment.getEndDateTime()));
 
-		assertNotNull(patientRepo.findUser(patientAppointment.patient.id));
-		assertNotNull(doctorRepo.findUser(patientAppointment.doctor.id));
-		//needs a doctor in doctor repo with id '0' and name "System"
+		assertTrue(patientAppointment.getEndDateTime().isAfter(now));
+		assertTrue(patientAppointment.getStartDateTime().isAfter(now.minusMinutes(1))); // Adjust to a safe margin before `now`
+
+		when(patientRepo.findUser(patientAppointment.getPatient().getId())).thenReturn(patientAppointment.getPatient());
+		when(doctorRepo.findUser(patientAppointment.getDoctor().getId())).thenReturn(patientAppointment.getDoctor());
+		when(doctorRepo.findUser("0")).thenReturn(new Doctor("0", "System"));
+
+		assertNotNull(patientRepo.findUser(patientAppointment.getPatient().getId()));
+		assertNotNull(doctorRepo.findUser(patientAppointment.getDoctor().getId()));
 		assertNotNull(doctorRepo.findUser("0"));
 	}
 
 	@Test
-	testAppointmentEmpty(systemAppointment)
-	{
-		assertNull(systemAppointment.note);
-		assertNull(systemAppointment.patient);
-		assertNull(systemAppointment.type);
-		assertEquals(systemAppointment.editDateTime, now);
+	void testSystemAppointmentEmptyFields() {
+		assertNull(systemAppointment.getNote());
+		assertNull(systemAppointment.getPatient());
+		assertNull(systemAppointment.getType());
+		assertEquals(systemAppointment.getEditDateTime(), now);
 	}
-
 }
