@@ -1,6 +1,9 @@
 package Java.services;
 
 import com.medieninformatik.patientcare.entities.*;
+import com.medieninformatik.patientcare.entities.Diagnosis;
+import com.medieninformatik.patientcare.entities.Treatment;
+
 import com.medieninformatik.patientcare.repo.PatientRepo;
 import com.medieninformatik.patientcare.services.NoteService;
 import org.junit.jupiter.api.Test;
@@ -76,6 +79,9 @@ class NoteServiceTest {
         Doctor doctor = new Doctor("Dr. Francis", "Smith");
         User creator = doctor;
         Date date = new Date();
+
+        Diagnosis diagnosis = new Diagnosis(patient, doctor, creator, date, "A00.1", "Empfehlungstext");
+        String action = "Tetanus Impfung verabreicht";
 
         assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(null, doctor, date, creator,
                 diagnosis, action));

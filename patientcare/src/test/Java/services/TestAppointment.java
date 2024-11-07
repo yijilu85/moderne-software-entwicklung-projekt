@@ -4,11 +4,15 @@ import com.medieninformatik.patientcare.*;
 import java.time.LocalDateTime;
 import java.time.Month;
 
+import com.medieninformatik.patientcare.entities.Appointment;
+import com.medieninformatik.patientcare.repo.DoctorRepo;
+import com.medieninformatik.patientcare.repo.PatientRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import services.AppointmentService;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
