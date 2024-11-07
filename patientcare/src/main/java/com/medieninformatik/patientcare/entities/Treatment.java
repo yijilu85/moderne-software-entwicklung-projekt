@@ -4,12 +4,12 @@ import java.util.Date;
 
 public class Treatment {
 
-    public Patient patient;
-    public Doctor doctor;
-    public User creator;
-    public Date date;
-    public Diagnosis diagnosis;
-    public String action;
+    private Patient patient;
+    private Doctor doctor;
+    private User creator;
+    private Date date;
+    private Diagnosis diagnosis;
+    private String action;
 
     // Konstruktor
     public Treatment(Patient patient, Doctor doctor, User creator, Date date, Diagnosis diagnosis, String action) {

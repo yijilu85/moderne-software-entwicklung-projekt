@@ -1,4 +1,5 @@
 package com.medieninformatik.patientcare.services;
+import com.medieninformatik.patientcare.services.HelperService;
 
 import com.medieninformatik.patientcare.entities.*;
 
@@ -18,10 +19,16 @@ import java.util.regex.Pattern;
 public class NoteService {
 
     private final PatientRepo patientRepo;
+    private final HelperService helperService;
+
 
     @Autowired
     public NoteService(PatientRepo patientRepo) {
         this.patientRepo = patientRepo;
+    }
+
+    public NoteService(HelperService helperService) {
+        this.helperService = helperService;
     }
 
     public Optional<Patient> getPatient(Long personId) {
@@ -65,24 +72,7 @@ public class NoteService {
     }
 
 
-    public boolean noteUsersEqualsAppointmentUsers(Appointment appointment, Diagnosis diagnosis) {
-        // Validierung: Falls appointment oder diagnosis null ist, gib false zurück
-        if (appointment == null || diagnosis == null) {
-            return false;
-        }
 
-        // Überprüfen, ob der Patient und der Arzt in der Diagnose mit denen des Termins übereinstimmen
-        boolean patientMatches = appointment.getPatient() != null &&
-                diagnosis.getPatient() != null &&
-                appointment.getPatient().getId().equals(diagnosis.getPatient().getId());
-
-        boolean doctorMatches = appointment.getDoctor() != null &&
-                diagnosis.getDoctor() != null &&
-                appointment.getDoctor().getId().equals(diagnosis.getDoctor().getId());
-
-        // Rückgabe true, wenn sowohl Patient als auch Arzt übereinstimmen, sonst false
-        return patientMatches && doctorMatches;
-    }
 
     public void addNoteToAppointment(Appointment appointment, Diagnosis diagnosis) {
         // Überprüfung, ob die Eingabewerte null sind
@@ -91,7 +81,7 @@ public class NoteService {
         }
 
         // Überprüfe, ob die Benutzer des Termins mit denen der Notiz übereinstimmen
-        if (!noteUsersEqualsAppointmentUsers(appointment, diagnosis)) {
+        if (!helperService.noteUsersEqualsAppointmentUsers(appointment, diagnosis)) {
             throw new IllegalArgumentException("Die Benutzer des Termins stimmen nicht mit denen der Notiz überein.");
         }
 
@@ -99,20 +89,19 @@ public class NoteService {
         appointment.addNote(diagnosis);
     }
 
+    private static final Set<String> VALID_MIME_TYPES = Set.of(
+            "text/plain",
+            "application/pdf",
+            "image/jpg",
+            "image/jpeg",
+            "image/png",
+            "video/mp4",
+            "audio/mpeg"
+    );
+
     public boolean noteFileTypeIsValidMime(String mimeType) {
-        // Erlaubte MIME-Typen
-        Set<String> validMimeTypes = new HashSet<>();
-        validMimeTypes.add("text/plain");
-        validMimeTypes.add("application/pdf");
-        validMimeTypes.add("image/jpg");
-        validMimeTypes.add("image/jpeg");
-        validMimeTypes.add("image/png");
-        validMimeTypes.add("video/mp4");
-        validMimeTypes.add("audio/mpeg");
-
-
         // Überprüfen, ob der MIME-Typ in der Liste der erlaubten Typen enthalten ist
-        return validMimeTypes.contains(mimeType);
+        return VALID_MIME_TYPES.contains(mimeType);
     }
 //    public Note createNote(Patient patient, Doctor doctor, Date date, User creator) {
 //    }
