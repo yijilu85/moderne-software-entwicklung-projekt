@@ -2,7 +2,7 @@ package com.medieninformatik.patientcare.entities;
 
 import java.util.Date;
 
-public class Diagnosis {
+public class Diagnosis extends Note {
 
     private Patient patient;
     private Doctor doctor;

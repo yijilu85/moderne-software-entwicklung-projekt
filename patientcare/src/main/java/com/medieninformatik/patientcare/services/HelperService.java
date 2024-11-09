@@ -2,11 +2,13 @@ package com.medieninformatik.patientcare.services;
 
 import com.medieninformatik.patientcare.entities.Appointment;
 import com.medieninformatik.patientcare.entities.Diagnosis;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+@Service
 public class HelperService {
 
     // Methode zum Validieren des Datums

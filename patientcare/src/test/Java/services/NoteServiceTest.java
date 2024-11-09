@@ -7,6 +7,7 @@ import com.medieninformatik.patientcare.entities.Treatment;
 
 import com.medieninformatik.patientcare.repo.PatientRepo;
 import com.medieninformatik.patientcare.services.NoteService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
@@ -19,8 +20,14 @@ class NoteServiceTest {
 
     @Mock
     private PatientRepo patientRepo;
-    private NoteService noteService = new NoteService(patientRepo);
+    private NoteService noteService;
     private HelperService helperService;
+
+
+    @BeforeEach
+    void setUp() {
+        noteService = new NoteService(patientRepo, helperService);
+    }
 
     //unit tests for diagnosis class
     @Test

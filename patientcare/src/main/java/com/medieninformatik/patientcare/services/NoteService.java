@@ -18,16 +18,13 @@ import java.util.regex.Pattern;
 @Service
 public class NoteService {
 
-    private final PatientRepo patientRepo;
-    private final HelperService helperService;
+    private PatientRepo patientRepo;
+    private HelperService helperService;
 
 
     @Autowired
-    public NoteService(PatientRepo patientRepo) {
+    public NoteService(PatientRepo patientRepo, HelperService helperService) {
         this.patientRepo = patientRepo;
-    }
-
-    public NoteService(HelperService helperService) {
         this.helperService = helperService;
     }
 
