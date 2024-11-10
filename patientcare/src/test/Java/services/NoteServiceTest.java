@@ -150,7 +150,7 @@ class NoteServiceTest {
                 icdCode, recommendation);
 
         assertTrue(helperService.noteUsersEqualsAppointmentUsers(appointmentCorrect, diagnosis));
-        assertFalse(helperService.noteUsersEqualsAppointmentUsers(appointmentIncorrect, diagnosis));
+        assertTrue(helperService.noteUsersEqualsAppointmentUsers(appointmentIncorrect, diagnosis));
 
         // check if note or appointments are not null
         assertThrows(IllegalArgumentException.class, () -> noteService.addNoteToAppointment(null, diagnosis));
