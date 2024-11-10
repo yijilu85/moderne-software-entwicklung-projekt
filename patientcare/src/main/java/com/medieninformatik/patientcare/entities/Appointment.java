@@ -1,74 +1,153 @@
 package com.medieninformatik.patientcare.entities;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Appointment{
 
-    private LocalDateTime APDate;
+    public enum Type{
+        ONLINE,
+        OFFLINE
+    };
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates the ID
+    private Long id;
+
     private Patient patient;
     private Doctor doctor;
-    private Note note;
+    private User creator;
+    private LocalDateTime createdAt;
+    private LocalDateTime startDateTime;
+    private LocalDateTime endDateTime;
+    private LocalDateTime editDateTime;
+    private List<Note> notes;
+    private Type type;
+
 
     //Konstruktor
-    public Appointment(LocalDateTime APDate, Patient patient, Doctor doctor, Note note){
+    public Appointment(Doctor doctor, User creator, LocalDateTime startDateTime,LocalDateTime endDateTime, LocalDateTime createdAt){
 
-        this.APDate = APDate;
-        this.patient = patient;
         this.doctor = doctor;
-        this.note = note;
-}
-    //Getter und Setter
-    public LocalDateTime getAPDate() {
-        return APDate;
+        this.creator = creator;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
+        this.createdAt = createdAt;
+        this.notes = new ArrayList<>();
 }
 
-    public void setAPDate(LocalDateTime APDate) {
-        this.APDate = APDate;
+    //Konstruktor
+    public Appointment(Doctor doctor, Patient patient, User creator, Type type, LocalDateTime startDateTime,LocalDateTime endDateTime, LocalDateTime createdAt){
+
+        this.doctor = doctor;
+        this.patient = patient;
+        this.creator = creator;
+        this.type = type;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
+        this.createdAt = createdAt;
+        this.notes = new ArrayList<>();
+    }
+
+    /////////////////////////////////////////////////////////////////////////Getter
+    public long getId() {
+        return this.id;
+    }
+
+    public LocalDateTime getStartDateTime() {
+        return this.startDateTime;
+    }
+
+    public LocalDateTime getEndDateTime() {
+        return this.endDateTime;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return this.createdAt;
+    }
+
+    public LocalDateTime getEditDateTime() {
+        return this.editDateTime;
+    }
+
+    public User getCreator() {
+        return this.creator;
+    }
+
+    public Type getType() {
+        return this.type;
     }
 
     public Patient getPatient() {
         return this.patient;
     }
 
-    public void setPatient(Patient patient) {
-        this.patient = patient;
-    }
-
     public Doctor getDoctor() {
         return this.doctor;
+    }
+
+    public List<Note> getNotes() {
+        return this.notes;
+    }
+
+    /////////////////////////////////////////////////////////////////////////Setter
+    public void setCreatedAt() {
+        this.createdAt = createdAt;
+    }
+
+    public void setCreator() {
+        this.creator = creator;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public void setStartDateTime(LocalDateTime startDateTime) {
+        this.startDateTime = startDateTime;
+    }
+
+    public void setEditDateTime(LocalDateTime editDateTime) {
+        this.editDateTime = editDateTime;
+    }
+
+    public void setEndDateTime(LocalDateTime endDateTime) {
+        this.endDateTime = endDateTime;
+    }
+
+    public void setPatient(Patient patient) {
+        this.patient = patient;
     }
 
     public void setDoctor(Doctor doctor) {
         this.doctor = doctor;
     }
 
-    public Note getNote() {
-        return this.note;
+    public void addNote(Note note) {
+        this.notes.add(note);
     }
 
-    public void setNote(Note note) {
-        this.note = note;
+
+    public void removeSingleNote(Note note) {
+
+        if (this.notes.size() != 0){
+            for(int i = 0; i < this.notes.size(); i++){
+                if (this.notes.get(i).getId().equals(note.getId())){
+                    this.notes.remove(i);
+                    break;
+                }
+            }
+        }
     }
 
-    //Methoden
-
-    public void scheduleAppointment(){
-
-    }
-
-    public void editAppointment(){
-
-    }
-
-    public void addNote(Note note){
-
-    }
-
-    public void deleteNote(Note note){
-
-    }
-
-    public void sendAppoinmentReminder(){
-
+    public void removeAllNotes() {
+        if (this.notes.size() != 0) {
+            this.notes.clear();
+        }
     }
 }

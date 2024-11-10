@@ -26,7 +26,8 @@ class NoteServiceTest {
 
     @BeforeEach
     void setUp() {
-        noteService = new NoteService(patientRepo, helperService);
+        this.helperService = new HelperService();
+        this.noteService = new NoteService(patientRepo, helperService);
     }
 
     //unit tests for diagnosis class
@@ -120,10 +121,10 @@ class NoteServiceTest {
     @Test
     // check if note users have same id as appointment users
     void addNoteToAppointment_valid() {
-        Patient patient1 = new Patient("John", "Doe");
-        Patient patient2 = new Patient("Jana", "Doe");
-        Doctor doctor1 = new Doctor("Dr. Francis", "Smith");
-        Doctor doctor2 = new Doctor("Dr. Jana", "Smith");
+        Patient patient1 = mock(Patient.class);
+        Patient patient2 = mock(Patient.class);
+        Doctor doctor1 = mock(Doctor.class);
+        Doctor doctor2 = mock(Doctor.class);
 
         when(patient1.getId()).thenReturn(1L);
         when(patient2.getId()).thenReturn(2L);
@@ -137,8 +138,8 @@ class NoteServiceTest {
 
         Appointment appointmentIncorrect = mock(Appointment.class);
 
-        when(appointmentCorrect.getPatient()).thenReturn(patient2);
-        when(appointmentCorrect.getDoctor()).thenReturn(doctor2);
+        when(appointmentIncorrect.getPatient()).thenReturn(patient2);
+        when(appointmentIncorrect.getDoctor()).thenReturn(doctor2);
 
         User creator = doctor1;
         Date date = new Date();
