@@ -26,6 +26,10 @@ public class Note {
     @JsonIgnoreProperties("note")
     private List<File> files;
 
+    @ManyToOne
+    @JoinColumn(name = "trip")
+    private Appointment appointment;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

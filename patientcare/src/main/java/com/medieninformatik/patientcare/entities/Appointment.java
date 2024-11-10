@@ -1,14 +1,17 @@
 package com.medieninformatik.patientcare.entities;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
 public class Appointment{
+
+    public Appointment() {
+    }
 
     public enum Type{
         ONLINE,
@@ -19,14 +22,24 @@ public class Appointment{
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates the ID
     private Long id;
 
+    @OneToOne
     private Patient patient;
+
+    @OneToOne
     private Doctor doctor;
+
+    @OneToOne
     private User creator;
+
     private LocalDateTime createdAt;
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
     private LocalDateTime editDateTime;
+
+    @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("appointment")
     private List<Note> notes;
+
     private Type type;
 
 

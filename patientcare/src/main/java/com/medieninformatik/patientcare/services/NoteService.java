@@ -20,7 +20,15 @@ public class NoteService {
 
     private PatientRepo patientRepo;
     private HelperService helperService;
-
+    private static final Set<String> VALID_MIME_TYPES = Set.of(
+            "text/plain",
+            "application/pdf",
+            "image/jpg",
+            "image/jpeg",
+            "image/png",
+            "video/mp4",
+            "audio/mpeg"
+    );
 
     @Autowired
     public NoteService(PatientRepo patientRepo, HelperService helperService) {
@@ -32,23 +40,15 @@ public class NoteService {
         return patientRepo.findById(personId);
     }
 
-    public int calcTest(int a, int b){
-        int sum = a +b;
-        return sum;
-    }
-
     public Diagnosis createDiagnosis(Patient patient, Doctor doctor, Date date, User creator, String icdCode, String recommendation) {
-        // Erstelle ein neues Diagnosis-Objekt mit den übergebenen Parametern
         return new Diagnosis(patient, doctor, creator, date, icdCode, recommendation);
     }
 
     public Treatment createTreatment(Patient patient, Doctor doctor, Date date, User creator, Diagnosis diagnosis, String action) {
-        // Validierung: Überprüfe, ob die Eingaben nicht null sind
         if (patient == null || doctor == null || date == null || creator == null || diagnosis == null || action == null) {
             throw new IllegalArgumentException("Keiner der Eingabewerte darf null sein.");
         }
 
-        // Erstelle ein neues Treatment-Objekt mit den übergebenen Parametern
         return new Treatment(patient, doctor, creator, date, diagnosis, action);
     }
 
@@ -60,46 +60,27 @@ public class NoteService {
         return Pattern.matches(icd10Pattern, icdCode) || Pattern.matches(icd11Pattern, icdCode);
     }
 
-
     public boolean actionHasMinLength(String action) {
         if (action == null) {
-            return false; // Falls die Eingabe null ist, soll die Methode false zurückgeben
+            return false;
         }
         return action.length() >= 10;
     }
 
-
-
-
     public void addNoteToAppointment(Appointment appointment, Diagnosis diagnosis) {
-        // Überprüfung, ob die Eingabewerte null sind
         if (appointment == null || diagnosis == null) {
             throw new IllegalArgumentException("Appointment und Diagnosis dürfen nicht null sein.");
         }
 
-        // Überprüfe, ob die Benutzer des Termins mit denen der Notiz übereinstimmen
         if (!helperService.noteUsersEqualsAppointmentUsers(appointment, diagnosis)) {
             throw new IllegalArgumentException("Die Benutzer des Termins stimmen nicht mit denen der Notiz überein.");
         }
 
-
         appointment.addNote(diagnosis);
     }
 
-    private static final Set<String> VALID_MIME_TYPES = Set.of(
-            "text/plain",
-            "application/pdf",
-            "image/jpg",
-            "image/jpeg",
-            "image/png",
-            "video/mp4",
-            "audio/mpeg"
-    );
-
     public boolean noteFileTypeIsValidMime(String mimeType) {
-        // Überprüfen, ob der MIME-Typ in der Liste der erlaubten Typen enthalten ist
-        return VALID_MIME_TYPES.contains(mimeType);
+        return this.VALID_MIME_TYPES.contains(mimeType);
     }
-//    public Note createNote(Patient patient, Doctor doctor, Date date, User creator) {
-//    }
+
 }
