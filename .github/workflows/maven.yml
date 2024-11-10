@@ -29,8 +29,10 @@ jobs:
           java-version: '23'
           distribution: 'temurin'
           cache: maven
+      - name: Navigate to patientcare directory
+        run: cd patientcare
       - name: Build with Maven
-        run: mvn -B clean install --file patientcare/pom.xml
+        run: mvn -B clean install
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph
