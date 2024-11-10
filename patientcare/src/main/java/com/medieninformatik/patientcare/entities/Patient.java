@@ -5,18 +5,7 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "patients")
-public class Patient
-		extends User
-{
-
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates the ID
-private Long id;
-
-    private String firstName;
-
-    private String lastName;
+public class Patient extends User {
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
     private List<Note> notes;
@@ -28,50 +17,17 @@ private Long id;
 // Constructor with parameters
 public Patient(String firstName, String lastName)
 {
-	this.firstName = firstName;
-	this.lastName = lastName;
-}
-
-// Getter and Setter for 'id'
-public Long getId()
-{
-	return id;
-}
-
-public void setId(Long id)
-{
-	this.id = id;
-}
-
-// Getter and Setter for 'firstName'
-public String getFirstName()
-{
-	return firstName;
-}
-
-public void setFirstName(String firstName)
-{
-	this.firstName = firstName;
-}
-
-// Getter and Setter for 'lastName'
-public String getLastName()
-{
-	return lastName;
-}
-
-public void setLastName(String lastName)
-{
-	this.lastName = lastName;
+	this.setFirstName(firstName);
+	this.setLastName(lastName);
 }
 
 @Override
 public String toString()
 {
 	return "Patient{" +
-			"id=" + id +
-			", firstName='" + firstName + '\'' +
-			", lastName='" + lastName + '\'' +
+			"id=" + super.getId() +
+			", firstName='" + super.getFirstName() + '\'' +
+			", lastName='" + super.getLastName() + '\'' +
 			'}';
 }
 }
