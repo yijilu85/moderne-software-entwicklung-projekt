@@ -35,5 +35,5 @@ jobs:
         run: mvn -B clean install
       - name: Run unit tests with maven
         working-directory: patientcare
-        run:  mvn -B test --file pom.xml
+        run:  mvn -B test -X --file pom.xml
      
