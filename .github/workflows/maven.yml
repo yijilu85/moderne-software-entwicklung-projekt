@@ -20,22 +20,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check current directory and files
-        working-directory: ./patientcare
+        working-directory: patientcare
         run: |
           pwd
           ls -l
       - name: Set up JDK 23
-        working-directory: ./patientcare
+        working-directory: patientcare
         uses: actions/setup-java@v4
         with:
           java-version: '23'
           distribution: 'temurin'
           cache: maven
       - name: Build with Maven
-        working-directory: ./patientcare
+        working-directory: patientcare
         run: mvn -B clean install
       - name: Run unit tests with maven
-        working-directory: ./patientcare
+        working-directory: patientcare
         run:  mvn -B test --file pom.xml
       
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
