@@ -16,7 +16,8 @@ public class HelperService {
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
             LocalDate date = LocalDate.parse(dateStr, formatter);
-            return true; // Datum ist gültig
+            return date.format(formatter).equals(dateStr); //gültiges Datum im korrekten Format
+
         } catch (DateTimeParseException e) {
             return false; // Ungültiges Datum
         }
