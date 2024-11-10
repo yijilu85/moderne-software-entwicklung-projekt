@@ -1,8 +1,13 @@
 package Java.services;
+import com.medieninformatik.patientcare.services.HelperService;
 
 import com.medieninformatik.patientcare.entities.*;
+import com.medieninformatik.patientcare.entities.Diagnosis;
+import com.medieninformatik.patientcare.entities.Treatment;
+
 import com.medieninformatik.patientcare.repo.PatientRepo;
 import com.medieninformatik.patientcare.services.NoteService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
@@ -15,7 +20,15 @@ class NoteServiceTest {
 
     @Mock
     private PatientRepo patientRepo;
-    private NoteService noteService = new NoteService(patientRepo);
+    private NoteService noteService;
+    private HelperService helperService;
+
+
+    @BeforeEach
+    void setUp() {
+        this.helperService = new HelperService();
+        this.noteService = new NoteService(patientRepo, helperService);
+    }
 
     //unit tests for diagnosis class
     @Test
@@ -30,11 +43,11 @@ class NoteServiceTest {
         Diagnosis diagnosis = noteService.createDiagnosis(patient, doctor, date, creator,
                 icdCode, recommendation);
 
-        assertNotNull(diagnosis.patient);
-        assertNotNull(diagnosis.doctor);
-        assertNotNull(diagnosis.creator);
-        assertNotNull(diagnosis.date);
-        assertNotNull(diagnosis.icdCode);
+        assertNotNull(diagnosis.getPatient());
+        assertNotNull(diagnosis.getDoctor());
+        assertNotNull(diagnosis.getCreator());
+        assertNotNull(diagnosis.getDate());
+        assertNotNull(diagnosis.getIcdCode());
     }
 
     @Test
@@ -62,12 +75,12 @@ class NoteServiceTest {
         Treatment treatment = noteService.createTreatment(patient, doctor, date, creator,
                 diagnosis, action);
 
-        assertNotNull(treatment.patient);
-        assertNotNull(treatment.doctor);
-        assertNotNull(treatment.creator);
-        assertNotNull(treatment.date);
-        assertNotNull(treatment.diagnosis);
-        assertNotNull(treatment.action);
+        assertNotNull(treatment.getPatient());
+        assertNotNull(treatment.getDoctor());
+        assertNotNull(treatment.getCreator());
+        assertNotNull(treatment.getDate());
+        assertNotNull(treatment.getDiagnosis());
+        assertNotNull(treatment.getAction());
     }
 
     @Test
@@ -76,6 +89,9 @@ class NoteServiceTest {
         Doctor doctor = new Doctor("Dr. Francis", "Smith");
         User creator = doctor;
         Date date = new Date();
+
+        Diagnosis diagnosis = new Diagnosis(patient, doctor, creator, date, "A00.1", "Empfehlungstext");
+        String action = "Tetanus Impfung verabreicht";
 
         assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(null, doctor, date, creator,
                 diagnosis, action));
@@ -105,10 +121,10 @@ class NoteServiceTest {
     @Test
     // check if note users have same id as appointment users
     void addNoteToAppointment_valid() {
-        Patient patient1 = new Patient("John", "Doe");
-        Patient patient2 = new Patient("Jana", "Doe");
-        Doctor doctor1 = new Doctor("Dr. Francis", "Smith");
-        Doctor doctor2 = new Doctor("Dr. Jana", "Smith");
+        Patient patient1 = mock(Patient.class);
+        Patient patient2 = mock(Patient.class);
+        Doctor doctor1 = mock(Doctor.class);
+        Doctor doctor2 = mock(Doctor.class);
 
         when(patient1.getId()).thenReturn(1L);
         when(patient2.getId()).thenReturn(2L);
@@ -122,8 +138,8 @@ class NoteServiceTest {
 
         Appointment appointmentIncorrect = mock(Appointment.class);
 
-        when(appointmentCorrect.getPatient()).thenReturn(patient2);
-        when(appointmentCorrect.getDoctor()).thenReturn(doctor2);
+        when(appointmentIncorrect.getPatient()).thenReturn(patient2);
+        when(appointmentIncorrect.getDoctor()).thenReturn(doctor2);
 
         User creator = doctor1;
         Date date = new Date();
@@ -133,8 +149,8 @@ class NoteServiceTest {
         Diagnosis diagnosis = noteService.createDiagnosis(patient1, doctor1, date, creator,
                 icdCode, recommendation);
 
-        assertTrue(noteService.noteUsersEqualsAppointmentUsers(appointmentCorrect, diagnosis));
-        assertFalse(noteService.noteUsersEqualsAppointmentUsers(appointmentIncorrect, diagnosis));
+        assertTrue(helperService.noteUsersEqualsAppointmentUsers(appointmentCorrect, diagnosis));
+        assertFalse(helperService.noteUsersEqualsAppointmentUsers(appointmentIncorrect, diagnosis));
 
         // check if note or appointments are not null
         assertThrows(IllegalArgumentException.class, () -> noteService.addNoteToAppointment(null, diagnosis));
