@@ -135,8 +135,8 @@ haben.
 In unserem Projekt verwenden wir Github Actions.
 Im Workflow Java CI with Maven in `.github/workflows/maven.yml` werden folgende Schritte der CI/CD-Pipeline 
 konfiguriert.
-Bei jedem neuen Pull Request oder neuem Commit auf einem Branch offenem Pull Request wird:
-- das aktuelles Verzeichnis ausgegeben
+Bei jedem neuen Pull Request oder neuem Commit auf einem Branch mit offenem Pull Request wird:
+- das aktuelle Verzeichnis ausgegeben
 - Java JDK 23 installiert
 - Maven Projekt gebuilded
 - alle Unit Tests im Order `patientcare/test/java` ausgeführt
