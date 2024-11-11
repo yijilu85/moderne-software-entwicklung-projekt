@@ -132,6 +132,17 @@ Travis CI, GitHub Actions oder Jenkins lassen sich direkt in GitHub integrieren.
 dafür, dass neue Versionen automatisch deployed werden, sobald sie den Hauptbranch erreichen und alle Tests bestanden
 haben.
 
+In unserem Projekt verwenden wir Github Actions.
+Im Workflow Java CI with Maven in `.github/workflows/maven.yml` werden folgende Schritte der CI/CD-Pipeline 
+konfiguriert.
+Bei jedem neuen Pull Request oder neuem Commit auf einem Branch offenem Pull Request wird:
+- das aktuelles Verzeichnis ausgegeben
+- Java JDK 23 installiert
+- Maven Projekt gebuilded
+- alle Unit Tests im Order `patientcare/test/java` ausgeführt
+
+Erst wenn die gesamte Pipeline erfolgreich durchgelaufen ist, kann der Branch gemerged werden.
+
 ## Sicherheitsaspekte beachten
 
 Sensible Daten wie API-Schlüssel, Passwörter oder geheime Schlüssel sollten niemals im Repository gespeichert werden.
