@@ -21,6 +21,14 @@ public abstract class User {
 	@Column(name = "last_name", nullable = false)
 	private String lastName;
 
+	// Getter and Setter for 'id'
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 	// Getter and Setter for 'firstName'
 	public String getFirstName() {
 		return firstName;
