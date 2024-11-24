@@ -32,4 +32,15 @@ public class Measurement extends Note {
         this.value = value;
     }
 
+    private void setType (Type type){
+        this.type = type;
+    }
+
+    private double getValue(){
+        return this.value;
+    }
+
+    private void setValue (double value){
+        this.value = value;
+    }
 }

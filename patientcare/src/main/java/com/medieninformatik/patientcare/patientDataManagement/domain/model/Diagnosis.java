@@ -32,5 +32,31 @@ public class Diagnosis extends Note {
         this.date = date;
         this.icdCode = new IcdCode(icdCode);
         this.recommendation = new Recommendation(recommendation);
+
+    }
+
+    // Getter und Setter (optional, falls du sie benötigst)
+    public Patient getPatient() {
+        return this.patient;
+    }
+
+    public Doctor getDoctor() {
+        return this.doctor;
+    }
+
+    public User getCreator() {
+        return this.creator;
+    }
+
+    public Date getDate() {
+        return this.date;
+    }
+
+    public String getIcdCode() {
+        return this.icdCode.getIcdCode();
+    }
+
+    public String getRecommendation() {
+        return this.recommendation.getText();
     }
 }
