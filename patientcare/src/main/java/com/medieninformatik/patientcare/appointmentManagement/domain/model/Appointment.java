@@ -10,7 +10,11 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 public class Appointment{
 
@@ -70,7 +74,6 @@ public class Appointment{
         this.createdAt = createdAt;
         this.notes = new ArrayList<>();
     }
-
     /////////////////////////////////////////////////////////////////////////Getter
     public long getId() {
         return this.id;

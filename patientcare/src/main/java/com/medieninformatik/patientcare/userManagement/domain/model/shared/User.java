@@ -1,8 +1,11 @@
 package com.medieninformatik.patientcare.userManagement.domain.model.shared;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
-
+@Getter
+@Setter
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name= "users")
@@ -26,7 +29,6 @@ public abstract class User {
 	public void setId(Long id) {
 		this.id = id;
 	}
-
 	// Getter and Setter for 'firstName'
 	public String getFirstName() {
 		return firstName;
