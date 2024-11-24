@@ -37,6 +37,10 @@ const onEventClick = (appointment, mouseevent) => {
   selectedEvent.value = appointment;
   showDialog.value = true;
 };
+
+const bookAppointment = () => {
+  showDialog.value = false;
+};
 </script>
 
 <template>
@@ -58,10 +62,9 @@ const onEventClick = (appointment, mouseevent) => {
     :events="events"
     :on-event-click="onEventClick"
   />
-  <v-dialog v-if="showDialog">
+  <v-dialog v-model="showDialog" style="width: 500px">
     <v-card>
       <v-card-title>
-        <v-icon>{{ selectedEvent.icon }}</v-icon>
         <span>{{ selectedEvent.title }}</span>
         <v-spacer />
         <strong>{{
@@ -70,18 +73,19 @@ const onEventClick = (appointment, mouseevent) => {
       </v-card-title>
       <v-card-text>
         <p v-html="selectedEvent.contentFull" />
-        <strong>Event details:</strong>
+        <strong>Termindetails</strong>
         <ul>
           <li>
-            Event starts at:
+            Beginn:
             {{ selectedEvent.start && selectedEvent.start.formatTime() }}
           </li>
           <li>
-            Event ends at:
+            Ende:
             {{ selectedEvent.end && selectedEvent.end.formatTime() }}
           </li>
         </ul>
       </v-card-text>
+      <v-btn @click="bookAppointment">Termin buchen</v-btn>
     </v-card>
   </v-dialog>
 </template>
@@ -91,7 +95,6 @@ const onEventClick = (appointment, mouseevent) => {
   width: 150px;
   height: 150px;
 }
-
 .vuecal__event {
   cursor: pointer;
 }

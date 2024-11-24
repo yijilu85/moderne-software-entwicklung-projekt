@@ -15,7 +15,8 @@
     "pinia": "^2.2.4",
     "vue": "^3.5.12",
     "vue-cal": "^4.10.0",
-    "vue-router": "^4.4.5"
+    "vue-router": "^4.4.5",
+    "vuetify": "^3.7.4"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
