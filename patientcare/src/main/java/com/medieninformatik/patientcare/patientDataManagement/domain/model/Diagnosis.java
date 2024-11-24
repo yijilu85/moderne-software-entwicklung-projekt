@@ -53,7 +53,7 @@ public class Diagnosis extends Note {
     }
 
     public String getIcdCode() {
-        return this.icdCode.getIcdCode();
+        return this.icdCode.getCode();
     }
 
     public String getRecommendation() {

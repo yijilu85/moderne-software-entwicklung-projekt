@@ -6,9 +6,13 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Recommendation {
-private String text;
+    private String text;
 
-    public Recommendation (String text){
+    public Recommendation(String text) {
         this.text = text;
+    }
+
+    public String getText() {
+        return this.text;
     }
 }
