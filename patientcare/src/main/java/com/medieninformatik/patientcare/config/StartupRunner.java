@@ -1,17 +1,15 @@
 package com.medieninformatik.patientcare.config;
 
-import com.medieninformatik.patientcare.entities.Appointment;
-import com.medieninformatik.patientcare.entities.Doctor;
-import com.medieninformatik.patientcare.entities.Patient;
-import com.medieninformatik.patientcare.entities.User;
-import com.medieninformatik.patientcare.repo.AppointmentRepo;
-import com.medieninformatik.patientcare.repo.DoctorRepo;
-import com.medieninformatik.patientcare.repo.PatientRepo;
-import com.medieninformatik.patientcare.services.AppointmentService;
+import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appointment;
+import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
+import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
+import com.medieninformatik.patientcare.appointmentManagement.infrastructure.repositories.AppointmentRepo;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.DoctorRepo;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.PatientRepo;
+import com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.system.ApplicationPid;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
