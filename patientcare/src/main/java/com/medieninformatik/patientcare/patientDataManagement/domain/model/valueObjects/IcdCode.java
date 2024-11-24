@@ -5,10 +5,18 @@ import lombok.Setter;
 @Getter
 @Setter
 public class IcdCode {
-    private String icdCode;
+    private String code;
 
-    public IcdCode (String icdCode){
-        this.icdCode = icdCode;
+    public IcdCode (String code){
+        this.code = code;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+         this.code = code;
     }
 }
 

@@ -43,5 +43,4 @@ public class Measurement extends Note {
     private void setValue (double value){
         this.value = value;
     }
-
 }

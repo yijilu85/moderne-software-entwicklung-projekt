@@ -74,6 +74,7 @@ public class Note {
         this.files.remove(file);
     }
 
+
     public Doctor getDoctor() {
         return doctor;
     }
@@ -81,6 +82,5 @@ public class Note {
     public void setDoctor(Doctor doctor) {
         this.doctor = doctor;
     }
-
 
 }
