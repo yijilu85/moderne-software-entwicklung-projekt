@@ -10,7 +10,11 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 public class Appointment{
 
@@ -71,79 +75,6 @@ public class Appointment{
         this.notes = new ArrayList<>();
     }
 
-    /////////////////////////////////////////////////////////////////////////Getter
-    public long getId() {
-        return this.id;
-    }
-
-    public LocalDateTime getStartDateTime() {
-        return this.startDateTime;
-    }
-
-    public LocalDateTime getEndDateTime() {
-        return this.endDateTime;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return this.createdAt;
-    }
-
-    public LocalDateTime getEditDateTime() {
-        return this.editDateTime;
-    }
-
-    public User getCreator() {
-        return this.creator;
-    }
-
-    public Type getType() {
-        return this.type;
-    }
-
-    public Patient getPatient() {
-        return this.patient;
-    }
-
-    public Doctor getDoctor() {
-        return this.doctor;
-    }
-
-    public List<Note> getNotes() {
-        return this.notes;
-    }
-
-    /////////////////////////////////////////////////////////////////////////Setter
-    public void setCreatedAt() {
-        this.createdAt = createdAt;
-    }
-
-    public void setCreator() {
-        this.creator = creator;
-    }
-
-    public void setType(Type type) {
-        this.type = type;
-    }
-
-    public void setStartDateTime(LocalDateTime startDateTime) {
-        this.startDateTime = startDateTime;
-    }
-
-    public void setEditDateTime(LocalDateTime editDateTime) {
-        this.editDateTime = editDateTime;
-    }
-
-    public void setEndDateTime(LocalDateTime endDateTime) {
-        this.endDateTime = endDateTime;
-    }
-
-    public void setPatient(Patient patient) {
-        this.patient = patient;
-    }
-
-    public void setDoctor(Doctor doctor) {
-        this.doctor = doctor;
-    }
 
     public void addNote(Note note) {
         this.notes.add(note);
