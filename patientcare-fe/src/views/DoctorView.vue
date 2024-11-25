@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Appointment, Doctor } from "@/types/types";
 import { ref } from "vue";
+import { VDatePicker } from 'vuetify/components';
 
 const date = new Date();
 
@@ -29,8 +30,19 @@ const events = ref<Appointment[]>([
   },
 ]);
 
+// Neues Event
+const newEvent = ref({
+  title: "",
+  start: "",
+  end: "",
+  date:"",
+});
+
+const AppointmentDuration = 30;
+
 const selectedEvent = ref();
 const showDialog = ref(false);
+const showCreateDialog = ref(false);
 
 // (event: MouseEvent, appointment: Appointment)
 const onEventClick = (appointment: Appointment, mouseevent: MouseEvent) => {
@@ -38,8 +50,59 @@ const onEventClick = (appointment: Appointment, mouseevent: MouseEvent) => {
   showDialog.value = true;
 };
 
-const bookAppointment = () => {
-  showDialog.value = false;
+const onCellClick = (date: Date) => {
+  console.log("Zelle angeklickt:", date.toISOString()); // Debugging-Ausgabe
+  const startDate = new Date(date);
+  const endDate = new Date(startDate.getTime() + AppointmentDuration * 60000); // 30 Minuten später
+
+  newEvent.value.date = startDate.toISOString().split("T")[0];
+  newEvent.value.start = startDate.toISOString().split("T")[1].slice(0, 5); // Uhrzeit in HH:mm
+  newEvent.value.end = endDate.toISOString().split("T")[1].slice(0, 5); // Uhrzeit in HH:mm
+  showCreateDialog.value = true;
+}
+const createAppointment = () => {
+  if (!newEvent.value.title.trim() || !newEvent.start || !newEvent.end) {
+    alert("Bitte füllen Sie alle Felder aus.");
+    return;
+
+    console.log("newEventDate:", newEventDate.value);
+    console.log("newEvent.start:", newEvent.start);
+    console.log("newEvent.end:", newEvent.end);
+  }
+
+  // Kombinieren von Datum und Zeit zu ISO-Strings
+  const startDateTime = new Date(`${newEventDate.value}T${newEvent.start}`);
+  const endDateTime = new Date(`${newEventDate.value}T${newEvent.end}`);
+
+  // Validierung: Endzeit muss nach Startzeit liegen
+  if (endDateTime <= startDateTime) {
+    alert("Die Endzeit muss nach der Startzeit liegen.");
+    return;
+  }
+
+  // Neues Event speichern
+  console.log("Neues Event erstellt:", {
+    title: newEvent.value.title,
+    start: startDateTime.toISOString(),
+    end: endDateTime.toISOString(),
+    class: "new-event"
+  });
+
+  events.value.push({
+    title: newEvent.value.title,
+    start: startDateTime.toISOString(),
+    end: endDateTime.toISOString(),
+    class: "new-event",
+  });
+
+  // Dialog schließen und Felder zurücksetzen
+  showCreateDialog.value = false;
+  newEvent.value = { title: "", start: "", end: "" };
+  newEventDate.value = "";
+};
+
+  const bookAppointment = () => {
+    showDialog.value = false;
 };
 </script>
 
@@ -61,6 +124,7 @@ const bookAppointment = () => {
     style="height: 850px"
     :events="events"
     :on-event-click="onEventClick"
+    @cell-click="onCellClick"
   />
   <v-dialog v-model="showDialog" style="width: 500px">
     <v-card>
@@ -86,6 +150,27 @@ const bookAppointment = () => {
         </ul>
       </v-card-text>
       <v-btn @click="bookAppointment">Termin buchen</v-btn>
+    </v-card>
+  </v-dialog>
+
+
+  <v-dialog v-model="showCreateDialog" style="width: 500px">
+    <v-card>
+      <v-card-title>Neuen Termin erstellen</v-card-title>
+      <v-card-text>
+        <!--<v-text-field v-model="newEvent.title" label="Titel"></v-text-field>-->
+        <v-date-picker v-model="newEvent.date"></v-date-picker>
+        <v-time-picker ></v-time-picker>
+        <v-time-picker ></v-time-picker>
+<!--        <v-date-picker v-model="newEvent.date" label="Datum"></v-date-picker>
+        <v-time-picker v-model="newEvent.start" label="Startzeit"></v-time-picker>
+        <v-time-picker v-model="newEvent.end" label="Endzeit"></v-time-picker>-->
+      </v-card-text>
+      {{newEvent}}
+      <v-card-actions>
+        <v-btn color="primary" @click="createAppointment">Speichern</v-btn>
+        <v-btn @click="showCreateDialog = false">Abbrechen</v-btn>
+      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
