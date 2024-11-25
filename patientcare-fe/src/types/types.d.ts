@@ -17,7 +17,7 @@ export interface User {
   profileImg: string;
 }
 
-export interface appointment {
+export interface Appointment {
   start: datetime;
   end: datetime;
   title: string;

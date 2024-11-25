@@ -33,7 +33,7 @@ const selectedEvent = ref();
 const showDialog = ref(false);
 
 // (event: MouseEvent, appointment: Appointment)
-const onEventClick = (appointment, mouseevent) => {
+const onEventClick = (appointment: Appointment, mouseevent: MouseEvent) => {
   selectedEvent.value = appointment;
   showDialog.value = true;
 };
