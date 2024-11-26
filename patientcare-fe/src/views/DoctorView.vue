@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Appointment, Doctor } from "@/types/types";
 import { ref, onMounted } from "vue";
-
+import {createAppointmentSlot} from "@/api/appointmentController";
 
 const date = new Date();
 
@@ -34,6 +34,7 @@ const newEvent = ref<Appointment>({
   start: "",
   end: "",
   Patient: "",
+  Doctor:"",
   Behandlung: "",
   class: "new-event",
 });
@@ -43,16 +44,6 @@ const selectedEvent = ref();
 const showDialog = ref(false);
 const showCreateDialog = ref(false);
 
-const saveEventsToLocalStorage = () => {
-  localStorage.setItem("events", JSON.stringify(events.value));
-};
-
-const loadEventsFromLocalStorage = () => {
-  const savedEvents = localStorage.getItem("events");
-  if (savedEvents) {
-    events.value = JSON.parse(savedEvents);
-  }
-};
 
 
 // (event: MouseEvent, appointment: Appointment)
@@ -61,7 +52,7 @@ const onEventClick = (appointment: Appointment, mouseevent: MouseEvent) => {
   showDialog.value = true;
 };
 
-const createAppointment = () => {
+const createAppointment = async () => {
   /*if (!newEvent.value.title.trim() || !newEvent.start || !newEvent.end) {
     alert("Bitte füllen Sie alle Felder aus.");
     return;
@@ -72,32 +63,45 @@ const createAppointment = () => {
   const endDateTime = new Date(`${newEvent.value.date}T${newEvent.value.end}`);
 
   // Event hinzufügen
-  events.value.push({
+ /* events.value.push({
     title: newEvent.value.title,
     start: startDateTime.toISOString(),
     end: endDateTime.toISOString(),
     class: "new-event",
 
-  });
+  });*/
 
-  console.log("Titel:", newEvent.value.title);
-  console.log("Startzeit:", newEvent.value.start);
-  console.log("Endzeit:", newEvent.value.end);
+  const payload =
+      {
+    "doctor": {
+      "id": 2
+
+    },
+    "creator": {
+      "id": 2
+    },
+    "startDateTime": startDateTime,
+    "endDateTime": endDateTime,
+    "createdAt": Date.now(),
+    "type": "OFFLINE",
+    "notes": []
+  }
+  const appointment = await createAppointmentSlot(payload)
 
 
-  // Speichere in LocalStorage
-  saveEventsToLocalStorage();
+  console.log(appointment);
 
   // Dialog schließen und Felder zurücksetzen
   showCreateDialog.value = false;
   newEvent.value = { title: "", start: "", end: "", date: "" };
 };
 
+
+
 const onCellClick = (date: Date) => {
   const originalMinutes = date.getMinutes();
   const roundedMinutes = originalMinutes < 30 ? 30 : 0; // Runde auf die nächste halbe Stunde
   const startTime = new Date(date);
-
   // Setze die Stunden korrekt und die Minuten auf den gerundeten Wert
   if (roundedMinutes === 0) {
     startTime.setHours(startTime.getHours() + 1); // Nächste volle Stunde
@@ -126,9 +130,6 @@ const bookAppointment = () => {
   showDialog.value = false;
 };
 
-onMounted(() => {
-  loadEventsFromLocalStorage();
-});
 </script>
 
 <template>
