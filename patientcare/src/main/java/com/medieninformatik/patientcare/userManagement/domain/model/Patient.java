@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 
 import java.util.List;
 
+import static com.medieninformatik.patientcare.userManagement.domain.model.shared.User.UserType.PATIENT;
+
 @Entity
 public class Patient extends User {
 
@@ -21,6 +23,7 @@ public Patient(String firstName, String lastName)
 {
 	this.setFirstName(firstName);
 	this.setLastName(lastName);
+	this.setUsertype(PATIENT);
 }
 
 @Override

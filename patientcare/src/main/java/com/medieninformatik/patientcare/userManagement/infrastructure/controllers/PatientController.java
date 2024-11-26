@@ -5,6 +5,7 @@ import com.medieninformatik.patientcare.userManagement.services.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -17,6 +18,12 @@ public class PatientController {
     @Autowired
     public PatientController(PatientService patientService) {
         this.patientService = patientService;
+    }
+
+    @CrossOrigin
+    @GetMapping
+    public List<Patient> findAllPatients() {
+        return patientService.getAllPatients();
     }
 
     @CrossOrigin

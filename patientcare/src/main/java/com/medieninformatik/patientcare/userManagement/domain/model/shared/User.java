@@ -11,6 +11,11 @@ import lombok.Setter;
 @Table(name= "users")
 public abstract class User {
 
+	public enum UserType{
+		PATIENT,
+		DOCTOR
+	}
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates the ID
 	private Long id;
@@ -20,6 +25,9 @@ public abstract class User {
 
 	@Column(name = "last_name", nullable = false)
 	private String lastName;
+
+	@Column(name = "user_type", nullable = false)
+	private UserType userType;
 
 	// Getter and Setter for 'id'
 	public Long getId() {
@@ -47,4 +55,11 @@ public abstract class User {
 		this.lastName = lastName;
 	}
 
+	public void setUsertype(UserType userType){
+		this.userType = userType;
+	}
+
+	public UserType getUserType(){
+		return this.userType;
+	}
 }
