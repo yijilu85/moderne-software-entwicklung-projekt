@@ -28,8 +28,8 @@
 	</scm>
 	<properties>
 		<java.version>23</java.version>
-		<sonar.projectKey>MSE-WS24_moderne-software-entwicklung-projekt</sonar.projectKey>
-		<sonar.organization>mse-ws24</sonar.organization>
+		<sonar.projectKey>yijilu85_moderne-software-entwicklung-projekt</sonar.projectKey>
+		<sonar.organization>yijilu85</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
 	<dependencies>
