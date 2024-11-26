@@ -1,5 +1,9 @@
 package com.medieninformatik.patientcare.userManagement.domain.model.shared;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
+import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +13,11 @@ import lombok.Setter;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name= "users")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "userType", visible = true)
+@JsonSubTypes({
+		@JsonSubTypes.Type(value = Patient.class, name = "PATIENT"),
+		@JsonSubTypes.Type(value = Doctor.class, name = "DOCTOR")
+})
 public abstract class User {
 
 	public enum UserType{

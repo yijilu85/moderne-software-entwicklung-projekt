@@ -1,5 +1,8 @@
 package com.medieninformatik.patientcare.appointmentManagement.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appointment;
 import com.medieninformatik.patientcare.appointmentManagement.infrastructure.repositories.AppointmentRepo;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.shared.Note;
@@ -22,7 +25,7 @@ public class AppointmentService {
     private AppointmentRepo appointmentRepo;
     private UserRepo userRepo;
 
-    public AppointmentService(AppointmentRepo appointmentRepo, UserRepo userRepo){
+    public AppointmentService(AppointmentRepo appointmentRepo, UserRepo userRepo) {
         this.appointmentRepo = appointmentRepo;
         this.userRepo = userRepo;
     }
@@ -74,28 +77,77 @@ public class AppointmentService {
         return startDateTime.isAfter(LocalDateTime.now());
     }
 
-    public Optional<Appointment> getAppointment(Long appointmentId){
+    public Optional<Appointment> getAppointment(Long appointmentId) {
         return appointmentRepo.findById(appointmentId);
     }
 
-    public List<Appointment> getAllAppointments(){
+    public List<Appointment> getAllAppointments() {
         return appointmentRepo.findAll();
     }
 
-    public List<Appointment> getAllAppointmentsForUser(Long userId){
+    public List<Appointment> getAllAppointmentsForUser(Long userId) {
         Optional<User> foundUser = userRepo.findById(userId);
         User.UserType type = null;
-        if (!foundUser.isEmpty()){
+        if (!foundUser.isEmpty()) {
             type = foundUser.get().getUserType();
         }
         List<Appointment> appointments = new ArrayList<>();
         if (type == User.UserType.PATIENT) {
             appointments = appointmentRepo.findByPatient(userId);
-        } else if (type == User.UserType.DOCTOR){
+        } else if (type == User.UserType.DOCTOR) {
             appointments = appointmentRepo.findByDoctor(userId);
         }
         System.out.println("USER TYPE: " + type);
         return appointments;
-    };
+    }
+
+    ;
+
+    public Appointment parseJSONCreateAppointmentSlot(String payload) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(payload);
+
+        JsonNode patientNode = rootNode.get("patient");
+        JsonNode doctorNode = rootNode.get("doctor");
+        JsonNode creatorNode = rootNode.get("creator");
+
+        if (doctorNode == null || creatorNode == null) {
+            return null;
+        }
+        Optional<User> doctor = userRepo.findById(doctorNode.get("id").asLong());
+        Optional<User> creator = userRepo.findById(creatorNode.get("id").asLong());
+
+        if (doctor.isEmpty() || creator.isEmpty()) {
+            return null;
+        }
+
+        Doctor doctorEntity = null;
+        User creatorEntity = null;
+
+        if (doctor.get() instanceof Doctor) {
+            doctorEntity = (Doctor) doctor.get();
+        } else {
+            return null;
+        }
+
+        creatorEntity = creator.get();
+
+        LocalDateTime startDate = LocalDateTime.parse(rootNode.get("startDateTime").asText());
+        LocalDateTime endDate = LocalDateTime.parse(rootNode.get("endDateTime").asText());
+        LocalDateTime createdAt = LocalDateTime.now();
+
+        boolean valid = false;
+
+        if (isDateInFuture(startDate) && !isEndAppointmentBeforeStartAppointment(startDate, endDate)) {
+            valid = true;
+        }
+
+        if (valid) {
+            Appointment appointment = createAppointmentSlot(doctorEntity, creatorEntity, startDate, endDate, createdAt);
+            return appointmentRepo.save(appointment);
+        } else {
+            return null;
+        }
+    }
 
 }

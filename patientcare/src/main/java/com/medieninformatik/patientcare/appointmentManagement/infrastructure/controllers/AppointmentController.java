@@ -1,5 +1,6 @@
 package com.medieninformatik.patientcare.appointmentManagement.infrastructure.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appointment;
 import com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
@@ -36,5 +37,11 @@ public class AppointmentController {
     @GetMapping(path = "/{id}")
     public Optional<Appointment> findAppointment(@PathVariable("id") Long id) {
         return appointmentService.getAppointment(id);
+    }
+
+    @CrossOrigin
+    @PostMapping
+    public Appointment createAppointmentSlot(@RequestBody String json) throws JsonProcessingException {
+        return appointmentService.parseJSONCreateAppointmentSlot(json);
     }
 }
