@@ -12,6 +12,7 @@ import PatientList from "./components/PatientList.vue";
         <RouterLink to="/about">About</RouterLink>
       </nav>
     </div>
+    <PatientList></PatientList>
   </header>
 
   <RouterView />

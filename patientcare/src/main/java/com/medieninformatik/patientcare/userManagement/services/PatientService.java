@@ -5,6 +5,7 @@ import com.medieninformatik.patientcare.userManagement.infrastructure.repositori
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,5 +20,9 @@ public class PatientService {
 
     public Optional<Patient> getPatient(Long personId) {
         return patientRepo.findById(personId);
+    }
+
+    public List<Patient> getAllPatients(){
+        return patientRepo.findAll();
     }
 }
