@@ -30,13 +30,16 @@ public class Appointment{
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates the ID
     private Long id;
 
-    @OneToOne
+    @ManyToOne
+    @JoinColumn
     private Patient patient;
 
-    @OneToOne
+    @ManyToOne
+    @JoinColumn
     private Doctor doctor;
 
-    @OneToOne
+    @ManyToOne
+    @JoinColumn
     private User creator;
 
     private LocalDateTime createdAt;

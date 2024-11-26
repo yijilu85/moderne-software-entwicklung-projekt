@@ -1,5 +1,9 @@
 package com.medieninformatik.patientcare.userManagement.domain.model.shared;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
+import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +13,17 @@ import lombok.Setter;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name= "users")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "userType", visible = true)
+@JsonSubTypes({
+		@JsonSubTypes.Type(value = Patient.class, name = "PATIENT"),
+		@JsonSubTypes.Type(value = Doctor.class, name = "DOCTOR")
+})
 public abstract class User {
+
+	public enum UserType{
+		PATIENT,
+		DOCTOR
+	}
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates the ID
@@ -20,6 +34,9 @@ public abstract class User {
 
 	@Column(name = "last_name", nullable = false)
 	private String lastName;
+
+	@Column(name = "user_type", nullable = false)
+	private UserType userType;
 
 	// Getter and Setter for 'id'
 	public Long getId() {
@@ -47,4 +64,11 @@ public abstract class User {
 		this.lastName = lastName;
 	}
 
+	public void setUsertype(UserType userType){
+		this.userType = userType;
+	}
+
+	public UserType getUserType(){
+		return this.userType;
+	}
 }
