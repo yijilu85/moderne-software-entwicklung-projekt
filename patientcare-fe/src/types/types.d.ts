@@ -15,6 +15,7 @@ export interface User {
   city: string;
   dateOfBirth: Date;
   profileImg: string;
+  userType: "DOCTOR" | "PATIENT";
 }
 
 export interface Appointment {
