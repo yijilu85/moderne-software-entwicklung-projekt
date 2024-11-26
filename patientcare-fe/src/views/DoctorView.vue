@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { Appointment, Doctor } from "@/types/types";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import {
   createAppointmentSlot,
   getAllAppointments,
+  sendBookingAppointment,
 } from "@/api/appointmentController";
 
 const date = new Date();
@@ -36,6 +37,7 @@ const events = ref<Appointment[]>([]);
 const selectedDay = ref("");
 
 const newEvent = ref<Appointment>({
+  id: 0,
   start: "",
   end: "",
   patient: null,
@@ -48,6 +50,12 @@ const AppointmentDuration = 30;
 const selectedEvent = ref();
 const showDialog = ref(false);
 const showCreateDialog = ref(false);
+
+const snackbar = ref({
+  show: false,
+  message: "",
+  color: "success",
+});
 
 // (event: MouseEvent, appointment: Appointment)
 const onEventClick = (appointment: Appointment, mouseevent: MouseEvent) => {
@@ -75,12 +83,33 @@ const createAppointment = async () => {
     title: newEvent.value.title,
     notes: [],
   };
-  const appointment = await createAppointmentSlot(payload);
-  // Dialog schließen und Felder zurücksetzen
+
+  try {
+    const appointment = await createAppointmentSlot(payload);
+    setSnackBar("Termin erfolgreich erstellt!", "success");
+  } catch {
+    setSnackBar("Fehler beim Erstellen eines Termins!", "error");
+  }
   showCreateDialog.value = false;
-  newEvent.value = { title: "", start: "", end: "", date: "" };
+  newEvent.value = { id: 0, title: "", start: "", end: "", date: "" };
 
   fetchAppointments();
+};
+
+const setSnackBar = (message: string, type: string) => {
+  if (type === "success") {
+    snackbar.value = {
+      show: true,
+      message: message,
+      color: "success",
+    };
+  } else if (type === "error") {
+    snackbar.value = {
+      show: true,
+      message: message,
+      color: "error",
+    };
+  }
 };
 
 const onCellClick = (date: Date) => {
@@ -107,11 +136,27 @@ const onCellClick = (date: Date) => {
   showCreateDialog.value = true; // Dialog öffnen
 };
 
-const bookAppointment = () => {
+const bookAppointment = async () => {
+  const payload = {
+    appointmentId: selectedEvent.value.id,
+    patientId: 1,
+  };
+
+  try {
+    await sendBookingAppointment(payload);
+
+    setSnackBar("Termin erfolgreich gebucht!", "success");
+  } catch (error) {
+    console.error("Error booking appointment:", error);
+    setSnackBar("Fehler beim Buchen des Termins!", "error");
+  }
+
+  fetchAppointments();
   showDialog.value = false;
 };
 
 const fetchAppointments = async () => {
+  events.value = [];
   finishedLoading.value = false;
   const data = await getAllAppointments();
 
@@ -121,6 +166,7 @@ const fetchAppointments = async () => {
     }
 
     const appointment = {
+      id: event.id,
       start: parseDate(event.startDateTime),
       end: parseDate(event.endDateTime),
       patient: event.patient,
@@ -141,6 +187,14 @@ const parseDate = (date: string) => {
 
   return parsedDate;
 };
+
+const appointmentHasPatient = computed(() => {
+  if (selectedEvent.value?.patient?.id) {
+    return true;
+  } else {
+    return false;
+  }
+});
 
 onMounted(() => {
   fetchAppointments();
@@ -181,6 +235,10 @@ onMounted(() => {
         <p v-html="selectedEvent.contentFull" />
         <strong>Termindetails</strong>
         <ul>
+          <li v-if="appointmentHasPatient">
+            Patient: {{ selectedEvent.patient.firstName }}
+            {{ selectedEvent.patient.lastName }}
+          </li>
           <li>
             Beginn:
             {{ selectedEvent.start && selectedEvent.start.formatTime() }}
@@ -191,7 +249,9 @@ onMounted(() => {
           </li>
         </ul>
       </v-card-text>
-      <v-btn @click="bookAppointment">Termin buchen</v-btn>
+      <v-btn v-if="!appointmentHasPatient" @click="bookAppointment"
+        >Termin buchen</v-btn
+      >
     </v-card>
   </v-dialog>
 
@@ -218,6 +278,10 @@ onMounted(() => {
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+    {{ snackbar.message }}
+  </v-snackbar>
 </template>
 
 <style scoped>

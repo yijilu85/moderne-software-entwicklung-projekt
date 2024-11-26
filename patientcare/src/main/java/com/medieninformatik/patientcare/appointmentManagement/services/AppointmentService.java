@@ -28,7 +28,7 @@ public class AppointmentService {
     private HelperService helperService;
 
 
-    public AppointmentService(AppointmentRepo appointmentRepo, UserRepo userRepo, HelperService helperService){
+    public AppointmentService(AppointmentRepo appointmentRepo, UserRepo userRepo, HelperService helperService) {
         this.appointmentRepo = appointmentRepo;
         this.userRepo = userRepo;
         this.helperService = helperService;
@@ -103,9 +103,28 @@ public class AppointmentService {
         }
         System.out.println("USER TYPE: " + type);
         return appointments;
+    };
+
+
+    public Appointment parseJSONBookAppointmentSlot(String payload) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(payload);
+
+        Long patientId = rootNode.get("patientId").asLong();
+        Long appointmentid = rootNode.get("appointmentId").asLong();
+
+        Optional<User> patient = userRepo.findById(patientId);
+        Optional<Appointment> appointment = appointmentRepo.findById(appointmentid);
+
+        if (patient != null && appointment!=null) {
+            appointment.get().setPatient((Patient) patient.get());
+            appointmentRepo.save(appointment.get());
+            return appointment.get();
+        } else {
+            return null;
+        }
     }
 
-    ;
 
     public Appointment parseJSONCreateAppointmentSlot(String payload) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();

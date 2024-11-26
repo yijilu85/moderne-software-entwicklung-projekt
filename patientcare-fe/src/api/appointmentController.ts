@@ -20,3 +20,11 @@ export const createAppointmentSlot = async (payload: Appointment) => {
   const response = await axios.post(`/appointments`, payload);
   return response.data as Appointment;
 };
+
+export const sendBookingAppointment = async (payload: {
+  appointmentId: number;
+  patientId: number;
+}) => {
+  const response = await axios.post(`/appointments/book`, payload);
+  return response.data as Appointment;
+};

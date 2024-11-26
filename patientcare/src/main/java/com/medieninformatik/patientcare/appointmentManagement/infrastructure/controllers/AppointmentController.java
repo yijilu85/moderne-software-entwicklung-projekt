@@ -44,4 +44,10 @@ public class AppointmentController {
     public Appointment createAppointmentSlot(@RequestBody String json) throws JsonProcessingException {
         return appointmentService.parseJSONCreateAppointmentSlot(json);
     }
+
+    @CrossOrigin
+    @PostMapping(path = "/book")
+    public Appointment bookAppointment(@RequestBody String json) throws JsonProcessingException {
+        return appointmentService.parseJSONBookAppointmentSlot(json);
+    }
 }

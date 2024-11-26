@@ -19,6 +19,7 @@ export interface User {
 }
 
 export interface Appointment {
+  id: number;
   date?: date;
   start: datetime;
   end: datetime;
