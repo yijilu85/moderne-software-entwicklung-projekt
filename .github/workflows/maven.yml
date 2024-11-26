@@ -7,10 +7,12 @@
 # documentation.
 
 name: Java CI with Maven
-
 on:
+  push:
+    branches:
+      - main
   pull_request:
-    branches: '*'
+    types: [opened, synchronize, reopened]
 
 jobs:
   build:
@@ -36,4 +38,22 @@ jobs:
       - name: Run unit tests with maven
         working-directory: patientcare
         run:  mvn -B test -X --file pom.xml
+      - name: Cache SonarQube Cloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build and analyze
+        working-directory: patientcare
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=yijilu85_moderne-software-entwicklung-projekt
      
