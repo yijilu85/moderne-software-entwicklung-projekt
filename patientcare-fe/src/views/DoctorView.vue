@@ -6,6 +6,8 @@ import {
   getAllAppointments,
   sendBookingAppointment,
 } from "@/api/appointmentController";
+import { watch } from "vue";
+
 
 const date = new Date();
 
@@ -50,6 +52,10 @@ const AppointmentDuration = 30;
 const selectedEvent = ref();
 const showDialog = ref(false);
 const showCreateDialog = ref(false);
+const durations = ref<number[]>([]); // Liste für Zeitoptionen
+const selectedDuration = ref<number>(15); // Standarddauer 30 Minuten
+const startTimes = ref<string[]>([]); // Liste aller möglichen Startzeiten
+const selectedStartTime = ref<string>("09:00"); // Standardstartzeit
 
 const snackbar = ref({
   show: false,
@@ -66,9 +72,9 @@ const onEventClick = (appointment: Appointment, mouseevent: MouseEvent) => {
 const createAppointment = async () => {
   // Kombinieren von Datum und Zeit zu ISO-Strings
   const startDateTime = new Date(
-    `${newEvent.value.date}T${newEvent.value.start}`
+    `${newEvent.value.date}T${selectedStartTime.value}`
   );
-  const endDateTime = new Date(`${newEvent.value.date}T${newEvent.value.end}`);
+  const endDateTime = new Date(startDateTime.getTime() + selectedDuration.value * 60 * 1000);
   const payload = {
     doctor: {
       id: 2,
@@ -90,9 +96,12 @@ const createAppointment = async () => {
   } catch {
     setSnackBar("Fehler beim Erstellen eines Termins!", "error");
   }
+
+  //Resets
   showCreateDialog.value = false;
   newEvent.value = { id: 0, title: "", start: "", end: "", date: "" };
-
+  selectedDuration.value = 15; // Standarddauer zurücksetzen
+  selectedStartTime.value = "09:00"; // Standardstartzeit
   fetchAppointments();
 };
 
@@ -111,30 +120,63 @@ const setSnackBar = (message: string, type: string) => {
     };
   }
 };
+// Beobachte Änderungen an der ausgewählten Startzeit
+watch(selectedStartTime, (newStartTime) => {
+  if (newStartTime) {
+    const [hours, minutes] = newStartTime.split(":").map(Number);
+    const startDate = new Date();
+    startDate.setHours(hours, minutes, 0, 0);
+
+    // Berechne die Endzeit basierend auf der Dauer
+    const endDate = new Date(
+        startDate.getTime() + selectedDuration.value * 60 * 1000
+    );
+
+    // Aktualisiere die Anzeige
+    newEvent.value.start = newStartTime; // Startzeit
+    newEvent.value.end = endDate.toTimeString().slice(0, 5); // Endzeit (HH:mm)
+  }
+});
+
+const roundToQuarterHour = (date: Date): Date => {
+  const minutes = date.getMinutes();
+  const roundedMinutes = Math.ceil(minutes / 15) * 15; // Aufrunden auf nächsten 15-Minuten-Schritt
+  date.setMinutes(roundedMinutes, 0, 0); // Minuten, Sekunden und Millisekunden setzen
+  return date;
+};
+
 
 const onCellClick = (date: Date) => {
-  const originalMinutes = date.getMinutes();
-  const roundedMinutes = originalMinutes < 30 ? 30 : 0; // Runde auf die nächste halbe Stunde
-  const startTime = new Date(date);
-  // Setze die Stunden korrekt und die Minuten auf den gerundeten Wert
-  if (roundedMinutes === 0) {
-    startTime.setHours(startTime.getHours() + 1); // Nächste volle Stunde
-  }
-  startTime.setMinutes(roundedMinutes);
-  startTime.setSeconds(0);
-  startTime.setMilliseconds(0);
 
-  // Endzeit 30 Minuten später
+  // Zeit auf den nächsten 15-Minuten-Schritt runden
+  const startTime = roundToQuarterHour(new Date(date));
+
+  // Lokale Zeit direkt nutzen (keine doppelte Konvertierung)
+  const localStartTime = new Date(startTime.getTime());
+
+  // Berechnung der Endzeit basierend auf der Standarddauer oder ausgewählten Dauer
   const endTime = new Date(
-    startTime.getTime() + AppointmentDuration * 60 * 1000
+      localStartTime.getTime() + selectedDuration.value * 60 * 1000
   );
 
-  // Werte zuweisen
-  newEvent.value.date = startTime.toISOString().split("T")[0]; // YYYY-MM-DD
-  newEvent.value.start = startTime.toISOString().split("T")[1].slice(0, 5); // HH:mm
-  newEvent.value.end = endTime.toISOString().split("T")[1].slice(0, 5); // HH:mm
+  // Lokale Zeit korrekt formatieren
+  const formatTime = (date: Date) => date.toTimeString().slice(0, 5); // HH:mm
+
+  // toISOString formatiert wieder in UTC zurück deswegen lieber toTimeString
+  newEvent.value.date = localStartTime.toISOString().split("T")[0]; // Datum: YYYY-MM-DD
+  newEvent.value.start = localStartTime.toTimeString().slice(0, 5); // Startzeit: HH:mm
+  newEvent.value.end = endTime.toTimeString().slice(0, 5); // Endzeit: HH:mm
+
+  // Synchronisiere mit dem Dropdown für die Startzeit
+  selectedStartTime.value = newEvent.value.start;
+
   showCreateDialog.value = true; // Dialog öffnen
+
+  console.log("Original Date:", date.toISOString());
+  console.log("Rounded Date:", startTime.toISOString());
+  console.log("Localized Date:", localStartTime.toLocaleString());
 };
+
 
 const bookAppointment = async () => {
   const payload = {
@@ -196,7 +238,29 @@ const appointmentHasPatient = computed(() => {
   }
 });
 
+const calculateEndTime = (start: string, duration: number) => {
+  if (!start || !duration) return "";
+  const [hours, minutes] = start.split(":").map(Number);
+  const startDate = new Date();
+  startDate.setHours(hours, minutes, 0, 0);
+  const endDate = new Date(startDate.getTime() + duration * 60 * 1000); // Dauer hinzufügen
+  return endDate.toTimeString().slice(0, 5); // HH:mm
+};
+
 onMounted(() => {
+  // Generiere Zeitoptionen von 15 bis 60 Minuten
+  for (let i = 15; i <= 60; i += 15) {
+    durations.value.push(i);
+  }
+  // Generiere Zeitoptionen von 00:00 bis 23:45 in 15-Minuten-Schritten
+  for (let hour = 7; hour < 18; hour++) {
+    for (let minutes = 0; minutes < 60; minutes += 15) {
+      const time = `${hour.toString().padStart(2, "0")}:${minutes
+          .toString()
+          .padStart(2, "0")}`;
+      startTimes.value.push(time);
+    }
+  }
   fetchAppointments();
 });
 </script>
@@ -218,6 +282,7 @@ onMounted(() => {
   <vue-cal
     v-if="finishedLoading"
     style="height: 850px"
+    :time-cell-height="80"
     :events="events"
     :on-event-click="onEventClick"
     @cell-click="onCellClick"
@@ -262,13 +327,30 @@ onMounted(() => {
       <v-card-title>Neuen Termin erstellen</v-card-title>
       <v-card-text>
         <v-text-field v-model="newEvent.title" label="Titel"></v-text-field>
+
         <v-select
           label="Termintyp"
           :items="['OFFLINE', 'ONLINE']"
           v-model="newEvent.type"
         ></v-select>
+
+        <!-- Dropdown für Startzeit -->
+        <v-select
+            v-model="selectedStartTime"
+            :items="startTimes"
+            label="Startzeit"
+        ></v-select>
+
+        <!-- Dropdown für die Dauer -->
+        <v-select
+            v-model="selectedDuration"
+            :items="durations"
+            label="Termindauer (Minuten)"
+            item-text="value"
+            item-value="value"
+        ></v-select>
         <p>Beginn: {{ newEvent.start }}</p>
-        <p>Ende: {{ newEvent.end }}</p>
+        <p>Ende: {{ calculateEndTime(newEvent.start, selectedDuration) }}</p>
       </v-card-text>
       <v-card-actions>
         <v-btn color="primary" @click="createAppointment">Speichern</v-btn>
@@ -309,4 +391,6 @@ onMounted(() => {
 .vuecal__event-content {
   font-style: italic;
 }
+
+
 </style>
