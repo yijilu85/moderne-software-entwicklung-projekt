@@ -3,7 +3,7 @@ package com.medieninformatik.patientcare.userManagement.domain.model.DTO;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 @Getter
 @AllArgsConstructor
@@ -24,6 +24,7 @@ public class DoctorResponseDTO{
     private String licenseId;
     private String title;
 
+    @JsonCreator
     public DoctorResponseDTO(Doctor doctor) {
         this.userType = doctor.getUserType().toString();
         this.id = doctor.getId();

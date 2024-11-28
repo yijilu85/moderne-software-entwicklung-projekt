@@ -7,36 +7,55 @@ import {
   sendBookingAppointment,
 } from "@/api/appointmentController";
 import { watch } from "vue";
+import { getDoctor } from "@/api/doctorController";
+import { useRoute } from "vue-router"; // Importiere useRoute
+
+
+
 
 
 const date = new Date();
+const doctor = ref<Doctor | null>(null); // Ref für den geladenen Doktor
+const route = useRoute(); // Zugriff auf die Route
+const events = ref<Appointment[]>([]);
+const selectedDay = ref("");
+const finishedLoading = ref(false);
+const AppointmentDuration = 30;
+const selectedEvent = ref();
+const showDialog = ref(false);
+const showCreateDialog = ref(false);
+const durations = ref<number[]>([]); // Liste für Zeitoptionen
+const selectedDuration = ref<number>(15); // Standarddauer 30 Minuten
+const startTimes = ref<string[]>([]); // Liste aller möglichen Startzeiten
+const selectedStartTime = ref<string>("09:00"); // Standardstartzeit
 
-const dummyDoctor = ref<Doctor>({
-  id: 2,
-  firstName: "Hans",
-  lastName: "Ulrich",
-  street: "Berliner Straße",
-  houseNumber: "12",
-  zipCode: "12345",
-  city: "Berlin",
-  dateOfBirth: date,
-  title: "Dr. med.",
-  speciality: "Zahnarzt",
-  medicalId: "123asd",
-  profileImg: "dummy-doctor.png",
-  userType: "DOCTOR",
+
+// Funktion zum Laden der Doktor-Daten
+const loadDoctor = async (doctorId: number) => {
+  try {
+    console.log("Sende Anfrage an Backend für Doktor mit ID:", doctorId);
+    const doctorData = await getDoctor(doctorId);
+    console.log("Antwort vom Backend für Doktor:", doctorData);
+    if (!doctorData) {
+      console.error("Keine Doktor-Daten gefunden!");
+      setSnackBar("Doktor-Daten konnten nicht geladen werden!", "error");
+    } else {
+      doctor.value = doctorData;
+    }
+  } catch (error) {
+    console.error("Fehler beim Abrufen der Doktor-Daten:", error);
+    setSnackBar("Fehler beim Abrufen der Doktor-Daten!", "error");
+  }
+};
+
+watch(() => route.params.id, async (newId) => {
+  const doctorId = Number(newId);
+  if (!isNaN(doctorId)) {
+    await loadDoctor(doctorId);
+  }
 });
 
-// const events = ref<Appointment[]>([
-//   {
-//     start: "2024-11-25 10:30",
-//     end: "2024-11-25 11:30",
-//     title: "Doctor appointment",
-//   },
-// ]);
-const events = ref<Appointment[]>([]);
 
-const selectedDay = ref("");
 
 const newEvent = ref<Appointment>({
   id: 0,
@@ -47,15 +66,7 @@ const newEvent = ref<Appointment>({
   title: "",
 });
 
-const finishedLoading = ref(false);
-const AppointmentDuration = 30;
-const selectedEvent = ref();
-const showDialog = ref(false);
-const showCreateDialog = ref(false);
-const durations = ref<number[]>([]); // Liste für Zeitoptionen
-const selectedDuration = ref<number>(15); // Standarddauer 30 Minuten
-const startTimes = ref<string[]>([]); // Liste aller möglichen Startzeiten
-const selectedStartTime = ref<string>("09:00"); // Standardstartzeit
+
 
 const snackbar = ref({
   show: false,
@@ -72,7 +83,7 @@ const onEventClick = (appointment: Appointment, mouseevent: MouseEvent) => {
 const createAppointment = async () => {
   // Kombinieren von Datum und Zeit zu ISO-Strings
   const startDateTime = new Date(
-    `${newEvent.value.date}T${selectedStartTime.value}`
+      `${newEvent.value.date}T${selectedStartTime.value}`
   );
   const endDateTime = new Date(startDateTime.getTime() + selectedDuration.value * 60 * 1000);
   const payload = {
@@ -247,12 +258,12 @@ const calculateEndTime = (start: string, duration: number) => {
   return endDate.toTimeString().slice(0, 5); // HH:mm
 };
 
-onMounted(() => {
-  // Generiere Zeitoptionen von 15 bis 60 Minuten
+
+// Zeitoptionen generieren
+const generateTimeOptions = () => {
   for (let i = 15; i <= 60; i += 15) {
     durations.value.push(i);
   }
-  // Generiere Zeitoptionen von 00:00 bis 23:45 in 15-Minuten-Schritten
   for (let hour = 7; hour < 18; hour++) {
     for (let minutes = 0; minutes < 60; minutes += 15) {
       const time = `${hour.toString().padStart(2, "0")}:${minutes
@@ -261,31 +272,55 @@ onMounted(() => {
       startTimes.value.push(time);
     }
   }
-  fetchAppointments();
+};
+
+// Initiale Daten laden
+const loadInitialData = async () => {
+  try {
+    const doctorId = Number(route.params.id);
+    console.log("Doctor ID aus der Route:", doctorId);
+    if (!isNaN(doctorId)) {
+      await loadDoctor(doctorId);
+    } else {
+      console.error("Ungültige ID in der URL:", route.params.id);
+      setSnackBar("Ungültige ID in der URL!", "error");
+    }
+  } catch (error) {
+    console.error("Fehler bei der Initialisierung:", error);
+    setSnackBar("Fehler bei der Initialisierung!", "error");
+  }
+};
+
+onMounted(async () => {
+
+  generateTimeOptions(); // Zeitoptionen generieren
+  await loadInitialData(); // Daten laden
+
 });
 </script>
 
 <template>
-  <div class="doctor-detail">
+  <div class="doctor-detail" v-if="doctor">
     <h1>
-      {{ dummyDoctor.title }} {{ dummyDoctor.firstName }}
-      {{ dummyDoctor.lastName }}
+      {{ doctor.title }} {{ doctor.firstName }} {{ doctor.lastName }}
     </h1>
-    <img class="doctor-img" src="@/assets/images/dummy-doctor.png" />
-    <p>{{ dummyDoctor.speciality }}</p>
-    <p>{{ dummyDoctor.medicalId }}</p>
-    <p>{{ dummyDoctor.street }} {{ dummyDoctor.houseNumber }}</p>
-    <p>{{ dummyDoctor.zipCode }} {{ dummyDoctor.city }}</p>
+    <img class="doctor-img" :src="doctor.profileImg || 'fallback-image.png'" />
+    <p>{{ doctor.speciality }}</p>
+    <p>{{ doctor.licenseId }}</p>
+    <p>{{ doctor.street }} {{ doctor.houseNumber }}</p>
+    <p>{{ doctor.zipCode }} {{ doctor.city }}</p>
   </div>
-
+  <div v-else>
+    <p>Loading doctor details...</p>
+  </div>
   <h2>Termin buchen</h2>
   <vue-cal
-    v-if="finishedLoading"
-    style="height: 850px"
-    :time-cell-height="80"
-    :events="events"
-    :on-event-click="onEventClick"
-    @cell-click="onCellClick"
+      v-if="finishedLoading"
+      style="height: 850px"
+      :time-cell-height="80"
+      :events="events"
+      :on-event-click="onEventClick"
+      @cell-click="onCellClick"
   />
   <v-dialog v-model="showDialog" style="width: 500px">
     <v-card>
@@ -293,8 +328,8 @@ onMounted(() => {
         <span>{{ selectedEvent.title }}</span>
         <v-spacer />
         <strong>{{
-          selectedEvent.start && selectedEvent.start.format("DD/MM/YYYY")
-        }}</strong>
+            selectedEvent.start && selectedEvent.start.format("DD/MM/YYYY")
+          }}</strong>
       </v-card-title>
       <v-card-text>
         <p v-html="selectedEvent.contentFull" />
@@ -315,7 +350,7 @@ onMounted(() => {
         </ul>
       </v-card-text>
       <v-btn v-if="!appointmentHasPatient" @click="bookAppointment"
-        >Termin buchen</v-btn
+      >Termin buchen</v-btn
       >
     </v-card>
   </v-dialog>
@@ -329,9 +364,9 @@ onMounted(() => {
         <v-text-field v-model="newEvent.title" label="Titel"></v-text-field>
 
         <v-select
-          label="Termintyp"
-          :items="['OFFLINE', 'ONLINE']"
-          v-model="newEvent.type"
+            label="Termintyp"
+            :items="['OFFLINE', 'ONLINE']"
+            v-model="newEvent.type"
         ></v-select>
 
         <!-- Dropdown für Startzeit -->
@@ -355,7 +390,7 @@ onMounted(() => {
       <v-card-actions>
         <v-btn color="primary" @click="createAppointment">Speichern</v-btn>
         <v-btn color="secondary" @click="showCreateDialog = false"
-          >Abbrechen</v-btn
+        >Abbrechen</v-btn
         >
       </v-card-actions>
     </v-card>
