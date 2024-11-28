@@ -2,11 +2,14 @@ package com.medieninformatik.patientcare.userManagement.services;
 
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.DoctorRepo;
+import com.medieninformatik.patientcare.userManagement.domain.model.valueObjects.MedicalSpeciality;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.github.javafaker.Faker;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+
 
 @Service
 public class FakerService {
@@ -18,13 +21,27 @@ public class FakerService {
         this.doctorRepo = doctorRepo;
     }
 
-    public void createDoctors() {
+    public void createDoctors(int amount) {
         Faker faker = new Faker();
-        for (int i = 0; i < 10; i++) {
+        Random random = new Random();
+        MedicalSpeciality.Speciality[] specialities = MedicalSpeciality.Speciality.values();
+
+
+        for (int i = 0; i < amount; i++) {
             Doctor doctor = new Doctor();
             doctor.setFirstName(faker.name().firstName());
             doctor.setLastName(faker.name().lastName());
-//            doctor.set(faker.medical().department());
+            doctor.setEmail(faker.internet().emailAddress());
+            doctor.setPassword("1234567890");
+            doctor.setPhoneNumber(faker.phoneNumber().phoneNumber());
+            doctor.setStreet(faker.address().streetAddress());
+            doctor.setHouseNumber(faker.address().buildingNumber());
+            doctor.setZipCode(faker.address().zipCode());
+            doctor.setLicenseId("A" + faker.number().digits(5)+"-D" + faker.number().digits(5));
+            doctor.setCity(faker.address().city());
+            MedicalSpeciality.Speciality speciality = specialities[random.nextInt(specialities.length)];
+            doctor.setSpeciality(speciality);
+            doctor.setUsertype(Doctor.UserType.DOCTOR);
             doctorRepo.save(doctor);
         }
     }

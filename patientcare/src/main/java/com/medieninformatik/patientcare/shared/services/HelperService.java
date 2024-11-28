@@ -5,6 +5,7 @@ import com.medieninformatik.patientcare.patientDataManagement.domain.model.Diagn
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
@@ -21,5 +22,10 @@ public class HelperService {
         } catch (DateTimeParseException e) {
             return false; // Ungültiges Datum
         }
+    }
+
+    public LocalDateTime parseDateFromJSON(String dateStr) {
+        String strippedInput = dateStr.replace("Z", ""); // Remove the Z
+        return LocalDateTime.parse(strippedInput);
     }
 }

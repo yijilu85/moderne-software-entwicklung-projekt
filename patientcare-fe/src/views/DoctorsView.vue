@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Appointment, Doctor } from "@/types/types";
 import { onMounted, ref } from "vue";
-
+import { getAllDoctors } from "@/api/doctorController";
 const date = new Date();
 const specialities = ref<string[]>([]);
 const doctors = ref<Doctor[]>([
@@ -91,13 +91,21 @@ const populateSpecialities = () => {
   console.log("specialities", specialities.value);
 };
 
-onMounted(() => {
+const fetchDoctors = async () => {
+  const data = await getAllDoctors();
+  doctors.value = data;
   populateSpecialities();
+};
+
+onMounted(() => {
+  fetchDoctors();
+  // populateSpecialities();
 });
 </script>
 
 <template>
   <h1>Ärztesuche</h1>
+  {{ doctors }}
   <v-combobox clearable label="Fachrichtung" :items="specialities"></v-combobox>
 
   <!-- <div class="doctor-detail">

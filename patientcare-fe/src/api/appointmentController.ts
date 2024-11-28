@@ -7,16 +7,24 @@ export const getAllAppointments = async () => {
 };
 
 export const getAppointment = async (id: number) => {
-  const response = await axios.get(`/appointment/${id}`);
+  const response = await axios.get(`/appointments/${id}`);
   return response.data as Appointment;
 };
 
 export const getAllAppointmentsForUser = async (id: number) => {
-  const response = await axios.get(`/appointment/?userId=${id}`);
+  const response = await axios.get(`/appointments/?userId=${id}`);
   return response.data as Appointment[];
 };
 
 export const createAppointmentSlot = async (payload: Appointment) => {
-  const response = await axios.post(`/appointment`, payload);
+  const response = await axios.post(`/appointments`, payload);
+  return response.data as Appointment;
+};
+
+export const sendBookingAppointment = async (payload: {
+  appointmentId: number;
+  patientId: number;
+}) => {
+  const response = await axios.post(`/appointments/book`, payload);
   return response.data as Appointment;
 };

@@ -34,7 +34,7 @@ public class MedicalSpeciality {
         }
 
         // Getter for the German name
-        public String getlabel() {
+        public String getLabel() {
             return label;
         }
 
@@ -52,7 +52,7 @@ public class MedicalSpeciality {
 
     @Override
     public String toString() {
-        return "Fachgebiet: " + this.speciality.getlabel();
+        return "Fachgebiet: " + this.speciality.getLabel();
     }
 }
 

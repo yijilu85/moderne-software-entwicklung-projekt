@@ -46,6 +46,7 @@ public class Appointment{
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
     private LocalDateTime editDateTime;
+    private String title;
 
     @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("appointment")
@@ -155,6 +156,13 @@ public class Appointment{
         this.notes.add(note);
     }
 
+    public String getTitle(){
+        return this.title;
+    }
+
+    public void setTitle(String title){
+        this.title = title;
+    }
 
     public void removeSingleNote(Note note) {
 
@@ -172,5 +180,22 @@ public class Appointment{
         if (this.notes.size() != 0) {
             this.notes.clear();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Appointment{" +
+                "id=" + id +
+                ", patient=" + patient +
+                ", doctor=" + doctor +
+                ", creator=" + creator +
+                ", createdAt=" + createdAt +
+                ", startDateTime=" + startDateTime +
+                ", endDateTime=" + endDateTime +
+                ", editDateTime=" + editDateTime +
+                ", title='" + title + '\'' +
+                ", notes=" + notes +
+                ", type=" + type +
+                '}';
     }
 }
