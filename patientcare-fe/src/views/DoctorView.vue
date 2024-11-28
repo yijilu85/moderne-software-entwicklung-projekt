@@ -56,7 +56,6 @@ watch(() => route.params.id, async (newId) => {
 });
 
 
-
 const newEvent = ref<Appointment>({
   id: 0,
   start: "",
@@ -65,8 +64,6 @@ const newEvent = ref<Appointment>({
   doctor: null,
   title: "",
 });
-
-
 
 const snackbar = ref({
   show: false,
