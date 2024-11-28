@@ -26,10 +26,6 @@ public class DoctorService {
         return doctorRepo.findById(personId);
     }
 
-//    public List<Doctor> getAllDoctors() {
-//        return doctorRepo.findAll();
-//    }
-
     @GetMapping
     public List<DoctorResponseDTO> getAllDoctors() {
         return doctorRepo.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());

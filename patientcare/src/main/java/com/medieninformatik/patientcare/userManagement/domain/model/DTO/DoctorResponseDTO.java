@@ -1,13 +1,9 @@
 package com.medieninformatik.patientcare.userManagement.domain.model.DTO;
 
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
-import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
-import com.medieninformatik.patientcare.userManagement.domain.model.valueObjects.MedicalSpeciality;
-import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import static com.medieninformatik.patientcare.userManagement.domain.model.shared.User.UserType.DOCTOR;
 
 @Getter
 @AllArgsConstructor
