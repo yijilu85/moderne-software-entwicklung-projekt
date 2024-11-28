@@ -9,12 +9,12 @@ export interface User {
   id: number;
   firstName: string;
   lastName: string;
-  street: string;
-  houseNumber: string;
-  zipCode: string;
-  city: string;
-  dateOfBirth: Date;
-  profileImg: string;
+  street?: string;
+  houseNumber?: string;
+  zipCode?: string;
+  city?: string;
+  dateOfBirth?: Date;
+  profileImg?: string;
   userType: "DOCTOR" | "PATIENT";
 }
 

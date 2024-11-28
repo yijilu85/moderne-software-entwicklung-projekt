@@ -17,6 +17,7 @@ const dummyDoctor = ref<Doctor>({
   speciality: "Zahnarzt",
   medicalId: "123asd",
   profileImg: "dummy-doctor.png",
+  userType: "DOCTOR",
 });
 
 const events = ref<Appointment[]>([

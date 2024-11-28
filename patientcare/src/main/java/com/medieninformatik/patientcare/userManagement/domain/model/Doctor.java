@@ -28,4 +28,5 @@ public class Doctor
                 ", lastName='" + super.getLastName() + '\'' +
                 '}';
     }
+
 }
