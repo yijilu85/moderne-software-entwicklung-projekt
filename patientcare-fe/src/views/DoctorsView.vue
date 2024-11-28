@@ -77,6 +77,14 @@ const clearField = (fieldname: string) => {
   }
 };
 
+watch(cityFilter, (newCity, oldCity) => {
+  populateSpecialities();
+});
+
+watch(specialtyFilter, (newSpecialty, oldSpecialty) => {
+  populateCities();
+});
+
 onMounted(async () => {
   await fetchDoctors();
   populateSpecialities();
