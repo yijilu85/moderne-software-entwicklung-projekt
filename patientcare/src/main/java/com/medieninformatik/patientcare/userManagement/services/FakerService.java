@@ -6,8 +6,6 @@ import com.medieninformatik.patientcare.userManagement.domain.model.valueObjects
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.github.javafaker.Faker;
-import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 
@@ -25,7 +23,7 @@ public class FakerService {
         Faker faker = new Faker();
         Random random = new Random();
         MedicalSpeciality.Speciality[] specialities = MedicalSpeciality.Speciality.values();
-
+        String[] cities = {"Berlin", "Hamburg", "Munich", "Cologne", "Frankfurt", "Stuttgart"};
 
         for (int i = 0; i < amount; i++) {
             Doctor doctor = new Doctor();
@@ -36,9 +34,9 @@ public class FakerService {
             doctor.setPhoneNumber(faker.phoneNumber().phoneNumber());
             doctor.setStreet(faker.address().streetAddress());
             doctor.setHouseNumber(faker.address().buildingNumber());
-            doctor.setZipCode(faker.address().zipCode());
-            doctor.setLicenseId("A" + faker.number().digits(5)+"-D" + faker.number().digits(5));
-            doctor.setCity(faker.address().city());
+            doctor.setZipCode(faker.number().digits(5));
+            doctor.setLicenseId("A" + faker.number().digits(5) + "-D" + faker.number().digits(5));
+            doctor.setCity(cities[random.nextInt(cities.length)]);
             MedicalSpeciality.Speciality speciality = specialities[random.nextInt(specialities.length)];
             doctor.setSpeciality(speciality);
             doctor.setUsertype(Doctor.UserType.DOCTOR);
