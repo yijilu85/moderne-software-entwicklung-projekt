@@ -17,6 +17,7 @@ public class Doctor
     private String zipCode;
     private String city;
     private String licenseId;
+    private String title;
 
     // Default constructor
     public Doctor() {
@@ -92,10 +93,19 @@ public class Doctor
         this.licenseId = licenseId;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     @Override
     public String toString() {
      return "Doctor{" +
              "id=" + super.getId() +
+             ", title='" + title + '\'' +
              ", firstName='" + super.getFirstName() + '\'' +
              ", lastName='" + super.getLastName() + '\'' +
              ", speciality='" + speciality + '\'' +

@@ -22,6 +22,7 @@ public class DoctorResponseDTO{
     private String zipCode;
     private String city;
     private String licenseId;
+    private String title;
 
     public DoctorResponseDTO(Doctor doctor) {
         this.userType = doctor.getUserType().toString();
@@ -36,5 +37,6 @@ public class DoctorResponseDTO{
         this.zipCode = doctor.getZipCode();
         this.city = doctor.getCity();
         this.licenseId = doctor.getLicenseId();
+        this.title = doctor.getTitle();
     }
 }

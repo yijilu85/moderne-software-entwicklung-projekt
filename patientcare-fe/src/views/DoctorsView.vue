@@ -1,86 +1,34 @@
 <script setup lang="ts">
 import type { Appointment, Doctor } from "@/types/types";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
+import type { Ref } from "vue";
 import { getAllDoctors } from "@/api/doctorController";
+import { useRouter } from "vue-router";
+
 const date = new Date();
 const specialities = ref<string[]>([]);
-const doctors = ref<Doctor[]>([
-  {
-    id: 1,
-    firstName: "Hans",
-    lastName: "Ulrich",
-    street: "Berliner Straße",
-    houseNumber: "12",
-    zipCode: "12345",
-    city: "Berlin",
-    dateOfBirth: date,
-    title: "Dr. med.",
-    speciality: "Dermatologie",
-    medicalId: "123asd",
-    profileImg: "dummy-doctor.png",
-    userType: "DOCTOR",
-  },
-  {
-    id: 2,
-    firstName: "Hans",
-    lastName: "Ulrich",
-    street: "Berliner Straße",
-    houseNumber: "12",
-    zipCode: "12345",
-    city: "Berlin",
-    dateOfBirth: date,
-    title: "Dr. med.",
-    speciality: "Dentologie",
-    medicalId: "123asd",
-    profileImg: "dummy-doctor.png",
-    userType: "DOCTOR",
-  },
-  {
-    id: 3,
-    firstName: "Hans",
-    lastName: "Ulrich",
-    street: "Berliner Straße",
-    houseNumber: "12",
-    zipCode: "12345",
-    city: "Berlin",
-    dateOfBirth: date,
-    title: "Dr. med.",
-    speciality: "Urologie",
-    medicalId: "123asd",
-    profileImg: "dummy-doctor.png",
-    userType: "DOCTOR",
-  },
-  {
-    id: 4,
-    firstName: "Hans",
-    lastName: "Ulrich",
-    street: "Berliner Straße",
-    houseNumber: "12",
-    zipCode: "12345",
-    city: "Berlin",
-    dateOfBirth: date,
-    title: "Dr. med.",
-    speciality: "Urologie",
-    medicalId: "123asd",
-    profileImg: "dummy-doctor.png",
-    userType: "DOCTOR",
-  },
-  {
-    id: 5,
-    firstName: "Hans",
-    lastName: "Ulrich",
-    street: "Berliner Straße",
-    houseNumber: "12",
-    zipCode: "12345",
-    city: "Berlin",
-    dateOfBirth: date,
-    title: "Dr. med.",
-    speciality: "Dentologie",
-    medicalId: "123asd",
-    profileImg: "dummy-doctor.png",
-    userType: "DOCTOR",
-  },
-]);
+const cities = ref<string[]>([]);
+const doctors = ref<Doctor[]>([]);
+const cityFilter = ref<string | null>(null);
+const specialtyFilter = ref<string | null>(null);
+const router = useRouter();
+
+const filteredDoctorList = computed(() => {
+  let filteredList = doctors.value;
+
+  if (cityFilter.value) {
+    filteredList = filteredList.filter(
+      (doctor) => doctor.city === cityFilter.value
+    );
+  }
+  if (specialtyFilter.value) {
+    filteredList = filteredList.filter(
+      (doctor) => doctor.speciality === specialtyFilter.value
+    );
+  }
+
+  return filteredList;
+});
 
 const populateSpecialities = () => {
   for (const doctor of doctors.value) {
@@ -88,70 +36,144 @@ const populateSpecialities = () => {
       specialities.value.push(doctor.speciality);
     }
   }
-  console.log("specialities", specialities.value);
+};
+const populateCities = () => {
+  for (const doctor of doctors.value) {
+    if (doctor.city) {
+      if (!cities.value.includes(doctor.city)) {
+        cities.value.push(doctor.city);
+      }
+    }
+  }
 };
 
 const fetchDoctors = async () => {
   const data = await getAllDoctors();
   doctors.value = data;
-  populateSpecialities();
 };
 
-onMounted(() => {
-  fetchDoctors();
-  // populateSpecialities();
+const doctorCardTitle = (doctor: Doctor) => {
+  let titleStr = "";
+  if (doctor.title) {
+    titleStr = doctor.title;
+  }
+
+  return `${titleStr} ${doctor.firstName} ${doctor.lastName}`;
+};
+const doctorCardSubtitle = (doctor: Doctor) => {
+  return `${doctor.speciality}, ${doctor.city}`;
+};
+
+const handleClick = (doctor: Doctor) => {
+  router.push({ name: "doctor", params: { id: doctor.id } });
+};
+
+const clearField = (fieldname: string) => {
+  if (fieldname === "speciality") {
+    specialtyFilter.value = null;
+  }
+  if (fieldname === "city") {
+    cityFilter.value = null;
+  }
+};
+
+onMounted(async () => {
+  await fetchDoctors();
+  populateSpecialities();
+  populateCities();
 });
 </script>
 
 <template>
   <h1>Ärztesuche</h1>
-  {{ doctors }}
-  <v-combobox clearable label="Fachrichtung" :items="specialities"></v-combobox>
+  filters: {{ cityFilter }} {{ specialtyFilter }}
+  <div class="filter-header">
+    <v-combobox
+      clearable
+      label="Fachrichtung"
+      :items="specialities"
+      v-model="specialtyFilter"
+      class="filter-field"
+    >
+      <template v-slot:append-inner>
+        <img
+          v-if="specialtyFilter"
+          src="@/assets/icons/x-circle.svg"
+          class="clear-icon"
+          @click.prevent="clearField('speciality')"
+        />
+      </template>
+    </v-combobox>
+    <v-combobox
+      clearable
+      label="Stadt"
+      :items="cities"
+      v-model="cityFilter"
+      class="filter-field"
+    >
+      <template v-slot:append-inner>
+        <img
+          v-if="cityFilter"
+          src="@/assets/icons/x-circle.svg"
+          class="clear-icon"
+          @click.prevent="clearField('city')"
+        /> </template
+    ></v-combobox>
+  </div>
 
-  <!-- <div class="doctor-detail">
-    <h1>
-      {{ dummyDoctor.title }} {{ dummyDoctor.firstName }}
-      {{ dummyDoctor.lastName }}
-    </h1>
-    <img class="doctor-img" src="@/assets/images/dummy-doctor.png" />
-    <p>{{ dummyDoctor.speciality }}</p>
-    <p>{{ dummyDoctor.medicalId }}</p>
-    <p>{{ dummyDoctor.street }} {{ dummyDoctor.houseNumber }}</p>
-    <p>{{ dummyDoctor.zipCode }} {{ dummyDoctor.city }}</p>
-  </div> -->
-
-  <!-- <h2>Termin buchen</h2>
-  <vue-cal
-    style="height: 850px"
-    :events="events"
-    :on-event-click="onEventClick"
-  />
-  <v-dialog v-model="showDialog" style="width: 500px">
-    <v-card>
-      <v-card-title>
-        <span>{{ selectedEvent.title }}</span>
-        <v-spacer />
-        <strong>{{
-          selectedEvent.start && selectedEvent.start.format("DD/MM/YYYY")
-        }}</strong>
-      </v-card-title>
-      <v-card-text>
-        <p v-html="selectedEvent.contentFull" />
-        <strong>Termindetails</strong>
-        <ul>
-          <li>
-            Beginn:
-            {{ selectedEvent.start && selectedEvent.start.formatTime() }}
-          </li>
-          <li>
-            Ende:
-            {{ selectedEvent.end && selectedEvent.end.formatTime() }}
-          </li>
-        </ul>
-      </v-card-text>
-      <v-btn @click="bookAppointment">Termin buchen</v-btn>
-    </v-card>
-  </v-dialog> -->
+  <div class="doctor-grid">
+    <h2>Gefundene Ärtze ({{ filteredDoctorList.length }})</h2>
+    <v-row justify="start" dense>
+      <v-col
+        v-for="doctor in filteredDoctorList"
+        cols="12"
+        md="4"
+        class="doctor-card"
+      >
+        <v-card
+          class="mx-auto"
+          :subtitle="doctorCardSubtitle(doctor)"
+          :title="doctorCardTitle(doctor)"
+        >
+          <template v-slot:append>
+            <v-avatar size="60">
+              <v-img
+                alt="John"
+                src="https://cdn.vuetifyjs.com/images/john.png"
+              ></v-img>
+            </v-avatar>
+          </template>
+          <v-card-text>
+            <p>{{ doctor.street }} {{ doctor.houseNumber }}</p>
+            <p>{{ doctor.zipCode }} {{ doctor.city }}</p>
+            <p>{{ doctor.phoneNumber }}</p>
+            <p>{{ doctor.email }}</p>
+          </v-card-text>
+          <v-btn
+            color="teal-accent-4"
+            text="Mehr Infos"
+            variant="text"
+            @click="handleClick(doctor)"
+          ></v-btn>
+        </v-card>
+      </v-col>
+    </v-row>
+  </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.filter-header {
+  display: flex;
+  gap: 10px;
+}
+
+.clear-icon {
+  height: 20px;
+  width: 20px;
+  cursor: pointer;
+}
+
+.filter-field {
+  width: 50%;
+}
+</style>

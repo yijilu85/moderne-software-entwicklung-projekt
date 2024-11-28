@@ -15,6 +15,8 @@ export interface User {
   city?: string;
   dateOfBirth?: Date;
   profileImg?: string;
+  phoneNumber: string;
+  email: string;
   userType: "DOCTOR" | "PATIENT";
 }
 

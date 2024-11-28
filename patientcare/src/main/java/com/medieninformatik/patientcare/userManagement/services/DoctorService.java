@@ -45,7 +45,8 @@ public class DoctorService {
                 doctor.getHouseNumber(),
                 doctor.getZipCode(),
                 doctor.getCity(),
-                doctor.getLicenseId()
+                doctor.getLicenseId(),
+                doctor.getTitle() != null ? doctor.getTitle() : null
         );
     }
 }
