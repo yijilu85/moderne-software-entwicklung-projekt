@@ -38,6 +38,12 @@ public abstract class User {
 	@Column(name = "user_type", nullable = false)
 	private UserType userType;
 
+	@Column(name = "email", nullable = true)
+	private String email;
+
+	@Column(name = "password", nullable = true)
+	private String password;
+
 	// Getter and Setter for 'id'
 	public Long getId() {
 		return id;
@@ -70,5 +76,21 @@ public abstract class User {
 
 	public UserType getUserType(){
 		return this.userType;
+	}
+
+	public String getEmail(){
+		return this.email;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setEmail(String email){
+		this.email = email;
+	}
+
+	public void setPassword(String password){
+		this.password = password;
 	}
 }

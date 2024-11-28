@@ -19,9 +19,14 @@ export interface User {
 }
 
 export interface Appointment {
+  id: number;
+  date?: date;
   start: datetime;
   end: datetime;
   title: string;
-  content: string;
-  class: string;
+  content?: string;
+  class?: string;
+  patient?: Patient | null;
+  doctor?: Doctor | null;
+  type?: "OFFLINE" | "ONLINE";
 }
