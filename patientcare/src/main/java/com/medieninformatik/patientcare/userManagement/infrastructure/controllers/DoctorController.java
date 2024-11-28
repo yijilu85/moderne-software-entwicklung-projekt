@@ -30,7 +30,7 @@ public class DoctorController {
 
     @CrossOrigin
     @GetMapping(path = "/{id}")
-    public Optional<Doctor> findDoctor(@PathVariable("id") Long id) {
+    public Optional<DoctorResponseDTO> findDoctor(@PathVariable("id") Long id) {
         return doctorService.getDoctor(id);
     }
 }

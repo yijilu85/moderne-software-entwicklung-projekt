@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type { Appointment, Doctor } from "@/types/types";
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import type { Ref } from "vue";
 import { getAllDoctors } from "@/api/doctorController";
 import { useRouter } from "vue-router";
 
-const date = new Date();
 const specialities = ref<string[]>([]);
 const cities = ref<string[]>([]);
 const doctors = ref<Doctor[]>([]);
@@ -26,19 +25,20 @@ const filteredDoctorList = computed(() => {
       (doctor) => doctor.speciality === specialtyFilter.value
     );
   }
-
   return filteredList;
 });
 
 const populateSpecialities = () => {
-  for (const doctor of doctors.value) {
+  specialities.value = [];
+  for (const doctor of filteredDoctorList.value) {
     if (!specialities.value.includes(doctor.speciality)) {
       specialities.value.push(doctor.speciality);
     }
   }
 };
 const populateCities = () => {
-  for (const doctor of doctors.value) {
+  cities.value = [];
+  for (const doctor of filteredDoctorList.value) {
     if (doctor.city) {
       if (!cities.value.includes(doctor.city)) {
         cities.value.push(doctor.city);
@@ -86,7 +86,6 @@ onMounted(async () => {
 
 <template>
   <h1>Ärztesuche</h1>
-  filters: {{ cityFilter }} {{ specialtyFilter }}
   <div class="filter-header">
     <v-combobox
       clearable

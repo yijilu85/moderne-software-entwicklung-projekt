@@ -22,8 +22,8 @@ public class DoctorService {
         this.doctorRepo = doctorRepo;
     }
 
-    public Optional<Doctor> getDoctor(Long personId) {
-        return doctorRepo.findById(personId);
+    public Optional<DoctorResponseDTO> getDoctor(Long personId) {
+        return doctorRepo.findById(personId).stream().map(this::convertToDTO).collect(Collectors.toList()).stream().findFirst();
     }
 
     @GetMapping
