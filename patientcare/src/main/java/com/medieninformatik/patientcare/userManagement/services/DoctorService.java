@@ -32,21 +32,6 @@ public class DoctorService {
     }
 
     private DoctorResponseDTO convertToDTO(Doctor doctor) {
-        return new DoctorResponseDTO(
-                doctor.getUserType().toString(),
-                doctor.getId(),
-                doctor.getFirstName(),
-                doctor.getLastName(),
-                doctor.getSpeciality() != null ? doctor.getSpeciality().getLabel() : null, // Get the German label
-                doctor.getEmail(),
-                doctor.getDateOfBirth() != null ? doctor.getDateOfBirth().toString() : null,
-                doctor.getPhoneNumber(),
-                doctor.getStreet(),
-                doctor.getHouseNumber(),
-                doctor.getZipCode(),
-                doctor.getCity(),
-                doctor.getLicenseId(),
-                doctor.getTitle() != null ? doctor.getTitle() : null
-        );
+        return new DoctorResponseDTO(doctor);
     }
 }
