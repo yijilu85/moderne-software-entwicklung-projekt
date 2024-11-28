@@ -8,11 +8,12 @@ import PatientList from "./components/PatientList.vue";
   <header>
     <div class="wrapper">
       <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+        <RouterLink to="/">Dashboard</RouterLink>
+        <RouterLink to="/doctors">Ärztesuche</RouterLink>
+        <RouterLink to="#">Meine Patientenakte</RouterLink>
+        <RouterLink to="#">Meine Praxisseite</RouterLink>
       </nav>
     </div>
-    <PatientList></PatientList>
   </header>
 
   <RouterView />

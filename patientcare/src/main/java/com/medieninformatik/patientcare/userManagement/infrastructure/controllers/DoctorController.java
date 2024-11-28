@@ -1,5 +1,6 @@
 package com.medieninformatik.patientcare.userManagement.infrastructure.controllers;
 
+import com.medieninformatik.patientcare.userManagement.domain.model.DTO.DoctorResponseDTO;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import com.medieninformatik.patientcare.userManagement.services.DoctorService;
@@ -23,13 +24,13 @@ public class DoctorController {
 
     @CrossOrigin
     @GetMapping
-    public List<Doctor> findAllDoctors() {
+    public List<DoctorResponseDTO> findAllDoctors() {
         return doctorService.getAllDoctors();
     }
 
     @CrossOrigin
     @GetMapping(path = "/{id}")
-    public Optional<Doctor> findDoctor(@PathVariable("id") Long id) {
+    public Optional<DoctorResponseDTO> findDoctor(@PathVariable("id") Long id) {
         return doctorService.getDoctor(id);
     }
 }

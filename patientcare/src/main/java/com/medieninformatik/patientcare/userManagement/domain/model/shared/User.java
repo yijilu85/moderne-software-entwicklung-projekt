@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @Entity
@@ -37,6 +39,15 @@ public abstract class User {
 
 	@Column(name = "user_type", nullable = false)
 	private UserType userType;
+	@Column(name = "email", nullable = true)
+	private String email;
+
+	@Column(name = "password", nullable = true)
+	private String password;
+	
+	@Column(name = "date_of_birth", nullable = true)
+	private LocalDate dateOfBirth;
+
 
 	// Getter and Setter for 'id'
 	public Long getId() {
@@ -70,5 +81,29 @@ public abstract class User {
 
 	public UserType getUserType(){
 		return this.userType;
+	}
+
+	public LocalDate getDateOfBirth() {
+		return dateOfBirth;
+	}
+
+	public void setDateOfBirth(LocalDate dateOfBirth) {
+		this.dateOfBirth = dateOfBirth;
+	}
+
+	public String getEmail(){
+		return this.email;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setEmail(String email){
+		this.email = email;
+	}
+
+	public void setPassword(String password){
+		this.password = password;
 	}
 }
