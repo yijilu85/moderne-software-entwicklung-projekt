@@ -30,13 +30,14 @@ public class DoctorResponseDTO{
         this.firstName = doctor.getFirstName();
         this.lastName = doctor.getLastName();
         this.email = doctor.getEmail();
-        this.dateOfBirth = doctor.getDateOfBirth().toString();
+        this.dateOfBirth = doctor.getDateOfBirth() != null ? doctor.getDateOfBirth().toString() : null;
         this.phoneNumber = doctor.getPhoneNumber();
         this.street = doctor.getStreet();
         this.houseNumber = doctor.getHouseNumber();
         this.zipCode = doctor.getZipCode();
         this.city = doctor.getCity();
         this.licenseId = doctor.getLicenseId();
-        this.title = doctor.getTitle();
+        this.title = doctor.getTitle() != null ? doctor.getTitle() : null;
+        this.speciality = doctor.getSpeciality() != null ? doctor.getSpeciality().getLabel() : null;
     }
 }
