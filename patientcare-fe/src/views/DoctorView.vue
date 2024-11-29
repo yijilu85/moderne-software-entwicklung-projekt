@@ -5,6 +5,7 @@ import {
   createAppointmentSlot,
   getAllAppointmentsForUser,
   sendBookingAppointment,
+  deleteAppointment,
 } from "@/api/appointmentController";
 import { watch } from "vue";
 import { getPatient } from "@/api/patientController";
@@ -280,6 +281,41 @@ const appointmentHasPatient = computed(() => {
   }
 });
 
+
+const deleteSelectedAppointment = async () => {
+  if (!selectedEvent.value) {
+    console.error("Kein Termin ausgewählt");
+    return;
+  }
+
+  const loggedInUser = useUserStore().getLoggedInUser;
+
+  // Überprüfen, ob der Benutzer der Ersteller des Termins ist
+  if (loggedInUser.id !== selectedEvent.value.doctor.id) {
+    alert("Sie können diesen Termin nicht löschen, da Sie ihn nicht erstellt haben.");
+    return;
+  }
+
+  try {
+    const confirmDeletion = confirm(
+        "Möchten Sie diesen Termin wirklich löschen?"
+    );
+    if (!confirmDeletion) return;
+
+    await deleteAppointment(selectedEvent.value.id, loggedInUser.id); // API-Aufruf
+    setSnackBar("Termin erfolgreich gelöscht!", "success");
+
+    // Aktualisiere die Terminliste
+    await fetchAppointments();
+
+    // Schließe den Dialog
+    showDialog.value = false;
+  } catch (error) {
+    console.error("Fehler beim Löschen des Termins:", error);
+    setSnackBar("Fehler beim Löschen des Termins!", "error");
+  }
+};
+
 const calculateEndTime = (start: string, duration: number) => {
   if (!start || !duration) return "";
   const [hours, minutes] = start.split(":").map(Number);
@@ -391,6 +427,13 @@ onMounted(async () => {
       <v-btn v-if="!appointmentHasPatient" @click="bookAppointment"
         >Termin buchen</v-btn
       >
+      <v-btn
+          v-if="selectedEvent?.doctor?.id === useUserStore().getLoggedInUser.id"
+          color="red"
+          @click="deleteSelectedAppointment"
+      >
+        Termin löschen
+      </v-btn>
     </v-card>
   </v-dialog>
 

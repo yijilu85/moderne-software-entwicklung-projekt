@@ -21,6 +21,13 @@ export const createAppointmentSlot = async (payload: Appointment) => {
   return response.data as Appointment;
 };
 
+export const deleteAppointment = async (id: number, userId: number) => {
+  const response = await axios.delete(`/appointments/${id}`, {
+    params: { userId },
+  });
+  return response.data;
+};
+
 export const sendBookingAppointment = async (payload: {
   appointmentId: number;
   patientId: number;

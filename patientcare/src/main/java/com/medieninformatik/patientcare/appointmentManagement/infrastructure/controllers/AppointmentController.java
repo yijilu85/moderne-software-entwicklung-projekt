@@ -6,6 +6,8 @@ import com.medieninformatik.patientcare.appointmentManagement.services.Appointme
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import com.medieninformatik.patientcare.userManagement.services.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -47,6 +49,28 @@ public class AppointmentController {
     }
 
     @CrossOrigin
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAppointment(@PathVariable Long id, @RequestParam Long userId) {
+        Optional<Appointment> appointment = appointmentService.getAppointment(id);
+
+        if (appointment.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Termin nicht gefunden
+        }
+
+        // Prüfen, ob der Benutzer der Arzt ist, der den Termin erstellt hat
+        if (!appointment.get().getDoctor().getId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Zugriff verweigert
+        }
+
+        try {
+            appointmentService.deleteAppointment(id, userId);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Allgemeiner Fehler
+        }
+    }
+
+    @CrossOrigin
     @PostMapping
     public Appointment createAppointmentSlot(@RequestBody String json) throws JsonProcessingException {
         return appointmentService.parseJSONCreateAppointmentSlot(json);
@@ -58,20 +82,4 @@ public class AppointmentController {
         return appointmentService.parseJSONBookAppointmentSlot(json);
     }
 
-   /* @Configuration
-    public class WebConfig {
-
-        @Bean
-        public WebMvcConfigurer corsConfigurer() {
-            return new WebMvcConfigurer() {
-                @Override
-                public void addCorsMappings(CorsRegistry registry) {
-                    registry.addMapping("/**") // Erlaubt alle Endpunkte
-                            .allowedOrigins("http://localhost:5179") // Erlaubt das Frontend
-                            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Erlaubt spezifische Methoden
-                            .allowedHeaders("*"); // Erlaubt alle Header
-                }
-            };
-        }
-    }*/
 }

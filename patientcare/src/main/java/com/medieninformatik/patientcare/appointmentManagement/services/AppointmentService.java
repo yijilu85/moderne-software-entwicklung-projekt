@@ -11,9 +11,11 @@ import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.UserRepo;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.sql.Array;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -52,6 +54,15 @@ public class AppointmentService {
     }
 
     public void editAppointment() {
+    }
+
+    public void deleteAppointment(Long appointmentId, Long userId) {
+        Optional<Appointment> appointment = appointmentRepo.findById(appointmentId);
+        if (appointment.isPresent()) {
+            appointmentRepo.delete(appointment.get());
+        } else {
+            throw new EntityNotFoundException("Termin nicht gefunden mit ID: " + appointmentId);
+        }
     }
 
     public void addNote(Appointment appointment, Note note) {
