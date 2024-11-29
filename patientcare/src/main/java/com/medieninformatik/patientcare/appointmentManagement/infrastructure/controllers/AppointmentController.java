@@ -8,8 +8,15 @@ import com.medieninformatik.patientcare.userManagement.services.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
 
 
 @RestController
@@ -50,4 +57,21 @@ public class AppointmentController {
     public Appointment bookAppointment(@RequestBody String json) throws JsonProcessingException {
         return appointmentService.parseJSONBookAppointmentSlot(json);
     }
+
+   /* @Configuration
+    public class WebConfig {
+
+        @Bean
+        public WebMvcConfigurer corsConfigurer() {
+            return new WebMvcConfigurer() {
+                @Override
+                public void addCorsMappings(CorsRegistry registry) {
+                    registry.addMapping("/**") // Erlaubt alle Endpunkte
+                            .allowedOrigins("http://localhost:5179") // Erlaubt das Frontend
+                            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Erlaubt spezifische Methoden
+                            .allowedHeaders("*"); // Erlaubt alle Header
+                }
+            };
+        }
+    }*/
 }

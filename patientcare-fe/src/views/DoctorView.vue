@@ -3,7 +3,7 @@ import type { Appointment, Doctor } from "@/types/types";
 import { ref, onMounted, computed } from "vue";
 import {
   createAppointmentSlot,
-  getAllAppointments,
+  getAllAppointmentsForUser,
   sendBookingAppointment,
 } from "@/api/appointmentController";
 import { watch } from "vue";
@@ -49,9 +49,13 @@ const loadDoctor = async (doctorId: number) => {
 };
 
 watch(() => route.params.id, async (newId) => {
+  console.log("Route ID geändert:", newId);
   const doctorId = Number(newId);
   if (!isNaN(doctorId)) {
+    console.log("Validierte Doktor-ID:", doctorId);
     await loadDoctor(doctorId);
+  } else {
+    console.error("Ungültige ID aus Route:", newId);
   }
 });
 
@@ -155,24 +159,28 @@ const roundToQuarterHour = (date: Date): Date => {
 
 
 const onCellClick = (date: Date) => {
+  // Grenzen definieren
+  const startHour = 7; // früheste Startzeit
+  const endHour = 18; // späteste Startzeit
 
   // Zeit auf den nächsten 15-Minuten-Schritt runden
-  const startTime = roundToQuarterHour(new Date(date));
+  let startTime = roundToQuarterHour(new Date(date));
 
-  // Lokale Zeit direkt nutzen (keine doppelte Konvertierung)
-  const localStartTime = new Date(startTime.getTime());
+  // Prüfen, ob die geklickte Zeit außerhalb der erlaubten Zeit liegt
+  if (startTime.getHours() < startHour) {
+    startTime.setHours(startHour, 0, 0, 0); // Startzeit auf 7:00 setzen
+  } else if (startTime.getHours() >= endHour) {
+    startTime.setHours(endHour, 0, 0, 0); // Startzeit auf 18:00 setzen
+  }
 
   // Berechnung der Endzeit basierend auf der Standarddauer oder ausgewählten Dauer
   const endTime = new Date(
-      localStartTime.getTime() + selectedDuration.value * 60 * 1000
+      startTime.getTime() + selectedDuration.value * 60 * 1000
   );
 
   // Lokale Zeit korrekt formatieren
-  const formatTime = (date: Date) => date.toTimeString().slice(0, 5); // HH:mm
-
-  // toISOString formatiert wieder in UTC zurück deswegen lieber toTimeString
-  newEvent.value.date = localStartTime.toISOString().split("T")[0]; // Datum: YYYY-MM-DD
-  newEvent.value.start = localStartTime.toTimeString().slice(0, 5); // Startzeit: HH:mm
+  newEvent.value.date = startTime.toISOString().split("T")[0]; // Datum: YYYY-MM-DD
+  newEvent.value.start = startTime.toTimeString().slice(0, 5); // Startzeit: HH:mm
   newEvent.value.end = endTime.toTimeString().slice(0, 5); // Endzeit: HH:mm
 
   // Synchronisiere mit dem Dropdown für die Startzeit
@@ -182,7 +190,7 @@ const onCellClick = (date: Date) => {
 
   console.log("Original Date:", date.toISOString());
   console.log("Rounded Date:", startTime.toISOString());
-  console.log("Localized Date:", localStartTime.toLocaleString());
+  console.log("Localized Date:", startTime.toLocaleString());
 };
 
 
@@ -206,29 +214,51 @@ const bookAppointment = async () => {
 };
 
 const fetchAppointments = async () => {
+
+  if (!doctor.value?.id) {
+    console.error("Doctor ID nicht verfügbar");
+    return; // Beende die Funktion, wenn keine ID vorhanden ist
+  }
+
   events.value = [];
   finishedLoading.value = false;
-  const data = await getAllAppointments();
 
-  for (const event of data) {
-    if (event === undefined) {
+  try {
+    // Abrufen der Daten mit der API-Methode
+    console.log("Lade Termine für Doctor ID:", doctor.value?.id);
+    const data = await getAllAppointmentsForUser(doctor.value.id);
+    console.log("Geladene Termine:", data);
+
+    // Prüfen, ob Daten existieren
+    if (!data || data.length === 0) {
+      console.log("Keine Termine gefunden.");
       return;
     }
 
-    const appointment = {
-      id: event.id,
-      start: parseDate(event.startDateTime),
-      end: parseDate(event.endDateTime),
-      patient: event.patient,
-      title: event.title,
-      doctor: event.doctor,
-      notes: event.notes,
-      type: event.type,
-    } as Appointment;
+    for (const event of data) {
+      if (!event) continue;
 
-    events.value.push(appointment);
+      const appointment = {
+        id: event.id,
+        start: parseDate(event.startDateTime), // Datum parsen
+        end: parseDate(event.endDateTime),
+        patient: event.patient,
+        title: event.title,
+        doctor: event.doctor,
+        notes: event.notes,
+        type: event.type,
+      } as Appointment;
+
+      events.value.push(appointment);
+    }
+  } catch (error) {
+    // Fehler abfangen und anzeigen
+    console.error("Fehler beim Abrufen der Termine:", error);
+    setSnackBar("Fehler beim Abrufen der Termine!", "error");
+  } finally {
+    // Ladezustand aktualisieren
+    finishedLoading.value = true;
   }
-  finishedLoading.value = true;
 };
 
 const parseDate = (date: string) => {
