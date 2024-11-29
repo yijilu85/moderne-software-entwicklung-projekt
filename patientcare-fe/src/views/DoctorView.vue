@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Appointment, Doctor } from "@/types/types";
+import type { Appointment, Doctor, User } from "@/types/types";
 import { ref, onMounted, computed } from "vue";
 import {
   createAppointmentSlot,
@@ -7,12 +7,10 @@ import {
   sendBookingAppointment,
 } from "@/api/appointmentController";
 import { watch } from "vue";
+import { getPatient } from "@/api/patientController";
 import { getDoctor } from "@/api/doctorController";
 import { useRoute } from "vue-router"; // Importiere useRoute
-
-
-
-
+import { useUserStore } from "@/stores/userStore";
 
 const date = new Date();
 const doctor = ref<Doctor | null>(null); // Ref für den geladenen Doktor
@@ -28,7 +26,6 @@ const durations = ref<number[]>([]); // Liste für Zeitoptionen
 const selectedDuration = ref<number>(15); // Standarddauer 30 Minuten
 const startTimes = ref<string[]>([]); // Liste aller möglichen Startzeiten
 const selectedStartTime = ref<string>("09:00"); // Standardstartzeit
-
 
 // Funktion zum Laden der Doktor-Daten
 const loadDoctor = async (doctorId: number) => {
@@ -48,17 +45,19 @@ const loadDoctor = async (doctorId: number) => {
   }
 };
 
-watch(() => route.params.id, async (newId) => {
-  console.log("Route ID geändert:", newId);
-  const doctorId = Number(newId);
-  if (!isNaN(doctorId)) {
-    console.log("Validierte Doktor-ID:", doctorId);
-    await loadDoctor(doctorId);
-  } else {
-    console.error("Ungültige ID aus Route:", newId);
+watch(
+  () => route.params.id,
+  async (newId) => {
+    console.log("Route ID geändert:", newId);
+    const doctorId = Number(newId);
+    if (!isNaN(doctorId)) {
+      console.log("Validierte Doktor-ID:", doctorId);
+      await loadDoctor(doctorId);
+    } else {
+      console.error("Ungültige ID aus Route:", newId);
+    }
   }
-});
-
+);
 
 const newEvent = ref<Appointment>({
   id: 0,
@@ -84,9 +83,11 @@ const onEventClick = (appointment: Appointment, mouseevent: MouseEvent) => {
 const createAppointment = async () => {
   // Kombinieren von Datum und Zeit zu ISO-Strings
   const startDateTime = new Date(
-      `${newEvent.value.date}T${selectedStartTime.value}`
+    `${newEvent.value.date}T${selectedStartTime.value}`
   );
-  const endDateTime = new Date(startDateTime.getTime() + selectedDuration.value * 60 * 1000);
+  const endDateTime = new Date(
+    startDateTime.getTime() + selectedDuration.value * 60 * 1000
+  );
   const payload = {
     doctor: {
       id: 2,
@@ -141,7 +142,7 @@ watch(selectedStartTime, (newStartTime) => {
 
     // Berechne die Endzeit basierend auf der Dauer
     const endDate = new Date(
-        startDate.getTime() + selectedDuration.value * 60 * 1000
+      startDate.getTime() + selectedDuration.value * 60 * 1000
     );
 
     // Aktualisiere die Anzeige
@@ -157,8 +158,13 @@ const roundToQuarterHour = (date: Date): Date => {
   return date;
 };
 
-
 const onCellClick = (date: Date) => {
+  if (doctor.value !== null && useUserStore().getLoggedInUser !== null) {
+    if (useUserStore().getLoggedInUser.id !== doctor.value.id) {
+      alert("NO SOUP FOUR YOU");
+      return;
+    }
+  }
   // Grenzen definieren
   const startHour = 7; // früheste Startzeit
   const endHour = 18; // späteste Startzeit
@@ -175,7 +181,7 @@ const onCellClick = (date: Date) => {
 
   // Berechnung der Endzeit basierend auf der Standarddauer oder ausgewählten Dauer
   const endTime = new Date(
-      startTime.getTime() + selectedDuration.value * 60 * 1000
+    startTime.getTime() + selectedDuration.value * 60 * 1000
   );
 
   // Lokale Zeit korrekt formatieren
@@ -192,7 +198,6 @@ const onCellClick = (date: Date) => {
   console.log("Rounded Date:", startTime.toISOString());
   console.log("Localized Date:", startTime.toLocaleString());
 };
-
 
 const bookAppointment = async () => {
   const payload = {
@@ -214,7 +219,6 @@ const bookAppointment = async () => {
 };
 
 const fetchAppointments = async () => {
-
   if (!doctor.value?.id) {
     console.error("Doctor ID nicht verfügbar");
     return; // Beende die Funktion, wenn keine ID vorhanden ist
@@ -285,7 +289,6 @@ const calculateEndTime = (start: string, duration: number) => {
   return endDate.toTimeString().slice(0, 5); // HH:mm
 };
 
-
 // Zeitoptionen generieren
 const generateTimeOptions = () => {
   for (let i = 15; i <= 60; i += 15) {
@@ -294,8 +297,8 @@ const generateTimeOptions = () => {
   for (let hour = 7; hour < 18; hour++) {
     for (let minutes = 0; minutes < 60; minutes += 15) {
       const time = `${hour.toString().padStart(2, "0")}:${minutes
-          .toString()
-          .padStart(2, "0")}`;
+        .toString()
+        .padStart(2, "0")}`;
       startTimes.value.push(time);
     }
   }
@@ -319,19 +322,27 @@ const loadInitialData = async () => {
   await fetchAppointments(); // Appointments abrufen
 };
 
-onMounted(async () => {
+const fakeUser = async (userType: "patient" | "doctor", id: number) => {
+  let fakedUser;
+  if (userType === "patient") {
+    fakedUser = await getPatient(id);
+  } else if (userType === "doctor") {
+    fakedUser = await getDoctor(id);
+  }
+  useUserStore().mutate(fakedUser!);
+  console.log("fakedUser:", useUserStore().getLoggedInUser);
+};
 
+onMounted(async () => {
   generateTimeOptions(); // Zeitoptionen generieren
   await loadInitialData(); // Daten laden
-
+  fakeUser("doctor", 3);
 });
 </script>
 
 <template>
   <div class="doctor-detail" v-if="doctor">
-    <h1>
-      {{ doctor.title }} {{ doctor.firstName }} {{ doctor.lastName }}
-    </h1>
+    <h1>{{ doctor.title }} {{ doctor.firstName }} {{ doctor.lastName }}</h1>
     <img class="doctor-img" :src="doctor.profileImg || 'fallback-image.png'" />
     <p>{{ doctor.speciality }}</p>
     <p>{{ doctor.licenseId }}</p>
@@ -343,12 +354,12 @@ onMounted(async () => {
   </div>
   <h2>Termin buchen</h2>
   <vue-cal
-      v-if="finishedLoading"
-      style="height: 850px"
-      :time-cell-height="80"
-      :events="events"
-      :on-event-click="onEventClick"
-      @cell-click="onCellClick"
+    v-if="finishedLoading"
+    style="height: 850px"
+    :time-cell-height="80"
+    :events="events"
+    :on-event-click="onEventClick"
+    @cell-click="onCellClick"
   />
   <v-dialog v-model="showDialog" style="width: 500px">
     <v-card>
@@ -356,8 +367,8 @@ onMounted(async () => {
         <span>{{ selectedEvent.title }}</span>
         <v-spacer />
         <strong>{{
-            selectedEvent.start && selectedEvent.start.format("DD/MM/YYYY")
-          }}</strong>
+          selectedEvent.start && selectedEvent.start.format("DD/MM/YYYY")
+        }}</strong>
       </v-card-title>
       <v-card-text>
         <p v-html="selectedEvent.contentFull" />
@@ -378,7 +389,7 @@ onMounted(async () => {
         </ul>
       </v-card-text>
       <v-btn v-if="!appointmentHasPatient" @click="bookAppointment"
-      >Termin buchen</v-btn
+        >Termin buchen</v-btn
       >
     </v-card>
   </v-dialog>
@@ -392,33 +403,33 @@ onMounted(async () => {
         <v-text-field v-model="newEvent.title" label="Titel"></v-text-field>
 
         <v-select
-            label="Termintyp"
-            :items="['OFFLINE', 'ONLINE']"
-            v-model="newEvent.type"
+          label="Termintyp"
+          :items="['OFFLINE', 'ONLINE']"
+          v-model="newEvent.type"
         ></v-select>
 
         <!-- Dropdown für Startzeit -->
         <v-select
-            v-model="selectedStartTime"
-            :items="startTimes"
-            label="Startzeit"
+          v-model="selectedStartTime"
+          :items="startTimes"
+          label="Startzeit"
         ></v-select>
 
         <!-- Dropdown für die Dauer -->
         <v-select
-            v-model="selectedDuration"
-            :items="durations"
-            label="Termindauer (Minuten)"
-            item-text="value"
-            item-value="value"
+          v-model="selectedDuration"
+          :items="durations"
+          label="Termindauer (Minuten)"
+          item-text="value"
+          item-value="value"
         ></v-select>
-<!--        <p>Beginn: {{ newEvent.start }}</p>-->
+        <!--        <p>Beginn: {{ newEvent.start }}</p>-->
         <p>Ende: {{ calculateEndTime(newEvent.start, selectedDuration) }}</p>
       </v-card-text>
       <v-card-actions>
         <v-btn color="primary" @click="createAppointment">Speichern</v-btn>
         <v-btn color="secondary" @click="showCreateDialog = false"
-        >Abbrechen</v-btn
+          >Abbrechen</v-btn
         >
       </v-card-actions>
     </v-card>
@@ -454,6 +465,4 @@ onMounted(async () => {
 .vuecal__event-content {
   font-style: italic;
 }
-
-
 </style>
