@@ -372,7 +372,8 @@ const fakeUser = async (userType: "patient" | "doctor", id: number) => {
 onMounted(async () => {
   generateTimeOptions(); // Zeitoptionen generieren
   await loadInitialData(); // Daten laden
-  fakeUser("doctor", 3);
+  fakeUser("patient", 2);
+  console.log("Aktueller Benutzer:", useUserStore().getLoggedInUser);
 });
 </script>
 

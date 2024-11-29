@@ -5,11 +5,13 @@ import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appoi
 import com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import com.medieninformatik.patientcare.userManagement.services.DoctorService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

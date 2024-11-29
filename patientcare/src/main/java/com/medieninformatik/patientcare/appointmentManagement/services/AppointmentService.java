@@ -59,7 +59,7 @@ public class AppointmentService {
     public void deleteAppointment(Long appointmentId, Long userId) {
         Optional<Appointment> appointment = appointmentRepo.findById(appointmentId);
         if (appointment.isPresent()) {
-            appointmentRepo.delete(appointment.get());
+            appointmentRepo.delete(appointment.get());6
         } else {
             throw new EntityNotFoundException("Termin nicht gefunden mit ID: " + appointmentId);
         }
