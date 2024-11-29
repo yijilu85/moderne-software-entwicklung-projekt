@@ -12,7 +12,7 @@ export const getAppointment = async (id: number) => {
 };
 
 export const getAllAppointmentsForUser = async (id: number) => {
-  const response = await axios.get(`/appointments/?userId=${id}`);
+  const response = await axios.get(`/appointments?userId=${id}`);
   return response.data as Appointment[];
 };
 

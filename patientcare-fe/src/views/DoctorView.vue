@@ -89,10 +89,10 @@ const createAppointment = async () => {
   const endDateTime = new Date(startDateTime.getTime() + selectedDuration.value * 60 * 1000);
   const payload = {
     doctor: {
-      id: 2,
+      id: doctor.value.id,
     },
     creator: {
-      id: 2,
+      id: doctor.value.id,
     },
     startDateTime: startDateTime,
     endDateTime: endDateTime,
@@ -225,7 +225,7 @@ const fetchAppointments = async () => {
 
   try {
     // Abrufen der Daten mit der API-Methode
-    console.log("Lade Termine für Doctor ID:", doctor.value?.id);
+    console.log("Lade Termine für Doctor ID:", doctor.value.id);
     const data = await getAllAppointmentsForUser(doctor.value.id);
     console.log("Geladene Termine:", data);
 
