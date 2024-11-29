@@ -286,6 +286,7 @@ const loadInitialData = async () => {
     console.error("Fehler bei der Initialisierung:", error);
     setSnackBar("Fehler bei der Initialisierung!", "error");
   }
+  await fetchAppointments(); // Appointments abrufen
 };
 
 onMounted(async () => {
@@ -381,7 +382,7 @@ onMounted(async () => {
             item-text="value"
             item-value="value"
         ></v-select>
-        <p>Beginn: {{ newEvent.start }}</p>
+<!--        <p>Beginn: {{ newEvent.start }}</p>-->
         <p>Ende: {{ calculateEndTime(newEvent.start, selectedDuration) }}</p>
       </v-card-text>
       <v-card-actions>
