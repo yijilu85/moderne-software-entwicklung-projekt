@@ -28,6 +28,13 @@ export const deleteAppointment = async (id: number, userId: number) => {
   return response.data;
 };
 
+export const cancelAppointment = async (appointmentId: number, userId: number) => {
+  const response = await axios.put(`/appointments/cancel/${appointmentId}`, null, {
+    params: { userId },
+  });
+  return response.data;
+};
+
 export const sendBookingAppointment = async (payload: {
   appointmentId: number;
   patientId: number;

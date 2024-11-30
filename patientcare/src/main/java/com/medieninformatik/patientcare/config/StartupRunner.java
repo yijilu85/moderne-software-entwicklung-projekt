@@ -32,6 +32,9 @@ public class StartupRunner implements ApplicationRunner {
     @Autowired
     private AppointmentService appointmentService;
 
+    @Autowired
+    private FakerService fakerService;
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
         System.out.println("running.........");
@@ -57,5 +60,22 @@ public class StartupRunner implements ApplicationRunner {
 //        appointmentService.scheduleAppointment(appointment, patient, Appointment.Type.OFFLINE);
     }
 
+   /*public void run(ApplicationArguments args) throws Exception {
+       System.out.println("StartupRunner is running...");
 
+       // Testpatient erstellen
+       Patient patient = new Patient("Hans", "Klaus");
+       patientRepo.save(patient);
+       System.out.println("Testpatient gespeichert: " + patient);
+
+       // FakerService verwenden, um Ärzte zu generieren
+       fakerService.createDoctors(20);
+
+       // Einen Testarzt aus der Datenbank abrufen
+       Doctor doctor = doctorRepo.findAll().stream().findFirst().orElse(null);
+       if (doctor == null) {
+           System.err.println("Keine Ärzte in der Datenbank gefunden!");
+           return;
+       }
+   }*/
 }

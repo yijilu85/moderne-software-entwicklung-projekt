@@ -79,6 +79,31 @@ public class AppointmentController {
     }
 
     @CrossOrigin
+    @PutMapping("/cancel/{id}")
+    public ResponseEntity<String> cancelAppointment(@PathVariable Long id, @RequestParam Long userId) {
+        Optional<Appointment> appointmentOpt = appointmentService.getAppointment(id);
+
+        if (appointmentOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Termin nicht gefunden");
+        }
+
+        Appointment appointment = appointmentOpt.get();
+
+        // Überprüfung: Ist der Benutzer Arzt oder Patient dieses Termins?
+        if (!appointment.getDoctor().getId().equals(userId) &&
+                (appointment.getPatient() == null || !appointment.getPatient().getId().equals(userId))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Keine Berechtigung, diesen Termin zu stornieren");
+        }
+
+        try {
+            appointmentService.cancelAppointment(id);
+            return ResponseEntity.ok("Termin erfolgreich storniert");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Stornieren des Termins");
+        }
+    }
+
+    @CrossOrigin
     @PostMapping(path = "/book")
     public Appointment bookAppointment(@RequestBody String json) throws JsonProcessingException {
         return appointmentService.parseJSONBookAppointmentSlot(json);

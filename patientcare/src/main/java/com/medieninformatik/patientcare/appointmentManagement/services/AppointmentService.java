@@ -59,10 +59,24 @@ public class AppointmentService {
     public void deleteAppointment(Long appointmentId, Long userId) {
         Optional<Appointment> appointment = appointmentRepo.findById(appointmentId);
         if (appointment.isPresent()) {
-            appointmentRepo.delete(appointment.get());6
+            appointmentRepo.delete(appointment.get());
         } else {
             throw new EntityNotFoundException("Termin nicht gefunden mit ID: " + appointmentId);
         }
+    }
+
+    @Transactional
+    public void cancelAppointment(Long appointmentId) {
+        Optional<Appointment> appointmentOpt = appointmentRepo.findById(appointmentId);
+        if (appointmentOpt.isEmpty()) {
+            throw new EntityNotFoundException("Termin mit ID " + appointmentId + " nicht gefunden");
+        }
+
+        Appointment appointment = appointmentOpt.get();
+
+        // Entferne den Patienten aus dem Termin
+        appointment.setPatient(null);
+        appointmentRepo.save(appointment);
     }
 
     public void addNote(Appointment appointment, Note note) {
