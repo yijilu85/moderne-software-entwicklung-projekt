@@ -202,9 +202,10 @@ const onCellClick = (date: Date) => {
 };
 
 const bookAppointment = async () => {
+  const loggedInUser = useUserStore().getLoggedInUser;
   const payload = {
     appointmentId: selectedEvent.value.id,
-    patientId: 1,
+    patientId: loggedInUser.id,
   };
 
   try {
@@ -367,7 +368,7 @@ const canCancelAppointment = computed(() => {
   const loggedInUser = useUserStore().getLoggedInUser;
 
   // Überprüfen, ob der eingeloggte Benutzer der Patient des Termins ist
-  return selectedEvent.value.patient.id === loggedInUser.id;
+  return selectedEvent.value.patient.id === loggedInUser.id || selectedEvent.value.doctor.id === loggedInUser.id;
 });
 
 const cancelSelectedAppointment = async () => {
@@ -378,12 +379,22 @@ const cancelSelectedAppointment = async () => {
 
   const loggedInUser = useUserStore().getLoggedInUser;
 
-  // Überprüfen, ob der eingeloggte Benutzer der Patient des Termins ist
-  if (selectedEvent.value.patient?.id !== loggedInUser.id) {
+  console.log(selectedEvent.value.patient.id, loggedInUser.id);
+  if(!((loggedInUser.userType === "DOCTOR" && selectedEvent.value.doctor?.id === loggedInUser.id)
+      || (loggedInUser.userType === "PATIENT" && selectedEvent.value.patient?.id === loggedInUser.id))) {
+
     console.warn("Der Benutzer ist nicht der Patient dieses Termins.");
     alert("Sie können nur Termine stornieren, die Sie gebucht haben.");
     return;
+
   }
+
+ /* // Überprüfen, ob der eingeloggte Benutzer der Patient des Termins ist
+  if (selectedEvent.value.patient?.id !== loggedInUser.id || selectedEvent.value.doctor?.id !== loggedInUser.id) {
+    console.warn("Der Benutzer ist nicht der Patient dieses Termins.");
+    alert("Sie können nur Termine stornieren, die Sie gebucht haben.");
+    return;
+  }*/
 
   try {
     const confirmCancellation = confirm(
@@ -391,7 +402,9 @@ const cancelSelectedAppointment = async () => {
     );
     if (!confirmCancellation) return;
 
-    await cancelAppointment(selectedEvent.value.id, loggedInUser.id);
+    const payload = {appointmentId:selectedEvent.value.id, userId:loggedInUser.id};
+
+    await cancelAppointment(payload);
     setSnackBar("Termin erfolgreich storniert!", "success");
 
     // Aktualisiere die Terminliste
@@ -419,7 +432,7 @@ const fakeUser = async (userType: "patient" | "doctor", id: number) => {
 onMounted(async () => {
   generateTimeOptions(); // Zeitoptionen generieren
   await loadInitialData(); // Daten laden
-  fakeUser("patient", 1);
+  fakeUser("doctor", 5);
   console.log("Aktueller Benutzer:", useUserStore().getLoggedInUser);
 });
 </script>

@@ -18,14 +18,14 @@ import java.util.*;
 public class FakerService {
 
     private final DoctorRepo doctorRepo;
-    /*private final PatientRepo patientRepo;*/
+    private final PatientRepo patientRepo;
 
 
     @Autowired
-    public FakerService(DoctorRepo doctorRepo/*, PatientRepo patientRepo*/) {
+    public FakerService(DoctorRepo doctorRepo, PatientRepo patientRepo) {
 
         this.doctorRepo = doctorRepo;
-        /*this.patientRepo = patientRepo;*/
+        this.patientRepo = patientRepo;
     }
 
     Map<String, List<Map<String, String>>> cityData = new HashMap<>();
@@ -139,7 +139,7 @@ public class FakerService {
         return streetData;
     }
 
-   /* public void createPatients(int amount) {
+    public void createPatients(int amount) {
         Faker faker = new Faker();
         for (int i = 0; i < amount; i++) {
             Patient patient = new Patient();
@@ -149,7 +149,7 @@ public class FakerService {
             patient.setPassword("1234567890"); // Einfaches Passwort für Tests
             patientRepo.save(patient);
         }
-    }*/
+    }
 
 
 

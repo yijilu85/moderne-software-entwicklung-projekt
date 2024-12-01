@@ -1,9 +1,13 @@
 package com.medieninformatik.patientcare.appointmentManagement.infrastructure.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appointment;
 import com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
+import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.UserRepo;
 import com.medieninformatik.patientcare.userManagement.services.DoctorService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +32,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
+    private final UserRepo userRepo;
 
     @Autowired
-    public AppointmentController(AppointmentService appointmentService) {
+    public AppointmentController(AppointmentService appointmentService, UserRepo userRepo) {
         this.appointmentService = appointmentService;
+        this.userRepo = userRepo;
     }
 
     @CrossOrigin
@@ -79,24 +85,39 @@ public class AppointmentController {
     }
 
     @CrossOrigin
-    @PutMapping("/cancel/{id}")
-    public ResponseEntity<String> cancelAppointment(@PathVariable Long id, @RequestParam Long userId) {
-        Optional<Appointment> appointmentOpt = appointmentService.getAppointment(id);
+    @PostMapping("/cancel/")
+    public ResponseEntity<String> cancelAppointment(@RequestBody String json) throws JsonProcessingException {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(json);
+
+        Optional<User> user = userRepo.findById(rootNode.get("userId").asLong());
+
+
+
+        Long appointmentId = rootNode.get("appointmentId").asLong();
+
+        if (!(user.get() instanceof User)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Termin nicht gefunden");
+        }
+
+
+        Optional<Appointment> appointmentOpt = appointmentService.getAppointment(appointmentId);
 
         if (appointmentOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Termin nicht gefunden");
         }
 
+        User userEntity = user.get();
         Appointment appointment = appointmentOpt.get();
 
-        // Überprüfung: Ist der Benutzer Arzt oder Patient dieses Termins?
-        if (!appointment.getDoctor().getId().equals(userId) &&
-                (appointment.getPatient() == null || !appointment.getPatient().getId().equals(userId))) {
+
+        if (! (appointment.getDoctor().getId().equals(userEntity.getId()) || appointment.getPatient().getId().equals(userEntity.getId()) )){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Keine Berechtigung, diesen Termin zu stornieren");
         }
 
         try {
-            appointmentService.cancelAppointment(id);
+            appointmentService.cancelAppointment(appointment.getId());
             return ResponseEntity.ok("Termin erfolgreich storniert");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Stornieren des Termins");

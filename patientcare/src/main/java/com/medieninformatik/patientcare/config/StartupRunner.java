@@ -39,17 +39,17 @@ public class StartupRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         System.out.println("running.........");
 
-        Patient patient = new Patient("Hans", "Klaus");
+        /*Patient patient = new Patient("Hans", "Klaus");
         patientRepo.save(patient);
         System.out.println("patient saved: " + patient);
-        System.out.println(patient.getLastName());
+        System.out.println(patient.getLastName());*/
 
 //        Doctor doctor = new Doctor("Hallo", "Dr. House");
 //        doctorRepo.save(doctor);
 
-        FakerService fakerService = new FakerService(doctorRepo);
+        FakerService fakerService = new FakerService(doctorRepo, patientRepo);
         fakerService.createDoctors(20);
-
+        fakerService.createPatients(20);
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startDateTime = LocalDateTime.of(2024, Month.NOVEMBER, 25, 12, 0);

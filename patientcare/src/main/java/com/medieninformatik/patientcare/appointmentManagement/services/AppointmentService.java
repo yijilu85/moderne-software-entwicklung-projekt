@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 @Service
 public class AppointmentService {
@@ -66,7 +67,7 @@ public class AppointmentService {
     }
 
     @Transactional
-    public void cancelAppointment(Long appointmentId) {
+    public Appointment cancelAppointment(Long appointmentId) {
         Optional<Appointment> appointmentOpt = appointmentRepo.findById(appointmentId);
         if (appointmentOpt.isEmpty()) {
             throw new EntityNotFoundException("Termin mit ID " + appointmentId + " nicht gefunden");
@@ -75,8 +76,12 @@ public class AppointmentService {
         Appointment appointment = appointmentOpt.get();
 
         // Entferne den Patienten aus dem Termin
-        appointment.setPatient(null);
+        /*appointment.setPatient(null);*/
+        appointment.clearPatient();
+        appointment.removeAllNotes();
         appointmentRepo.save(appointment);
+
+        return appointment;
     }
 
     public void addNote(Appointment appointment, Note note) {
@@ -210,5 +215,6 @@ public class AppointmentService {
             return null;
         }
     }
+
 
 }

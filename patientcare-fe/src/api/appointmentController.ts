@@ -28,10 +28,8 @@ export const deleteAppointment = async (id: number, userId: number) => {
   return response.data;
 };
 
-export const cancelAppointment = async (appointmentId: number, userId: number) => {
-  const response = await axios.put(`/appointments/cancel/${appointmentId}`, null, {
-    params: { userId },
-  });
+export const cancelAppointment = async (payload: {appointmentId: number, userId: number}) => {
+  const response = await axios.post(`/appointments/cancel/`, payload);
   return response.data;
 };
 
