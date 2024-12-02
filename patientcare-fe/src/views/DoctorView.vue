@@ -283,7 +283,6 @@ const appointmentHasPatient = computed(() => {
   }
 });
 
-
 const deleteSelectedAppointment = async () => {
   if (!selectedEvent.value) {
     console.error("Kein Termin ausgewählt");
@@ -300,7 +299,7 @@ const deleteSelectedAppointment = async () => {
 
   try {
     const confirmDeletion = confirm(
-        "Möchten Sie diesen Termin wirklich löschen?"
+      "Möchten Sie diesen Termin wirklich löschen?"
     );
     if (!confirmDeletion) return;
 
@@ -368,7 +367,10 @@ const canCancelAppointment = computed(() => {
   const loggedInUser = useUserStore().getLoggedInUser;
 
   // Überprüfen, ob der eingeloggte Benutzer der Patient des Termins ist
-  return selectedEvent.value.patient.id === loggedInUser.id || selectedEvent.value.doctor.id === loggedInUser.id;
+  return (
+    selectedEvent.value.patient.id === loggedInUser.id ||
+    selectedEvent.value.doctor.id === loggedInUser.id
+  );
 });
 
 const cancelSelectedAppointment = async () => {
@@ -380,16 +382,20 @@ const cancelSelectedAppointment = async () => {
   const loggedInUser = useUserStore().getLoggedInUser;
 
   console.log(selectedEvent.value.patient.id, loggedInUser.id);
-  if(!((loggedInUser.userType === "DOCTOR" && selectedEvent.value.doctor?.id === loggedInUser.id)
-      || (loggedInUser.userType === "PATIENT" && selectedEvent.value.patient?.id === loggedInUser.id))) {
-
+  if (
+    !(
+      (loggedInUser.userType === "DOCTOR" &&
+        selectedEvent.value.doctor?.id === loggedInUser.id) ||
+      (loggedInUser.userType === "PATIENT" &&
+        selectedEvent.value.patient?.id === loggedInUser.id)
+    )
+  ) {
     console.warn("Der Benutzer ist nicht der Patient dieses Termins.");
     alert("Sie können nur Termine stornieren, die Sie gebucht haben.");
     return;
-
   }
 
- /* // Überprüfen, ob der eingeloggte Benutzer der Patient des Termins ist
+  /* // Überprüfen, ob der eingeloggte Benutzer der Patient des Termins ist
   if (selectedEvent.value.patient?.id !== loggedInUser.id || selectedEvent.value.doctor?.id !== loggedInUser.id) {
     console.warn("Der Benutzer ist nicht der Patient dieses Termins.");
     alert("Sie können nur Termine stornieren, die Sie gebucht haben.");
@@ -398,11 +404,14 @@ const cancelSelectedAppointment = async () => {
 
   try {
     const confirmCancellation = confirm(
-        "Möchten Sie diesen Termin wirklich stornieren?"
+      "Möchten Sie diesen Termin wirklich stornieren?"
     );
     if (!confirmCancellation) return;
 
-    const payload = {appointmentId:selectedEvent.value.id, userId:loggedInUser.id};
+    const payload = {
+      appointmentId: selectedEvent.value.id,
+      userId: loggedInUser.id,
+    };
 
     await cancelAppointment(payload);
     setSnackBar("Termin erfolgreich storniert!", "success");
@@ -429,10 +438,30 @@ const fakeUser = async (userType: "patient" | "doctor", id: number) => {
   console.log("fakedUser:", useUserStore().getLoggedInUser);
 };
 
+const userCanSeeAppointment = (appointment: Appointment) => {
+  const loggedInUser = useUserStore().getLoggedInUser;
+
+  if (!appointment.patient?.id) {
+    return true;
+  } else if (
+    loggedInUser !== null &&
+    (appointment.patient?.id === loggedInUser.id ||
+      appointment.doctor?.id === loggedInUser.id)
+  ) {
+    return true;
+  }
+  return false;
+};
+
+const filterAppointmentsVisibility = computed(() => {
+  const filteredAppointments = events.value.filter(userCanSeeAppointment);
+  return filteredAppointments;
+});
+
 onMounted(async () => {
   generateTimeOptions(); // Zeitoptionen generieren
   await loadInitialData(); // Daten laden
-  fakeUser("doctor", 5);
+  fakeUser("doctor", 6);
   console.log("Aktueller Benutzer:", useUserStore().getLoggedInUser);
 });
 </script>
@@ -454,7 +483,7 @@ onMounted(async () => {
     v-if="finishedLoading"
     style="height: 850px"
     :time-cell-height="80"
-    :events="events"
+    :events="filterAppointmentsVisibility"
     :on-event-click="onEventClick"
     @cell-click="onCellClick"
   />
@@ -490,17 +519,17 @@ onMounted(async () => {
       >
 
       <v-btn
-          v-if="canCancelAppointment"
-          color="red"
-          @click="cancelSelectedAppointment"
+        v-if="canCancelAppointment"
+        color="red"
+        @click="cancelSelectedAppointment"
       >
-        Termin stornieren</v-btn>
-
+        Termin stornieren</v-btn
+      >
 
       <v-btn
-          v-if="selectedEvent?.doctor?.id === useUserStore().getLoggedInUser.id"
-          color="red"
-          @click="deleteSelectedAppointment"
+        v-if="selectedEvent?.doctor?.id === useUserStore().getLoggedInUser.id"
+        color="red"
+        @click="deleteSelectedAppointment"
       >
         Termin löschen
       </v-btn>
