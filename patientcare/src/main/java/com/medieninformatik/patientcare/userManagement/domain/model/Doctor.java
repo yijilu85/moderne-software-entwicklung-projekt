@@ -1,6 +1,7 @@
 package com.medieninformatik.patientcare.userManagement.domain.model;
 
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
+import com.medieninformatik.patientcare.userManagement.domain.model.valueObjects.MedicalSpeciality;
 import jakarta.persistence.*;
 
 import static com.medieninformatik.patientcare.userManagement.domain.model.shared.User.UserType.DOCTOR;
@@ -9,13 +10,14 @@ import static com.medieninformatik.patientcare.userManagement.domain.model.share
 public class Doctor
         extends User {
 
-    private String specialization;
+    private MedicalSpeciality.Speciality speciality;
     private String phoneNumber;
     private String street;
     private String houseNumber;
     private String zipCode;
     private String city;
     private String licenseId;
+    private String title;
 
     // Default constructor
     public Doctor() {
@@ -28,13 +30,13 @@ public class Doctor
         this.setUsertype(DOCTOR);
     }
 
-    // Getter and Setter for 'specialization'
-    public String getSpecialization() {
-        return specialization;
+    // Getter and Setter for 'speciality'
+    public MedicalSpeciality.Speciality getSpeciality() {
+        return speciality;
     }
 
-    public void setSpecialization(String specialization) {
-        this.specialization = specialization;
+    public void setSpeciality(MedicalSpeciality.Speciality speciality) {
+        this.speciality = speciality;
     }
 
     // Getter and Setter for 'phoneNumber'
@@ -91,13 +93,22 @@ public class Doctor
         this.licenseId = licenseId;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     @Override
     public String toString() {
      return "Doctor{" +
              "id=" + super.getId() +
+             ", title='" + title + '\'' +
              ", firstName='" + super.getFirstName() + '\'' +
              ", lastName='" + super.getLastName() + '\'' +
-             ", specialization='" + specialization + '\'' +
+             ", speciality='" + speciality + '\'' +
              ", phoneNumber='" + phoneNumber + '\'' +
              ", street='" + street + '\'' +
              ", houseNumber='" + houseNumber + '\'' +
@@ -106,4 +117,5 @@ public class Doctor
              ", licenseId='" + licenseId + '\'' +
              '}';
     }
+
 }

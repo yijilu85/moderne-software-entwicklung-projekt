@@ -6,7 +6,7 @@ export const getDoctor = async (userId: number) => {
   return response.data as Doctor;
 };
 
-export const getAllDoctors = async (userId: number) => {
+export const getAllDoctors = async () => {
   const response = await axios.get(`/doctors`);
   return response.data as Doctor[];
 };

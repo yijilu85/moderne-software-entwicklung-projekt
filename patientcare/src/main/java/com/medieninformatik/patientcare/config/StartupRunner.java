@@ -7,6 +7,7 @@ import com.medieninformatik.patientcare.appointmentManagement.infrastructure.rep
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.DoctorRepo;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.PatientRepo;
 import com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService;
+import com.medieninformatik.patientcare.userManagement.services.FakerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -40,17 +41,20 @@ public class StartupRunner implements ApplicationRunner {
         System.out.println("patient saved: " + patient);
         System.out.println(patient.getLastName());
 
-        Doctor doctor = new Doctor("Hallo", "Dr. House");
-        doctorRepo.save(doctor);
+//        Doctor doctor = new Doctor("Hallo", "Dr. House");
+//        doctorRepo.save(doctor);
+
+        FakerService fakerService = new FakerService(doctorRepo);
+        fakerService.createDoctors(20);
 
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startDateTime = LocalDateTime.of(2024, Month.NOVEMBER, 25, 12, 0);
         LocalDateTime endDateTime = LocalDateTime.of(2024, Month.NOVEMBER, 25, 12, 15);
-
-        Appointment appointment = appointmentService.createAppointmentSlot(doctor, doctor, startDateTime, endDateTime,
-                now);
-        appointmentService.scheduleAppointment(appointment, patient, Appointment.Type.OFFLINE);
+//
+//        Appointment appointment = appointmentService.createAppointmentSlot(doctor, doctor, startDateTime, endDateTime,
+//                now);
+//        appointmentService.scheduleAppointment(appointment, patient, Appointment.Type.OFFLINE);
     }
 
 
