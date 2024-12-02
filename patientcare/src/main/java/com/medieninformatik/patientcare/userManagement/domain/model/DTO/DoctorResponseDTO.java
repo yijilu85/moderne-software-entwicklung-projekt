@@ -3,6 +3,7 @@ package com.medieninformatik.patientcare.userManagement.domain.model.DTO;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -51,7 +52,6 @@ public class DoctorResponseDTO{
 
     @JsonProperty("title")
     private String title;
-
 
     @JsonCreator
     public DoctorResponseDTO(Doctor doctor) {
