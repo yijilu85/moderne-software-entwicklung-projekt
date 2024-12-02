@@ -198,4 +198,9 @@ public class Appointment{
                 ", type=" + type +
                 '}';
     }
+
+
+    public void clearPatient(){
+        this.patient = null;
+    }
 }

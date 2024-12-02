@@ -5,24 +5,52 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Getter
 @AllArgsConstructor
 public class DoctorResponseDTO{
 
+    @JsonProperty("userType")
     private String userType;
+
+    @JsonProperty("id")
     private Long id;
+
+    @JsonProperty("firstName")
     private String firstName;
+
+    @JsonProperty("lastName")
     private String lastName;
+
+    @JsonProperty("speciality")
     private String speciality;
+
+    @JsonProperty("email")
     private String email;
+
+    @JsonProperty("dateOfBirth")
     private String dateOfBirth;
+
+    @JsonProperty("phoneNumber")
     private String phoneNumber;
+
+    @JsonProperty("street")
     private String street;
+
+    @JsonProperty("houseNumber")
     private String houseNumber;
+
+    @JsonProperty("zipCode")
     private String zipCode;
+
+    @JsonProperty("city")
     private String city;
+
+    @JsonProperty("licenseId")
     private String licenseId;
+
+    @JsonProperty("title")
     private String title;
 
     @JsonCreator

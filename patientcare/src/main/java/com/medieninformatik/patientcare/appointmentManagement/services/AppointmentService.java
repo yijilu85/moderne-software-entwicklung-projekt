@@ -11,14 +11,17 @@ import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.UserRepo;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.sql.Array;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 @Service
 public class AppointmentService {
@@ -52,6 +55,33 @@ public class AppointmentService {
     }
 
     public void editAppointment() {
+    }
+
+    public void deleteAppointment(Long appointmentId, Long userId) {
+        Optional<Appointment> appointment = appointmentRepo.findById(appointmentId);
+        if (appointment.isPresent()) {
+            appointmentRepo.delete(appointment.get());
+        } else {
+            throw new EntityNotFoundException("Termin nicht gefunden mit ID: " + appointmentId);
+        }
+    }
+
+    @Transactional
+    public Appointment cancelAppointment(Long appointmentId) {
+        Optional<Appointment> appointmentOpt = appointmentRepo.findById(appointmentId);
+        if (appointmentOpt.isEmpty()) {
+            throw new EntityNotFoundException("Termin mit ID " + appointmentId + " nicht gefunden");
+        }
+
+        Appointment appointment = appointmentOpt.get();
+
+        // Entferne den Patienten aus dem Termin
+        /*appointment.setPatient(null);*/
+        appointment.clearPatient();
+        appointment.removeAllNotes();
+        appointmentRepo.save(appointment);
+
+        return appointment;
     }
 
     public void addNote(Appointment appointment, Note note) {
@@ -185,5 +215,6 @@ public class AppointmentService {
             return null;
         }
     }
+
 
 }

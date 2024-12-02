@@ -12,13 +12,25 @@ export const getAppointment = async (id: number) => {
 };
 
 export const getAllAppointmentsForUser = async (id: number) => {
-  const response = await axios.get(`/appointments/?userId=${id}`);
+  const response = await axios.get(`/appointments?userId=${id}`);
   return response.data as Appointment[];
 };
 
 export const createAppointmentSlot = async (payload: Appointment) => {
   const response = await axios.post(`/appointments`, payload);
   return response.data as Appointment;
+};
+
+export const deleteAppointment = async (id: number, userId: number) => {
+  const response = await axios.delete(`/appointments/${id}`, {
+    params: { userId },
+  });
+  return response.data;
+};
+
+export const cancelAppointment = async (payload: {appointmentId: number, userId: number}) => {
+  const response = await axios.post(`/appointments/cancel/`, payload);
+  return response.data;
 };
 
 export const sendBookingAppointment = async (payload: {

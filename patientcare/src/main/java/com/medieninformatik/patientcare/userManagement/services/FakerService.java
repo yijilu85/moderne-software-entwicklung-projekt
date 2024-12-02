@@ -1,7 +1,11 @@
 package com.medieninformatik.patientcare.userManagement.services;
 
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
+import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
+import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.DoctorRepo;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.PatientRepo;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.UserRepo;
 import com.medieninformatik.patientcare.userManagement.domain.model.valueObjects.MedicalSpeciality;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,10 +18,14 @@ import java.util.*;
 public class FakerService {
 
     private final DoctorRepo doctorRepo;
+    private final PatientRepo patientRepo;
+
 
     @Autowired
-    public FakerService(DoctorRepo doctorRepo) {
+    public FakerService(DoctorRepo doctorRepo, PatientRepo patientRepo) {
+
         this.doctorRepo = doctorRepo;
+        this.patientRepo = patientRepo;
     }
 
     Map<String, List<Map<String, String>>> cityData = new HashMap<>();
@@ -63,6 +71,16 @@ public class FakerService {
             doctorRepo.save(doctor);
         }
     }
+
+    /*public void createDoctors(int amount) {
+        Faker faker = new Faker();
+        for (int i = 0; i < amount; i++) {
+            Doctor doctor = new Doctor();
+            populateUserFields(doctor, faker);
+            doctor.setLicenseId("A" + faker.number().digits(5) + "-D" + faker.number().digits(5));
+            doctorRepo.save(doctor);
+        }
+    }*/
 
     public void populateCityData(){
         List<Map<String, String>> berlinStreets = new ArrayList<>();
@@ -120,4 +138,20 @@ public class FakerService {
         streetData.put("zipCode", zipCode);
         return streetData;
     }
+
+    public void createPatients(int amount) {
+        Faker faker = new Faker();
+        for (int i = 0; i < amount; i++) {
+            Patient patient = new Patient();
+            patient.setFirstName(faker.name().firstName());
+            patient.setLastName(faker.name().lastName());
+            patient.setEmail(faker.internet().emailAddress());
+            patient.setPassword("1234567890"); // Einfaches Passwort für Tests
+            patientRepo.save(patient);
+        }
+    }
+
+
+
+
 }
