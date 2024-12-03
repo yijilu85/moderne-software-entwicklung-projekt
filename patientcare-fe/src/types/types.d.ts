@@ -3,7 +3,7 @@ export interface Patient extends User {}
 export interface Doctor extends User {
   title: string;
   speciality: string;
-  medicalId: string;
+  licenseId?: string;
 }
 export interface User {
   id: number;

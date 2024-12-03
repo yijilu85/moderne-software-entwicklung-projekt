@@ -11,24 +11,23 @@ import {
 import { watch } from "vue";
 import { getPatient } from "@/api/patientController";
 import { getDoctor } from "@/api/doctorController";
-import { useRoute } from "vue-router"; // Importiere useRoute
+import { useRoute } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
 
 const date = new Date();
-const doctor = ref<Doctor | null>(null); // Ref für den geladenen Doktor
-const route = useRoute(); // Zugriff auf die Route
+const doctor = ref<Doctor | null>(null);
+const route = useRoute();
 const events = ref<Appointment[]>([]);
 const selectedDay = ref("");
 const finishedLoading = ref(false);
 const selectedEvent = ref();
 const showDialog = ref(false);
 const showCreateDialog = ref(false);
-const durations = ref<number[]>([]); // Liste für Zeitoptionen
-const selectedDuration = ref<number>(15); // Standarddauer 30 Minuten
-const startTimes = ref<string[]>([]); // Liste aller möglichen Startzeiten
-const selectedStartTime = ref<string>("09:00"); // Standardstartzeit
+const durations = ref<number[]>([]);
+const selectedDuration = ref<number>(15);
+const startTimes = ref<string[]>([]);
+const selectedStartTime = ref<string>("09:00");
 
-// Funktion zum Laden der Doktor-Daten
 const loadDoctor = async (doctorId: number) => {
   try {
     console.log("Sende Anfrage an Backend für Doktor mit ID:", doctorId);
@@ -75,14 +74,12 @@ const snackbar = ref({
   color: "success",
 });
 
-// (event: MouseEvent, appointment: Appointment)
 const onEventClick = (appointment: Appointment, mouseevent: MouseEvent) => {
   selectedEvent.value = appointment;
   showDialog.value = true;
 };
 
 const createAppointment = async () => {
-  // Kombinieren von Datum und Zeit zu ISO-Strings
   const startDateTime = new Date(
     `${newEvent.value.date}T${selectedStartTime.value}`
   );
@@ -91,10 +88,10 @@ const createAppointment = async () => {
   );
   const payload = {
     doctor: {
-      id: doctor.value.id,
+      id: doctor.value?.id,
     },
     creator: {
-      id: doctor.value.id,
+      id: doctor.value?.id,
     },
     startDateTime: startDateTime,
     endDateTime: endDateTime,
@@ -111,11 +108,10 @@ const createAppointment = async () => {
     setSnackBar("Fehler beim Erstellen eines Termins!", "error");
   }
 
-  //Resets
   showCreateDialog.value = false;
   newEvent.value = { id: 0, title: "", start: "", end: "", date: "" };
-  selectedDuration.value = 15; // Standarddauer zurücksetzen
-  selectedStartTime.value = "09:00"; // Standardstartzeit
+  selectedDuration.value = 15;
+  selectedStartTime.value = "09:00";
   fetchAppointments();
 };
 
@@ -135,66 +131,58 @@ const setSnackBar = (message: string, type: string) => {
   }
 };
 
-// Beobachte Änderungen an der ausgewählten Startzeit
 watch(selectedStartTime, (newStartTime) => {
   if (newStartTime) {
     const [hours, minutes] = newStartTime.split(":").map(Number);
     const startDate = new Date();
     startDate.setHours(hours, minutes, 0, 0);
 
-    // Berechne die Endzeit basierend auf der Dauer
     const endDate = new Date(
       startDate.getTime() + selectedDuration.value * 60 * 1000
     );
 
-    // Aktualisiere die Anzeige
-    newEvent.value.start = newStartTime; // Startzeit
-    newEvent.value.end = endDate.toTimeString().slice(0, 5); // Endzeit (HH:mm)
+    newEvent.value.start = newStartTime;
+    newEvent.value.end = endDate.toTimeString().slice(0, 5);
   }
 });
 
 const roundToQuarterHour = (date: Date): Date => {
   const minutes = date.getMinutes();
-  const roundedMinutes = Math.ceil(minutes / 15) * 15; // Aufrunden auf nächsten 15-Minuten-Schritt
-  date.setMinutes(roundedMinutes, 0, 0); // Minuten, Sekunden und Millisekunden setzen
+  const roundedMinutes = Math.ceil(minutes / 15) * 15;
+  date.setMinutes(roundedMinutes, 0, 0);
   return date;
 };
 
 const onCellClick = (date: Date) => {
   if (doctor.value !== null && useUserStore().getLoggedInUser !== null) {
-    if (useUserStore().getLoggedInUser.id !== doctor.value.id) {
+    if (useUserStore().getLoggedInUser?.id !== doctor.value.id) {
       alert("NO SOUP FOUR YOU");
       return;
     }
   }
-  // Grenzen definieren
-  const startHour = 7; // früheste Startzeit
-  const endHour = 18; // späteste Startzeit
 
-  // Zeit auf den nächsten 15-Minuten-Schritt runden
+  const startHour = 7;
+  const endHour = 18;
+
   let startTime = roundToQuarterHour(new Date(date));
 
-  // Prüfen, ob die geklickte Zeit außerhalb der erlaubten Zeit liegt
   if (startTime.getHours() < startHour) {
-    startTime.setHours(startHour, 0, 0, 0); // Startzeit auf 7:00 setzen
+    startTime.setHours(startHour, 0, 0, 0);
   } else if (startTime.getHours() >= endHour) {
-    startTime.setHours(endHour, 0, 0, 0); // Startzeit auf 18:00 setzen
+    startTime.setHours(endHour, 0, 0, 0);
   }
 
-  // Berechnung der Endzeit basierend auf der Standarddauer oder ausgewählten Dauer
   const endTime = new Date(
     startTime.getTime() + selectedDuration.value * 60 * 1000
   );
 
-  // Lokale Zeit korrekt formatieren
-  newEvent.value.date = startTime.toISOString().split("T")[0]; // Datum: YYYY-MM-DD
-  newEvent.value.start = startTime.toLocaleTimeString().slice(0, 5); // Startzeit: HH:mm
-  newEvent.value.end = endTime.toLocaleTimeString().slice(0, 5); // Endzeit: HH:mm
+  newEvent.value.date = startTime.toISOString().split("T")[0];
+  newEvent.value.start = startTime.toLocaleTimeString().slice(0, 5);
+  newEvent.value.end = endTime.toLocaleTimeString().slice(0, 5);
 
-  // Synchronisiere mit dem Dropdown für die Startzeit
   selectedStartTime.value = newEvent.value.start;
 
-  showCreateDialog.value = true; // Dialog öffnen
+  showCreateDialog.value = true;
 
   console.log("Original Date:", date.toISOString());
   console.log("Rounded Date:", startTime.toISOString());
@@ -205,7 +193,7 @@ const bookAppointment = async () => {
   const loggedInUser = useUserStore().getLoggedInUser;
   const payload = {
     appointmentId: selectedEvent.value.id,
-    patientId: loggedInUser.id,
+    patientId: loggedInUser?.id,
   };
 
   try {
@@ -224,19 +212,17 @@ const bookAppointment = async () => {
 const fetchAppointments = async () => {
   if (!doctor.value?.id) {
     console.error("Doctor ID nicht verfügbar");
-    return; // Beende die Funktion, wenn keine ID vorhanden ist
+    return;
   }
 
   events.value = [];
   finishedLoading.value = false;
 
   try {
-    // Abrufen der Daten mit der API-Methode
     console.log("Lade Termine für Doctor ID:", doctor.value.id);
     const data = await getAllAppointmentsForUser(doctor.value.id);
     console.log("Geladene Termine:", data);
 
-    // Prüfen, ob Daten existieren
     if (!data || data.length === 0) {
       console.log("Keine Termine gefunden.");
       return;
@@ -247,7 +233,7 @@ const fetchAppointments = async () => {
 
       const appointment = {
         id: event.id,
-        start: parseDate(event.startDateTime), // Datum parsen
+        start: parseDate(event.startDateTime),
         end: parseDate(event.endDateTime),
         patient: event.patient,
         title: event.title,
@@ -259,11 +245,9 @@ const fetchAppointments = async () => {
       events.value.push(appointment);
     }
   } catch (error) {
-    // Fehler abfangen und anzeigen
     console.error("Fehler beim Abrufen der Termine:", error);
     setSnackBar("Fehler beim Abrufen der Termine!", "error");
   } finally {
-    // Ladezustand aktualisieren
     finishedLoading.value = true;
   }
 };
@@ -271,7 +255,6 @@ const fetchAppointments = async () => {
 const parseDate = (date: string) => {
   if (date === undefined) return;
   let parsedDate = date.replace("T", " ").slice(0, -3);
-
   return parsedDate;
 };
 
@@ -290,26 +273,17 @@ const deleteSelectedAppointment = async () => {
   }
 
   const loggedInUser = useUserStore().getLoggedInUser;
-
-  /*// Überprüfen, ob der Benutzer der Ersteller des Termins ist
-  if (loggedInUser.id !== selectedEvent.value.doctor.id) {
-    alert("Sie können diesen Termin nicht löschen, da Sie ihn nicht erstellt haben.");
-    return;
-  }*/
-
   try {
     const confirmDeletion = confirm(
       "Möchten Sie diesen Termin wirklich löschen?"
     );
     if (!confirmDeletion) return;
 
-    await deleteAppointment(selectedEvent.value.id, loggedInUser.id); // API-Aufruf
+    await deleteAppointment(selectedEvent.value.id, loggedInUser.id);
     setSnackBar("Termin erfolgreich gelöscht!", "success");
 
-    // Aktualisiere die Terminliste
     await fetchAppointments();
 
-    // Schließe den Dialog
     showDialog.value = false;
   } catch (error) {
     console.error("Fehler beim Löschen des Termins:", error);
@@ -322,11 +296,10 @@ const calculateEndTime = (start: string, duration: number) => {
   const [hours, minutes] = start.split(":").map(Number);
   const startDate = new Date();
   startDate.setHours(hours, minutes, 0, 0);
-  const endDate = new Date(startDate.getTime() + duration * 60 * 1000); // Dauer hinzufügen
-  return endDate.toTimeString().slice(0, 5); // HH:mm
+  const endDate = new Date(startDate.getTime() + duration * 60 * 1000);
+  return endDate.toTimeString().slice(0, 5);
 };
 
-// Zeitoptionen generieren
 const generateTimeOptions = () => {
   for (let i = 15; i <= 60; i += 15) {
     durations.value.push(i);
@@ -341,7 +314,6 @@ const generateTimeOptions = () => {
   }
 };
 
-// Initiale Daten laden
 const loadInitialData = async () => {
   try {
     const doctorId = Number(route.params.id);
@@ -356,20 +328,17 @@ const loadInitialData = async () => {
     console.error("Fehler bei der Initialisierung:", error);
     setSnackBar("Fehler bei der Initialisierung!", "error");
   }
-  await fetchAppointments(); // Appointments abrufen
+  await fetchAppointments();
 };
 
 const canCancelAppointment = computed(() => {
   if (!selectedEvent.value || !selectedEvent.value.patient) {
-    return false; // Kein Termin oder kein Patient zugeordnet
+    return false;
   }
-
   const loggedInUser = useUserStore().getLoggedInUser;
-
-  // Überprüfen, ob der eingeloggte Benutzer der Patient des Termins ist
   return (
-    selectedEvent.value.patient.id === loggedInUser.id ||
-    selectedEvent.value.doctor.id === loggedInUser.id
+    selectedEvent.value.patient.id === loggedInUser?.id ||
+    selectedEvent.value.doctor.id === loggedInUser?.id
   );
 });
 
@@ -378,29 +347,20 @@ const cancelSelectedAppointment = async () => {
     console.error("Kein Termin ausgewählt");
     return;
   }
-
   const loggedInUser = useUserStore().getLoggedInUser;
-
-  console.log(selectedEvent.value.patient.id, loggedInUser.id);
+  console.log(selectedEvent.value.patient.id, loggedInUser?.id);
   if (
     !(
-      (loggedInUser.userType === "DOCTOR" &&
-        selectedEvent.value.doctor?.id === loggedInUser.id) ||
-      (loggedInUser.userType === "PATIENT" &&
-        selectedEvent.value.patient?.id === loggedInUser.id)
+      (loggedInUser?.userType === "DOCTOR" &&
+        selectedEvent.value.doctor?.id === loggedInUser?.id) ||
+      (loggedInUser?.userType === "PATIENT" &&
+        selectedEvent.value.patient?.id === loggedInUser?.id)
     )
   ) {
     console.warn("Der Benutzer ist nicht der Patient dieses Termins.");
     alert("Sie können nur Termine stornieren, die Sie gebucht haben.");
     return;
   }
-
-  /* // Überprüfen, ob der eingeloggte Benutzer der Patient des Termins ist
-  if (selectedEvent.value.patient?.id !== loggedInUser.id || selectedEvent.value.doctor?.id !== loggedInUser.id) {
-    console.warn("Der Benutzer ist nicht der Patient dieses Termins.");
-    alert("Sie können nur Termine stornieren, die Sie gebucht haben.");
-    return;
-  }*/
 
   try {
     const confirmCancellation = confirm(
@@ -410,16 +370,14 @@ const cancelSelectedAppointment = async () => {
 
     const payload = {
       appointmentId: selectedEvent.value.id,
-      userId: loggedInUser.id,
+      userId: loggedInUser?.id,
     };
 
     await cancelAppointment(payload);
     setSnackBar("Termin erfolgreich storniert!", "success");
 
-    // Aktualisiere die Terminliste
     await fetchAppointments();
 
-    // Schließe den Dialog
     showDialog.value = false;
   } catch (error) {
     console.error("Fehler beim Stornieren des Termins:", error);
@@ -459,9 +417,9 @@ const filterAppointmentsVisibility = computed(() => {
 });
 
 onMounted(async () => {
-  generateTimeOptions(); // Zeitoptionen generieren
-  await loadInitialData(); // Daten laden
-  fakeUser("doctor", 6);
+  generateTimeOptions();
+  await loadInitialData();
+  fakeUser("patient", 25);
   console.log("Aktueller Benutzer:", useUserStore().getLoggedInUser);
 });
 </script>
@@ -469,7 +427,10 @@ onMounted(async () => {
 <template>
   <div class="doctor-detail" v-if="doctor">
     <h1>{{ doctor.title }} {{ doctor.firstName }} {{ doctor.lastName }}</h1>
-    <img class="doctor-img" :src="doctor.profileImg || 'fallback-image.png'" />
+    <img
+      class="doctor-img"
+      :src="doctor.profileImg || 'https://cdn.vuetifyjs.com/images/john.png'"
+    />
     <p>{{ doctor.speciality }}</p>
     <p>{{ doctor.licenseId }}</p>
     <p>{{ doctor.street }} {{ doctor.houseNumber }}</p>
@@ -478,7 +439,7 @@ onMounted(async () => {
   <div v-else>
     <p>Loading doctor details...</p>
   </div>
-  <h2>Termin buchen</h2>
+  <h2 class="mt-8">Termin buchen</h2>
   <vue-cal
     v-if="finishedLoading"
     style="height: 850px"
@@ -520,14 +481,14 @@ onMounted(async () => {
 
       <v-btn
         v-if="canCancelAppointment"
-        color="red"
+        color="red-lighten-2"
         @click="cancelSelectedAppointment"
       >
         Termin stornieren</v-btn
       >
 
       <v-btn
-        v-if="selectedEvent?.doctor?.id === useUserStore().getLoggedInUser.id"
+        v-if="selectedEvent?.doctor?.id === useUserStore().getLoggedInUser?.id"
         color="red"
         @click="deleteSelectedAppointment"
       >
@@ -536,7 +497,6 @@ onMounted(async () => {
     </v-card>
   </v-dialog>
 
-  <!-- Dialog für neuen Termin -->
   <!-- @TODO: implement timepicker, appointment duration and calculate endtime -->
   <v-dialog v-model="showCreateDialog" style="width: 500px">
     <v-card>
@@ -550,14 +510,12 @@ onMounted(async () => {
           v-model="newEvent.type"
         ></v-select>
 
-        <!-- Dropdown für Startzeit -->
         <v-select
           v-model="selectedStartTime"
           :items="startTimes"
           label="Startzeit"
         ></v-select>
 
-        <!-- Dropdown für die Dauer -->
         <v-select
           v-model="selectedDuration"
           :items="durations"
@@ -565,7 +523,6 @@ onMounted(async () => {
           item-text="value"
           item-value="value"
         ></v-select>
-        <!--        <p>Beginn: {{ newEvent.start }}</p>-->
         <p>Ende: {{ calculateEndTime(newEvent.start, selectedDuration) }}</p>
       </v-card-text>
       <v-card-actions>
