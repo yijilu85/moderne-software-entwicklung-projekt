@@ -98,10 +98,6 @@ const onCreateAppointment = async () => {
     `${newEvent.value.date}T${selectedStartTime.value}`
   );
   const endDateTime = new Date(`${newEvent.value.date}T${newEvent.value.end}`);
-
-  console.log("selectedstart", selectedStartTime.value);
-  console.log("new event end", newEvent.value.end);
-  console.log("end", endDateTime);
   const payload = {
     doctor: {
       id: doctor.value?.id,
