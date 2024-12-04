@@ -1,18 +1,27 @@
 <script setup lang="ts">
 import type { Appointment, Doctor, User } from "@/types/types";
 import { ref, onMounted, computed } from "vue";
-import {
-  createAppointmentSlot,
-  getAllAppointmentsForUser,
-  sendBookingAppointment,
-  deleteAppointment,
-  cancelAppointment,
-} from "@/api/appointmentController";
+import { getAllAppointmentsForUser } from "@/api/appointmentController";
 import { watch } from "vue";
-import { getPatient } from "@/api/patientController";
 import { getDoctor } from "@/api/doctorController";
 import { useRoute } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
+import Snackbar from "@/components/Snackbar.vue";
+import {
+  useAppointmentHelpers,
+  parseDate,
+  roundToQuarterHour,
+  checkCanCancelAppointment,
+  checkCanSeeAppointment,
+  calculateEndTime,
+} from "@/helpers/appointmentHelpers";
+
+const {
+  delAppointment,
+  bookAppointment,
+  cancelSelectedAppointment,
+  createAppointment,
+} = useAppointmentHelpers();
 
 const date = new Date();
 const doctor = ref<Doctor | null>(null);
@@ -27,20 +36,17 @@ const durations = ref<number[]>([]);
 const selectedDuration = ref<number>(15);
 const startTimes = ref<string[]>([]);
 const selectedStartTime = ref<string>("09:00");
+const minDuration = ref<number>(15);
 
 const loadDoctor = async (doctorId: number) => {
   try {
-    console.log("Sende Anfrage an Backend für Doktor mit ID:", doctorId);
     const doctorData = await getDoctor(doctorId);
-    console.log("Antwort vom Backend für Doktor:", doctorData);
     if (!doctorData) {
-      console.error("Keine Doktor-Daten gefunden!");
       setSnackBar("Doktor-Daten konnten nicht geladen werden!", "error");
     } else {
       doctor.value = doctorData;
     }
   } catch (error) {
-    console.error("Fehler beim Abrufen der Doktor-Daten:", error);
     setSnackBar("Fehler beim Abrufen der Doktor-Daten!", "error");
   }
 };
@@ -74,18 +80,28 @@ const snackbar = ref({
   color: "success",
 });
 
+const showSnackbar = (message: string, color: string = "success") => {
+  snackbar.value = {
+    show: true,
+    message,
+    color,
+  };
+};
+
 const onEventClick = (appointment: Appointment, mouseevent: MouseEvent) => {
   selectedEvent.value = appointment;
   showDialog.value = true;
 };
 
-const createAppointment = async () => {
+const onCreateAppointment = async () => {
   const startDateTime = new Date(
     `${newEvent.value.date}T${selectedStartTime.value}`
   );
-  const endDateTime = new Date(
-    startDateTime.getTime() + selectedDuration.value * 60 * 1000
-  );
+  const endDateTime = new Date(`${newEvent.value.date}T${newEvent.value.end}`);
+
+  console.log("selectedstart", selectedStartTime.value);
+  console.log("new event end", newEvent.value.end);
+  console.log("end", endDateTime);
   const payload = {
     doctor: {
       id: doctor.value?.id,
@@ -101,17 +117,10 @@ const createAppointment = async () => {
     notes: [],
   };
 
-  try {
-    const appointment = await createAppointmentSlot(payload);
-    setSnackBar("Termin erfolgreich erstellt!", "success");
-  } catch {
-    setSnackBar("Fehler beim Erstellen eines Termins!", "error");
-  }
-
+  await createAppointment(payload, showSnackbar);
   showCreateDialog.value = false;
   newEvent.value = { id: 0, title: "", start: "", end: "", date: "" };
-  selectedDuration.value = 15;
-  selectedStartTime.value = "09:00";
+  selectedDuration.value = minDuration.value;
   fetchAppointments();
 };
 
@@ -145,13 +154,20 @@ watch(selectedStartTime, (newStartTime) => {
     newEvent.value.end = endDate.toTimeString().slice(0, 5);
   }
 });
+watch(selectedDuration, (newDuration) => {
+  if (newDuration) {
+    const [hours, minutes] = selectedStartTime.value.split(":").map(Number);
+    const startDate = new Date();
+    startDate.setHours(hours, minutes, 0, 0);
 
-const roundToQuarterHour = (date: Date): Date => {
-  const minutes = date.getMinutes();
-  const roundedMinutes = Math.ceil(minutes / 15) * 15;
-  date.setMinutes(roundedMinutes, 0, 0);
-  return date;
-};
+    const endDate = new Date(
+      startDate.getTime() + selectedDuration.value * 60 * 1000
+    );
+
+    newEvent.value.start = selectedStartTime.value;
+    newEvent.value.end = endDate.toTimeString().slice(0, 5);
+  }
+});
 
 const onCellClick = (date: Date) => {
   if (doctor.value !== null && useUserStore().getLoggedInUser !== null) {
@@ -160,7 +176,6 @@ const onCellClick = (date: Date) => {
       return;
     }
   }
-
   const startHour = 7;
   const endHour = 18;
 
@@ -179,33 +194,19 @@ const onCellClick = (date: Date) => {
   newEvent.value.date = startTime.toISOString().split("T")[0];
   newEvent.value.start = startTime.toLocaleTimeString().slice(0, 5);
   newEvent.value.end = endTime.toLocaleTimeString().slice(0, 5);
-
   selectedStartTime.value = newEvent.value.start;
 
   showCreateDialog.value = true;
-
-  console.log("Original Date:", date.toISOString());
-  console.log("Rounded Date:", startTime.toISOString());
-  console.log("Localized Date:", startTime.toLocaleString());
 };
 
-const bookAppointment = async () => {
+const onBookAppointment = async () => {
   const loggedInUser = useUserStore().getLoggedInUser;
-  const payload = {
-    appointmentId: selectedEvent.value.id,
-    patientId: loggedInUser?.id,
-  };
-
-  try {
-    await sendBookingAppointment(payload);
-
-    setSnackBar("Termin erfolgreich gebucht!", "success");
-  } catch (error) {
-    console.error("Error booking appointment:", error);
-    setSnackBar("Fehler beim Buchen des Termins!", "error");
-  }
-
-  fetchAppointments();
+  await bookAppointment(
+    selectedEvent.value.id,
+    loggedInUser?.id,
+    showSnackbar,
+    fetchAppointments
+  );
   showDialog.value = false;
 };
 
@@ -219,9 +220,7 @@ const fetchAppointments = async () => {
   finishedLoading.value = false;
 
   try {
-    console.log("Lade Termine für Doctor ID:", doctor.value.id);
     const data = await getAllAppointmentsForUser(doctor.value.id);
-    console.log("Geladene Termine:", data);
 
     if (!data || data.length === 0) {
       console.log("Keine Termine gefunden.");
@@ -252,12 +251,6 @@ const fetchAppointments = async () => {
   }
 };
 
-const parseDate = (date: string) => {
-  if (date === undefined) return;
-  let parsedDate = date.replace("T", " ").slice(0, -3);
-  return parsedDate;
-};
-
 const appointmentHasPatient = computed(() => {
   if (selectedEvent.value?.patient?.id) {
     return true;
@@ -271,33 +264,13 @@ const deleteSelectedAppointment = async () => {
     console.error("Kein Termin ausgewählt");
     return;
   }
-
-  const loggedInUser = useUserStore().getLoggedInUser;
-  try {
-    const confirmDeletion = confirm(
-      "Möchten Sie diesen Termin wirklich löschen?"
-    );
-    if (!confirmDeletion) return;
-
-    await deleteAppointment(selectedEvent.value.id, loggedInUser.id);
-    setSnackBar("Termin erfolgreich gelöscht!", "success");
-
-    await fetchAppointments();
-
-    showDialog.value = false;
-  } catch (error) {
-    console.error("Fehler beim Löschen des Termins:", error);
-    setSnackBar("Fehler beim Löschen des Termins!", "error");
-  }
-};
-
-const calculateEndTime = (start: string, duration: number) => {
-  if (!start || !duration) return "";
-  const [hours, minutes] = start.split(":").map(Number);
-  const startDate = new Date();
-  startDate.setHours(hours, minutes, 0, 0);
-  const endDate = new Date(startDate.getTime() + duration * 60 * 1000);
-  return endDate.toTimeString().slice(0, 5);
+  await delAppointment(
+    selectedEvent.value.id,
+    useUserStore().getLoggedInUser?.id,
+    showSnackbar,
+    fetchAppointments
+  );
+  showDialog.value = false;
 };
 
 const generateTimeOptions = () => {
@@ -332,95 +305,28 @@ const loadInitialData = async () => {
 };
 
 const canCancelAppointment = computed(() => {
-  if (!selectedEvent.value || !selectedEvent.value.patient) {
-    return false;
-  }
-  const loggedInUser = useUserStore().getLoggedInUser;
-  return (
-    selectedEvent.value.patient.id === loggedInUser?.id ||
-    selectedEvent.value.doctor.id === loggedInUser?.id
-  );
+  return checkCanCancelAppointment(selectedEvent.value);
 });
 
-const cancelSelectedAppointment = async () => {
-  if (!selectedEvent.value) {
-    console.error("Kein Termin ausgewählt");
-    return;
-  }
-  const loggedInUser = useUserStore().getLoggedInUser;
-  console.log(selectedEvent.value.patient.id, loggedInUser?.id);
-  if (
-    !(
-      (loggedInUser?.userType === "DOCTOR" &&
-        selectedEvent.value.doctor?.id === loggedInUser?.id) ||
-      (loggedInUser?.userType === "PATIENT" &&
-        selectedEvent.value.patient?.id === loggedInUser?.id)
-    )
-  ) {
-    console.warn("Der Benutzer ist nicht der Patient dieses Termins.");
-    alert("Sie können nur Termine stornieren, die Sie gebucht haben.");
-    return;
-  }
-
-  try {
-    const confirmCancellation = confirm(
-      "Möchten Sie diesen Termin wirklich stornieren?"
-    );
-    if (!confirmCancellation) return;
-
-    const payload = {
-      appointmentId: selectedEvent.value.id,
-      userId: loggedInUser?.id,
-    };
-
-    await cancelAppointment(payload);
-    setSnackBar("Termin erfolgreich storniert!", "success");
-
-    await fetchAppointments();
-
-    showDialog.value = false;
-  } catch (error) {
-    console.error("Fehler beim Stornieren des Termins:", error);
-    setSnackBar("Fehler beim Stornieren des Termins!", "error");
-  }
-};
-
-const fakeUser = async (userType: "patient" | "doctor", id: number) => {
-  let fakedUser;
-  if (userType === "patient") {
-    fakedUser = await getPatient(id);
-  } else if (userType === "doctor") {
-    fakedUser = await getDoctor(id);
-  }
-  useUserStore().mutate(fakedUser!);
-  console.log("fakedUser:", useUserStore().getLoggedInUser);
-};
-
-const userCanSeeAppointment = (appointment: Appointment) => {
-  const loggedInUser = useUserStore().getLoggedInUser;
-
-  if (!appointment.patient?.id) {
-    return true;
-  } else if (
-    loggedInUser !== null &&
-    (appointment.patient?.id === loggedInUser.id ||
-      appointment.doctor?.id === loggedInUser.id)
-  ) {
-    return true;
-  }
-  return false;
+const onCancelSelectedAppointment = async () => {
+  cancelSelectedAppointment(
+    selectedEvent.value,
+    useUserStore().getLoggedInUser?.id,
+    showSnackbar,
+    fetchAppointments
+  );
+  showDialog.value = false;
 };
 
 const filterAppointmentsVisibility = computed(() => {
-  const filteredAppointments = events.value.filter(userCanSeeAppointment);
+  const filteredAppointments = events.value.filter(checkCanSeeAppointment);
   return filteredAppointments;
 });
 
 onMounted(async () => {
   generateTimeOptions();
   await loadInitialData();
-  fakeUser("patient", 25);
-  console.log("Aktueller Benutzer:", useUserStore().getLoggedInUser);
+  useUserStore().fakeLogIn("doctor", 6);
 });
 </script>
 
@@ -475,14 +381,14 @@ onMounted(async () => {
           </li>
         </ul>
       </v-card-text>
-      <v-btn v-if="!appointmentHasPatient" @click="bookAppointment"
+      <v-btn v-if="!appointmentHasPatient" @click="onBookAppointment"
         >Termin buchen</v-btn
       >
 
       <v-btn
         v-if="canCancelAppointment"
         color="red-lighten-2"
-        @click="cancelSelectedAppointment"
+        @click="onCancelSelectedAppointment"
       >
         Termin stornieren</v-btn
       >
@@ -526,7 +432,7 @@ onMounted(async () => {
         <p>Ende: {{ calculateEndTime(newEvent.start, selectedDuration) }}</p>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="primary" @click="createAppointment">Speichern</v-btn>
+        <v-btn color="primary" @click="onCreateAppointment">Speichern</v-btn>
         <v-btn color="secondary" @click="showCreateDialog = false"
           >Abbrechen</v-btn
         >
@@ -534,9 +440,12 @@ onMounted(async () => {
     </v-card>
   </v-dialog>
 
-  <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
-    {{ snackbar.message }}
-  </v-snackbar>
+  <Snackbar
+    :show="snackbar.show"
+    :message="snackbar.message"
+    :color="snackbar.color"
+    @update:show="snackbar.show = $event"
+  />
 </template>
 
 <style scoped>

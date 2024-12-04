@@ -6,7 +6,7 @@ export interface Doctor extends User {
   licenseId?: string;
 }
 export interface User {
-  id: number;
+  id: number | undefined;
   firstName: string;
   lastName: string;
   street?: string;
@@ -25,6 +25,19 @@ export interface Appointment {
   date?: date;
   start: datetime;
   end: datetime;
+  title: string;
+  content?: string;
+  class?: string;
+  patient?: Patient | null;
+  doctor?: Doctor | null;
+  type?: "OFFLINE" | "ONLINE";
+}
+
+export interface BackendAppointment {
+  id: number;
+  date?: string;
+  startDateTime: string; // Corresponds to `start` in the frontend
+  endDateTime: string; // Corresponds to `end` in the frontend
   title: string;
   content?: string;
   class?: string;
