@@ -50,9 +50,8 @@ export function formatDate(dateTimeString: string, output: string) {
 export const useAppointmentHelpers = () => {
   const delAppointment = async (
     appointmentId: number,
-    userId: number,
-    showSnackbar: (message: string, color?: string) => void,
-    fetchAppointments: () => Promise<void>
+    userId: number | undefined,
+    showSnackbar: (message: string, color?: string) => void
   ) => {
     try {
       const confirmDeletion = confirm(
@@ -62,7 +61,6 @@ export const useAppointmentHelpers = () => {
 
       await deleteAppointment(appointmentId, userId); // Mock API call
       showSnackbar("Termin erfolgreich gelöscht!", "success");
-      await fetchAppointments();
     } catch (error) {
       console.error("Fehler beim Löschen des Termins:", error);
       showSnackbar("Fehler beim Löschen des Termins!", "error");
@@ -71,9 +69,8 @@ export const useAppointmentHelpers = () => {
 
   const bookAppointment = async (
     appointmentId: number,
-    userId: number,
-    showSnackbar: (message: string, color?: string) => void,
-    fetchAppointments: () => Promise<void>
+    userId: number | undefined,
+    showSnackbar: (message: string, color?: string) => void
   ) => {
     const payload = {
       appointmentId: appointmentId,
@@ -84,7 +81,6 @@ export const useAppointmentHelpers = () => {
       await sendBookingAppointment(payload);
 
       showSnackbar("Termin erfolgreich gebucht!", "success");
-      await fetchAppointments();
     } catch (error) {
       console.error("Error booking appointment:", error);
       showSnackbar("Fehler beim Buchen des Termins!", "error");
@@ -93,9 +89,8 @@ export const useAppointmentHelpers = () => {
 
   const cancelSelectedAppointment = async (
     appointment: Appointment,
-    userId: number,
-    showSnackbar: (message: string, color?: string) => void,
-    fetchAppointments: () => Promise<void>
+    userId: number | undefined,
+    showSnackbar: (message: string, color?: string) => void
   ) => {
     if (!appointment.id) {
       console.error("Kein Termin ausgewählt");
@@ -129,8 +124,6 @@ export const useAppointmentHelpers = () => {
 
       await cancelAppointment(payload);
       showSnackbar("Termin erfolgreich storniert!", "success");
-
-      await fetchAppointments();
     } catch (error) {
       console.error("Fehler beim Stornieren des Termins:", error);
       showSnackbar("Fehler beim Stornieren des Termins!", "error");
@@ -171,7 +164,9 @@ export function roundToQuarterHour(date: Date) {
   return date;
 }
 
-export function checkCanCancelAppointment(selectedEvent: Appointment) {
+export function checkCanCancelAppointment(
+  selectedEvent: Appointment | undefined
+) {
   if (!selectedEvent || !selectedEvent.patient) {
     return false;
   }
@@ -204,4 +199,12 @@ export function calculateEndTime(start: string, duration: number) {
   startDate.setHours(hours, minutes, 0, 0);
   const endDate = new Date(startDate.getTime() + duration * 60 * 1000);
   return endDate.toTimeString().slice(0, 5);
+}
+
+export function appointmentHasPatient(appointment: Appointment) {
+  if (appointment.patient?.id) {
+    return true;
+  } else {
+    return false;
+  }
 }

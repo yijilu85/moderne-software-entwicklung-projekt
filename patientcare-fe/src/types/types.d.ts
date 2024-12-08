@@ -30,6 +30,7 @@ export interface Appointment {
   class?: string;
   patient?: Patient | null;
   doctor?: Doctor | null;
+  notes?: AppointmentNote[];
   type?: "OFFLINE" | "ONLINE";
 }
 
@@ -43,5 +44,17 @@ export interface BackendAppointment {
   class?: string;
   patient?: Patient | null;
   doctor?: Doctor | null;
+  notes?: any;
   type?: "OFFLINE" | "ONLINE";
+}
+export interface AppointmentNote {
+  id: number | undefined;
+  timestamp?: string;
+  appointmentId?: number | undefined;
+  doctorId: number | undefined;
+  patientId: number | undefined;
+  files?: string;
+  type?: string;
+  body?: string;
+  type: "DIAGNOSIS" | "MEASUREMENT" | "TREATMENT" | "FILE" | undefined;
 }

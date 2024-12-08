@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import type { Appointment, Doctor, User } from "@/types/types";
+import type {
+  Appointment,
+  BackendAppointment,
+  Doctor,
+  User,
+} from "@/types/types";
 import { ref, onMounted, computed } from "vue";
 import { getAllAppointmentsForUser } from "@/api/appointmentController";
 import { watch } from "vue";
@@ -14,6 +19,7 @@ import {
   checkCanCancelAppointment,
   checkCanSeeAppointment,
   calculateEndTime,
+  appointmentHasPatient,
 } from "@/helpers/appointmentHelpers";
 
 const {
@@ -197,12 +203,8 @@ const onCellClick = (date: Date) => {
 
 const onBookAppointment = async () => {
   const loggedInUser = useUserStore().getLoggedInUser;
-  await bookAppointment(
-    selectedEvent.value.id,
-    loggedInUser?.id,
-    showSnackbar,
-    fetchAppointments
-  );
+  await bookAppointment(selectedEvent.value.id, loggedInUser?.id, showSnackbar);
+  fetchAppointments();
   showDialog.value = false;
 };
 
@@ -226,15 +228,16 @@ const fetchAppointments = async () => {
     for (const event of data) {
       if (!event) continue;
 
+      let mapped = event as any as BackendAppointment;
       const appointment = {
-        id: event.id,
-        start: parseDate(event.startDateTime),
-        end: parseDate(event.endDateTime),
-        patient: event.patient,
-        title: event.title,
-        doctor: event.doctor,
-        notes: event.notes,
-        type: event.type,
+        id: mapped.id,
+        start: parseDate(mapped.startDateTime),
+        end: parseDate(mapped.endDateTime),
+        patient: mapped.patient,
+        title: mapped.title,
+        doctor: mapped.doctor,
+        notes: mapped.notes,
+        type: mapped.type,
       } as Appointment;
 
       events.value.push(appointment);
@@ -247,12 +250,8 @@ const fetchAppointments = async () => {
   }
 };
 
-const appointmentHasPatient = computed(() => {
-  if (selectedEvent.value?.patient?.id) {
-    return true;
-  } else {
-    return false;
-  }
+const checkAppointmentHasPatient = computed(() => {
+  return appointmentHasPatient(selectedEvent.value);
 });
 
 const deleteSelectedAppointment = async () => {
@@ -263,9 +262,9 @@ const deleteSelectedAppointment = async () => {
   await delAppointment(
     selectedEvent.value.id,
     useUserStore().getLoggedInUser?.id,
-    showSnackbar,
-    fetchAppointments
+    showSnackbar
   );
+  fetchAppointments();
   showDialog.value = false;
 };
 
@@ -305,12 +304,12 @@ const canCancelAppointment = computed(() => {
 });
 
 const onCancelSelectedAppointment = async () => {
-  cancelSelectedAppointment(
+  await cancelSelectedAppointment(
     selectedEvent.value,
     useUserStore().getLoggedInUser?.id,
-    showSnackbar,
-    fetchAppointments
+    showSnackbar
   );
+  fetchAppointments();
   showDialog.value = false;
 };
 
@@ -322,7 +321,7 @@ const filterAppointmentsVisibility = computed(() => {
 onMounted(async () => {
   generateTimeOptions();
   await loadInitialData();
-  useUserStore().fakeLogIn("doctor", 6);
+  useUserStore().fakeLogIn("patient", 26);
 });
 </script>
 
@@ -361,9 +360,10 @@ onMounted(async () => {
       </v-card-title>
       <v-card-text>
         <p v-html="selectedEvent.contentFull" />
-        <strong>Termindetails</strong>
+        <strong>Termindetails</strong> -
+        <a :href="`/appointment/${selectedEvent.id}`">Termin öffnen</a>
         <ul>
-          <li v-if="appointmentHasPatient">
+          <li v-if="checkAppointmentHasPatient">
             Patient: {{ selectedEvent.patient.firstName }}
             {{ selectedEvent.patient.lastName }}
           </li>
@@ -377,7 +377,7 @@ onMounted(async () => {
           </li>
         </ul>
       </v-card-text>
-      <v-btn v-if="!appointmentHasPatient" @click="onBookAppointment"
+      <v-btn v-if="!checkAppointmentHasPatient" @click="onBookAppointment"
         >Termin buchen</v-btn
       >
 
