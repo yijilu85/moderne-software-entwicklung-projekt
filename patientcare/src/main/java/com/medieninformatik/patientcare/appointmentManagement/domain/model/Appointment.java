@@ -27,7 +27,7 @@ public class Appointment{
     };
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates the ID
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

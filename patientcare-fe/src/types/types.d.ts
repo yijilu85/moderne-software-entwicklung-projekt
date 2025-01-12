@@ -3,10 +3,10 @@ export interface Patient extends User {}
 export interface Doctor extends User {
   title: string;
   speciality: string;
-  medicalId: string;
+  licenseId?: string;
 }
 export interface User {
-  id: number;
+  id: number | undefined;
   firstName: string;
   lastName: string;
   street?: string;
@@ -30,5 +30,31 @@ export interface Appointment {
   class?: string;
   patient?: Patient | null;
   doctor?: Doctor | null;
+  notes?: AppointmentNote[];
   type?: "OFFLINE" | "ONLINE";
+}
+
+export interface BackendAppointment {
+  id: number;
+  date?: string;
+  startDateTime: string; // Corresponds to `start` in the frontend
+  endDateTime: string; // Corresponds to `end` in the frontend
+  title: string;
+  content?: string;
+  class?: string;
+  patient?: Patient | null;
+  doctor?: Doctor | null;
+  notes?: any;
+  type?: "OFFLINE" | "ONLINE";
+}
+export interface AppointmentNote {
+  id: number | undefined;
+  timestamp?: string;
+  appointmentId?: number | undefined;
+  doctorId: number | undefined;
+  patientId: number | undefined;
+  files?: string;
+  type?: string;
+  body?: string;
+  type: "DIAGNOSIS" | "MEASUREMENT" | "TREATMENT" | "FILE" | undefined;
 }
