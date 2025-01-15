@@ -321,7 +321,7 @@ const filterAppointmentsVisibility = computed(() => {
 onMounted(async () => {
   generateTimeOptions();
   await loadInitialData();
-  useUserStore().fakeLogIn("patient", 26);
+  useUserStore().fakeLogIn("doctor", 1);
 });
 </script>
 
