@@ -39,11 +39,64 @@ public class LoggerAspect {
     @Pointcut("execution(* com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService.parseJSONCreateAppointmentSlot(..))")
     public void createAppointmentPointcut() {}
 
+    @Pointcut("execution(* com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService.parseJSONBookAppointmentSlot(..))")
+    public void bookAppointmentPointcut() {}
 
-    // Logging vor der Methode
+    @Pointcut("execution(* com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService.deleteAppointment(..))")
+    public void deleteAppointmentPointcut() {}
+
+    @Pointcut("execution(* com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService.cancelAppointment(..))")
+    public void cancelAppointmentPointcut() {}
+
+
+    // Logging vor den Methoden
     @Before("createAppointmentPointcut()")
-    public void logBefore(JoinPoint joinPoint) {
-        logger.info("Before executing method: " + joinPoint.getSignature().getName());
+    public void logBeforeCreate(JoinPoint joinPoint) {
+        logBefore(joinPoint, "Create Appointment");
+    }
+
+    @Before("bookAppointmentPointcut()")
+    public void logBeforeBook(JoinPoint joinPoint) {
+        logBefore(joinPoint, "Book Appointment");
+    }
+
+    @Before("deleteAppointmentPointcut()")
+    public void logBeforeDelete(JoinPoint joinPoint) {
+        logBefore(joinPoint, "Delete Appointment");
+    }
+
+    @Before("cancelAppointmentPointcut()")
+    public void logBeforeCancel(JoinPoint joinPoint) {
+        logBefore(joinPoint, "Cancel Appointment");
+    }
+
+
+    // Logging nach den Methoden
+    @After("createAppointmentPointcut()")
+    public void logAfterCreate(JoinPoint joinPoint) {
+        logAfter(joinPoint, "Create Appointment");
+    }
+
+    @After("bookAppointmentPointcut()")
+    public void logAfterBook(JoinPoint joinPoint) {
+        logAfter(joinPoint, "Book Appointment");
+    }
+
+    @After("deleteAppointmentPointcut()")
+    public void logAfterDelete(JoinPoint joinPoint) {
+        logAfter(joinPoint, "Delete Appointment");
+    }
+
+    @After("cancelAppointmentPointcut()")
+    public void logAfterCancel(JoinPoint joinPoint) {
+        logAfter(joinPoint, "Cancel Appointment");
+    }
+
+
+
+    // Gemeinsame Logging-Methoden
+    private void logBefore(JoinPoint joinPoint, String operation) {
+        logger.info("Before " + operation + " - Method: " + joinPoint.getSignature().getName());
         Object[] args = joinPoint.getArgs();
         if (args.length > 0) {
             StringBuilder argsLog = new StringBuilder("Arguments: ");
@@ -54,10 +107,8 @@ public class LoggerAspect {
         }
     }
 
-    // Logging nach der Methode
-    @After("createAppointmentPointcut()")
-    public void logAfter(JoinPoint joinPoint) {
-        logger.info("After executing method: " + joinPoint.getSignature().getName());
+    private void logAfter(JoinPoint joinPoint, String operation) {
+        logger.info("After " + operation + " - Method: " + joinPoint.getSignature().getName());
     }
     /*
 
