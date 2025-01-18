@@ -2,6 +2,10 @@
 import { RouterLink, RouterView } from "vue-router";
 import HelloWorld from "./components/HelloWorld.vue";
 import PatientList from "./components/PatientList.vue";
+
+import { useAuthStore } from '@/stores';
+
+const authStore = useAuthStore();
 </script>
 
 <template>
@@ -15,12 +19,22 @@ import PatientList from "./components/PatientList.vue";
       </nav>
     </div>
   </header>
-
-  <RouterView />
+  <div class="app-container bg-light">
+    <nav v-show="authStore.user" class="navbar navbar-expand navbar-dark bg-dark">
+      <div class="navbar-nav">
+        <RouterLink to="/" class="nav-item nav-link">Home</RouterLink>
+        <a @click="authStore.logout()" class="nav-item nav-link">Logout</a>
+      </div>
+    </nav>
+    <div class="container pt-4 pb-4">
+      <RouterView />
+    </div>
+  </div>
 </template>
 
 <style scoped>
-/* header {
+@import '@/assets/base.css';
+header {
   line-height: 1.5;
   max-height: 100vh;
 }
@@ -80,5 +94,5 @@ nav a:first-of-type {
     padding: 1rem 0;
     margin-top: 1rem;
   }
-} */
+}
 </style>

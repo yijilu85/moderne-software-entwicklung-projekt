@@ -151,7 +151,7 @@ const onAddNote = () => {
   newNote.value.timestamp = Date.now().toString();
 };
 onMounted(async () => {
-  useUserStore().fakeLogIn("patient", 26);
+  useUserStore().fakeLogIn("doctor", 1);
   fetchAppointment();
 });
 </script>
