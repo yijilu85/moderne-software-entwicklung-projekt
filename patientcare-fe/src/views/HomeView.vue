@@ -124,7 +124,7 @@ const formatTitle = (appointment: Appointment, today: boolean) => {
     return `${formatDate(
       appointment.start,
       "date"
-    )} : ${formattedAppointmentTime(
+    )} um ${formattedAppointmentTime(
       appointment
     )}: ${formattedAppointmentPatient(appointment)}`;
   }
