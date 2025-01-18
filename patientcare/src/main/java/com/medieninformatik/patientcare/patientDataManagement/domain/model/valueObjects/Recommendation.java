@@ -11,11 +11,17 @@ public class Recommendation {
 
     private String text;
 
-    // No-argument constructor required by JPA
     public Recommendation() {}
 
-    // Parameterized constructor
     public Recommendation(String text) {
+        this.text = text;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
         this.text = text;
     }
 }

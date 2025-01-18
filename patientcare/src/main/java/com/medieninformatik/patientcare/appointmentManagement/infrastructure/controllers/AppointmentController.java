@@ -47,7 +47,7 @@ public class AppointmentController {
             return appointmentService.getAllAppointments();
         } else {
             if (timeRange != null) {
-                return appointmentService.getAllAppointmentsForUserInTimeRange(userId, timeRange);
+                return appointmentService.getAllAppointmentsForUser(userId, timeRange);
             } else {
             return appointmentService.getAllAppointmentsForUser(userId);
             }

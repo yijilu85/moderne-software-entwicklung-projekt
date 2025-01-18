@@ -16,6 +16,23 @@ export const getAllAppointmentsForUser = async (id: number) => {
   return response.data as Appointment[];
 };
 
+export const getAllPastAppointmentsForUser = async (id: number) => {
+  const response = await axios.get(`/appointments?userId=${id}&timeRange=past`);
+  return response.data as Appointment[];
+};
+export const getAllFutureAppointmentsForUser = async (id: number) => {
+  const response = await axios.get(
+    `/appointments?userId=${id}&timeRange=future`
+  );
+  return response.data as Appointment[];
+};
+export const getAllTodayAppointmentsForUser = async (id: number) => {
+  const response = await axios.get(
+    `/appointments?userId=${id}&timeRange=today`
+  );
+  return response.data as Appointment[];
+};
+
 export const createAppointmentSlot = async (payload: Appointment) => {
   const response = await axios.post(`/appointments`, payload);
   return response.data as Appointment;
