@@ -18,10 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.file.AccessDeniedException;
 import java.sql.Array;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.*;
 
 @Service
 public class AppointmentService {
@@ -133,8 +130,59 @@ public class AppointmentService {
         }
         System.out.println("USER TYPE: " + type);
         return appointments;
-    };
+    }
 
+    public boolean belongsToPatient(Appointment appointment, Long patientId) {
+        return appointment.getPatient().getId().equals(patientId);
+    }
+
+    public boolean belongsToDoctor(Appointment appointment, Long doctorId) {
+        return appointment.getDoctor().getId().equals(doctorId);
+    }
+
+    private final AppointmentValidator pastValidator = appointment ->
+        appointment.getStartDateTime().toLocalDate().isBefore(LocalDateTime.now().toLocalDate());
+
+    private final AppointmentValidator todayValidator = appointment -> appointment.getStartDateTime().toLocalDate().isEqual(LocalDateTime.now().toLocalDate());
+
+    private final AppointmentValidator futureValidator = appointment ->
+            appointment.getStartDateTime().toLocalDate().isAfter(LocalDateTime.now().toLocalDate());
+
+
+    public List<Appointment> getAllAppointmentsForUser(Long userId, String timeRange) {
+        List<Appointment> allAppointments = appointmentRepo.findAll();
+        Optional<User> user = userRepo.findById(userId);
+
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("User mit ID " + userId + " nicht gefunden");
+        }
+
+        AppointmentValidator userValidator = appointment -> {
+            User.UserType type = user.get().getUserType();
+            if (type.equals(User.UserType.PATIENT)) {
+                return belongsToPatient(appointment, userId);
+            } else if (type.equals(User.UserType.DOCTOR)) {
+                return belongsToDoctor(appointment, userId);
+            }
+            return false;
+        };
+
+        Map<String, AppointmentValidator> validators = Map.of(
+                "past", pastValidator,
+                "today", todayValidator,
+                "future", futureValidator
+        );
+
+        AppointmentValidator timeRangeValidator = validators.get(timeRange);
+        if (timeRangeValidator == null) {
+            throw new IllegalArgumentException("Ungültiger Zeitraum: " + timeRange);
+        }
+
+        return allAppointments.stream()
+                .filter(timeRangeValidator::isValid)
+                .filter(userValidator::isValid)
+                .toList();
+    }
 
     public Appointment parseJSONBookAppointmentSlot(String payload) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -146,7 +194,7 @@ public class AppointmentService {
         Optional<User> patient = userRepo.findById(patientId);
         Optional<Appointment> appointment = appointmentRepo.findById(appointmentid);
 
-        if (patient != null && appointment!=null) {
+        if (patient != null && appointment != null) {
             appointment.get().setPatient((Patient) patient.get());
             appointmentRepo.save(appointment.get());
             return appointment.get();
@@ -155,6 +203,9 @@ public class AppointmentService {
         }
     }
 
+    public Appointment saveAppointment(Appointment appointment) {
+        return appointmentRepo.save(appointment);
+    }
 
     public Appointment parseJSONCreateAppointmentSlot(String payload) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();

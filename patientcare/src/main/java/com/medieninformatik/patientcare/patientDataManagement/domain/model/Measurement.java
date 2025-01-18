@@ -16,7 +16,7 @@ public class Measurement extends Note {
     public Measurement() {
     }
 
-    enum Type {
+    public enum Type {
         BLOOD_SUGAR,
         BLOOD_PRESSURE,
         HEART_RATE,
@@ -30,17 +30,17 @@ public class Measurement extends Note {
     public Measurement(Type type, double value){
         this.type = type;
         this.value = value;
+        this.setNoteType(this.getClass().getSimpleName().toUpperCase());
     }
 
-    private void setType (Type type){
+    public void setType (Type type){
         this.type = type;
     }
 
-    private double getValue(){
+    public double getValue(){
         return this.value;
     }
-
-    private void setValue (double value){
+    public void setValue (double value){
         this.value = value;
     }
 }

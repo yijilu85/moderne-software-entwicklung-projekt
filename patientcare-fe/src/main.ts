@@ -11,6 +11,7 @@ import "vuetify/styles";
 import { createVuetify } from "vuetify";
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
+import { useUserStore } from "@/stores/userStore";
 
 import { router } from './helpers';
 import { fakeBackend } from './helpers';
@@ -25,6 +26,8 @@ const vuetify = createVuetify({
 app.component("VueCal", VueCal);
 
 app.use(createPinia());
+
 app.use(router);
 app.use(vuetify);
+useUserStore().fakeLogIn("patient", 21);
 app.mount("#app");

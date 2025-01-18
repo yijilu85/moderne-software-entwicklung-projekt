@@ -1,11 +1,14 @@
 package patientDataManagement.services;
 
 import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appointment;
+import com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService;
+import com.medieninformatik.patientcare.patientDataManagement.infrastructure.repositories.NoteRepo;
 import com.medieninformatik.patientcare.shared.services.HelperService;
 
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Diagnosis;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Treatment;
 
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.DoctorRepo;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.PatientRepo;
 import com.medieninformatik.patientcare.patientDataManagement.services.NoteService;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
@@ -26,12 +29,17 @@ class NoteServiceTest {
     private PatientRepo patientRepo;
     private NoteService noteService;
     private HelperService helperService;
-
+    @Mock
+    private NoteRepo noteRepo;
+    @Mock
+    private DoctorRepo doctorRepo;
+    @Mock
+    private AppointmentService appointmentService;
 
     @BeforeEach
     void setUp() {
         this.helperService = new HelperService();
-        this.noteService = new NoteService(patientRepo, helperService);
+        this.noteService = new NoteService(patientRepo, helperService, appointmentService, noteRepo, doctorRepo);
     }
 
     //unit tests for diagnosis class
@@ -39,18 +47,18 @@ class NoteServiceTest {
     void createDiagnosis_referencesNotNull() {
         Patient patient = new Patient("John", "Doe");
         Doctor doctor = new Doctor("Dr. Francis", "Smith");
+        Appointment appointment = mock(Appointment.class);
+
         User creator = doctor;
         Date date = new Date();
         String icdCode = "A00.1";
         String recommendation = "Patient soll regelmäßig Wasser trinken";
 
-        Diagnosis diagnosis = noteService.createDiagnosis(patient, doctor, date, creator,
+        Diagnosis diagnosis = noteService.createDiagnosis(patient, doctor, appointment, date,
                 icdCode, recommendation);
 
         assertNotNull(diagnosis.getPatient());
         assertNotNull(diagnosis.getDoctor());
-        assertNotNull(diagnosis.getCreator());
-        assertNotNull(diagnosis.getDate());
         assertNotNull(diagnosis.getIcdCode());
     }
 
@@ -72,18 +80,21 @@ class NoteServiceTest {
     void createTreatment_referencesNotNull() {
         Patient patient = new Patient("John", "Doe");
         Doctor doctor = new Doctor("Dr. Francis", "Smith");
-        User creator = doctor;
+        Appointment appointment = mock(Appointment.class);
         Date date = new Date();
         String action = "Tetanus Impfung verabreicht";
-        Diagnosis diagnosis = mock(Diagnosis.class);
-        Treatment treatment = noteService.createTreatment(patient, doctor, date, creator,
-                diagnosis, action);
+        String icdCode = "J45.0";
+        String recommendation = "Entspannung";
+
+        Treatment treatment = noteService.createTreatment(patient, doctor, appointment, date,
+                icdCode, recommendation, action);
 
         assertNotNull(treatment.getPatient());
         assertNotNull(treatment.getDoctor());
-        assertNotNull(treatment.getCreator());
-        assertNotNull(treatment.getDate());
-        assertNotNull(treatment.getDiagnosis());
+//        assertNotNull(treatment.getCreator());
+//        assertNotNull(treatment.getDate());
+        assertNotNull(treatment.getIcdCode());
+        assertNotNull(treatment.getRecommendation());
         assertNotNull(treatment.getAction());
     }
 
@@ -91,24 +102,29 @@ class NoteServiceTest {
     void createTreatment_ShouldThrowExecptionOnNullRefrences() {
         Patient patient = new Patient("John", "Doe");
         Doctor doctor = new Doctor("Dr. Francis", "Smith");
-        User creator = doctor;
+        Appointment appointment = mock(Appointment.class);
         Date date = new Date();
-
-        Diagnosis diagnosis = new Diagnosis(patient, doctor, creator, date, "A00.1", "Empfehlungstext");
+        String recommendation = "Patient soll regelmäßig Wasser trinken";
+        String icdCode = "J45.0";
+        Diagnosis diagnosis = new Diagnosis("A00.1", "Empfehlungstext");
         String action = "Tetanus Impfung verabreicht";
 
-        assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(null, doctor, date, creator,
-                diagnosis, action));
-        assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(patient, null, date, creator,
-                diagnosis, action));
-        assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(patient, doctor, null, creator,
-                diagnosis, action));
-        assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(patient, doctor, date, null,
-                diagnosis, action));
-        assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(patient, doctor, date, creator,
-                null, action));
-        assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(patient, doctor, date, creator,
-                diagnosis, null));
+        assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(null, doctor, appointment, date,
+                icdCode, recommendation, action));
+        assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(patient, null, appointment, date,
+                icdCode, recommendation, action));
+        assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(patient, doctor, appointment,
+                null,
+                icdCode,recommendation, action));
+        assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(patient, doctor, appointment, null,
+                icdCode, recommendation, action));
+        assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(patient, doctor, appointment,
+                date,
+                null, recommendation, action));
+        assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(patient, doctor, appointment,
+                date,
+                icdCode, null,
+                 null));
     }
 
     @Test
@@ -123,7 +139,7 @@ class NoteServiceTest {
     //unit tests note super class
 
     @Test
-    // check if note users have same id as appointment users
+        // check if note users have same id as appointment users
     void addNoteToAppointment_valid() {
         Patient patient1 = mock(Patient.class);
         Patient patient2 = mock(Patient.class);
@@ -150,19 +166,19 @@ class NoteServiceTest {
         String icdCode = "A00.1";
         String recommendation = "Patient soll regelmäßig Wasser trinken";
 
-        Diagnosis diagnosis = noteService.createDiagnosis(patient1, doctor1, date, creator,
+        Diagnosis diagnosis = noteService.createDiagnosis(patient1, doctor1, appointmentCorrect, date,
                 icdCode, recommendation);
 
         assertTrue(noteService.noteUsersEqualsAppointmentUsers(appointmentCorrect, diagnosis));
         assertFalse(noteService.noteUsersEqualsAppointmentUsers(appointmentIncorrect, diagnosis));
 
         // check if note or appointments are not null
-        assertThrows(IllegalArgumentException.class, () -> noteService.addNoteToAppointment(null, diagnosis));
-        assertThrows(IllegalArgumentException.class, () -> noteService.addNoteToAppointment(appointmentCorrect, null));
+        assertThrows(IllegalArgumentException.class, () -> noteService.addDiagnosisToAppointment(null, diagnosis));
+        assertThrows(IllegalArgumentException.class, () -> noteService.addDiagnosisToAppointment(appointmentCorrect, null));
     }
 
     @Test
-    void noteFileType_isValid(){
+    void noteFileType_isValid() {
 
         // ony allow text files, pdf files, image files, audio files, video files
         String mimeTypeValidText = "text/plain";

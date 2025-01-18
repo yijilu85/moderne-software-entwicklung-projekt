@@ -29,6 +29,7 @@ export function mapBackendToFrontend(
     patient: backendData.patient,
     doctor: backendData.doctor,
     type: backendData.type,
+    notes: backendData.notes,
   };
 }
 
@@ -42,6 +43,11 @@ export function formatDate(dateTimeString: string, output: string) {
       const hours = String(date.getHours()).padStart(2, "0");
       const minutes = String(date.getMinutes()).padStart(2, "0");
       return `${hours}:${minutes}`;
+    }
+    case "dateTime": {
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      return `${date.toLocaleDateString()} | ${hours}:${minutes}`;
     }
   }
   return dateTimeString;

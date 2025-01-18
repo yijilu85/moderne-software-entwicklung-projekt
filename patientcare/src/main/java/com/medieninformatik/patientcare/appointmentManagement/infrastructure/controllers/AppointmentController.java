@@ -26,7 +26,6 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
-
 @RestController
 @RequestMapping(path = "/appointments")
 public class AppointmentController {
@@ -42,11 +41,16 @@ public class AppointmentController {
 
     @CrossOrigin
     @GetMapping
-    public List<Appointment> findAllAppointments(@RequestParam(required = false) Long userId) {
+    public List<Appointment> findAllAppointments(@RequestParam(required = false) Long userId, @RequestParam(required
+            = false) String timeRange) {
         if (userId == null) {
             return appointmentService.getAllAppointments();
         } else {
+            if (timeRange != null) {
+                return appointmentService.getAllAppointmentsForUser(userId, timeRange);
+            } else {
             return appointmentService.getAllAppointmentsForUser(userId);
+            }
         }
     }
 
@@ -94,7 +98,6 @@ public class AppointmentController {
         Optional<User> user = userRepo.findById(rootNode.get("userId").asLong());
 
 
-
         Long appointmentId = rootNode.get("appointmentId").asLong();
 
         if (!(user.get() instanceof User)) {
@@ -112,7 +115,7 @@ public class AppointmentController {
         Appointment appointment = appointmentOpt.get();
 
 
-        if (! (appointment.getDoctor().getId().equals(userEntity.getId()) || appointment.getPatient().getId().equals(userEntity.getId()) )){
+        if (!(appointment.getDoctor().getId().equals(userEntity.getId()) || appointment.getPatient().getId().equals(userEntity.getId()))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Keine Berechtigung, diesen Termin zu stornieren");
         }
 

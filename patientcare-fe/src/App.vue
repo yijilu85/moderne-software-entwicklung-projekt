@@ -14,8 +14,6 @@ const authStore = useAuthStore();
       <nav>
         <RouterLink to="/">Dashboard</RouterLink>
         <RouterLink to="/doctors">Ärztesuche</RouterLink>
-        <RouterLink to="#">Meine Patientenakte</RouterLink>
-        <RouterLink to="#">Meine Praxisseite</RouterLink>
       </nav>
     </div>
   </header>
@@ -32,6 +30,7 @@ const authStore = useAuthStore();
   </div>
 </template>
 
+<style scoped></style>
 <style scoped>
 @import '@/assets/base.css';
 header {
