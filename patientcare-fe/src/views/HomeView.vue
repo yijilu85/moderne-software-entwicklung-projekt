@@ -12,6 +12,7 @@ import {
   getAllFutureAppointmentsForUser,
   getAllTodayAppointmentsForUser,
 } from "@/api/appointmentController";
+import { authenticate } from "@/api/authentificationController";
 
 import {
   useAppointmentHelpers,

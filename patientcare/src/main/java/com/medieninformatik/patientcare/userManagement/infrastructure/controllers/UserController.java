@@ -1,6 +1,7 @@
 package com.medieninformatik.patientcare.userManagement.infrastructure.controllers;
 
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
+import com.medieninformatik.patientcare.userManagement.domain.model.valueObjects.LoginRequest;
 import com.medieninformatik.patientcare.userManagement.infrastructure.Exceptions.InvalidCredentialsException;
 import com.medieninformatik.patientcare.userManagement.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,13 +36,24 @@ public class UserController {
         return userService.getUser(id);
     }
 
+//    @CrossOrigin
+//    @GetMapping(path = "/login")
+//    public ResponseEntity<User> loginUser(
+//            @RequestParam("email") String email,
+//            @RequestParam("password") String password) {
+//        try {
+//            User user = userService.loginUser(email, password);
+//            return ResponseEntity.ok(user);
+//        } catch (InvalidCredentialsException ex) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+//        }
+//    }
+
     @CrossOrigin
-    @GetMapping(path = "/login")
-    public ResponseEntity<User> loginUser(
-            @RequestParam("email") String email,
-            @RequestParam("password") String password) {
+    @PostMapping(path = "/login")
+    public ResponseEntity<User> loginUser(@RequestBody LoginRequest loginRequest) {
         try {
-            User user = userService.loginUser(email, password);
+            User user = userService.loginUser(loginRequest.getEmail(), loginRequest.getPassword());
             return ResponseEntity.ok(user);
         } catch (InvalidCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
