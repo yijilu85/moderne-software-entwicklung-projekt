@@ -15,37 +15,29 @@ import static com.medieninformatik.patientcare.userManagement.domain.model.share
 public class Patient extends User {
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
-	private List<Note> notes;
+    private List<Note> notes;
 
-   /* // Getter and Setter for 'insuranceNumber'
-    @Setter
-    @Getter
-    private String insuranceNumber; // Versicherungsnummer*/
-
-
-	// Default constructor
-	public Patient() {
-		this.setUsertype(PATIENT);
-	}
+    // Default constructor
+    public Patient() {
+        this.setUsertype(PATIENT);
+    }
 
 
+    // Constructor with parameters
+    public Patient(String firstName, String lastName) {
+        super();
+        this.setFirstName(firstName);
+        this.setLastName(lastName);
+        this.setUsertype(PATIENT);
+    }
 
-// Constructor with parameters
-public Patient(String firstName, String lastName)
-{
-	super();
-	this.setFirstName(firstName);
-	this.setLastName(lastName);
-	this.setUsertype(PATIENT);
-}
-
-	@Override
-	public String toString() {
-		return "Patient{" +
-				"id=" + super.getId() +
-				", firstName='" + super.getFirstName() + '\'' +
-				", lastName='" + super.getLastName() + '\'' +
-				/*", insuranceNumber='" + insuranceNumber + '\'' +*/
-				'}';
-	}
+    @Override
+    public String toString() {
+        return "Patient{" +
+                "id=" + super.getId() +
+                ", firstName='" + super.getFirstName() + '\'' +
+                ", lastName='" + super.getLastName() + '\'' +
+                /*", insuranceNumber='" + insuranceNumber + '\'' +*/
+                '}';
+    }
 }

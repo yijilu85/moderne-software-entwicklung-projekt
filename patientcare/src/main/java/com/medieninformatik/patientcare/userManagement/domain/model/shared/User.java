@@ -39,10 +39,10 @@ public abstract class User {
 
 	@Column(name = "user_type", nullable = false)
 	private UserType userType;
-	@Column(name = "email", nullable = true)
+	@Column(name = "email", unique = true, nullable = false)
 	private String email;
 
-	@Column(name = "password", nullable = true)
+	@Column(name = "password", nullable = false)
 	private String password;
 	
 	@Column(name = "date_of_birth", nullable = true)
