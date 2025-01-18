@@ -1,5 +1,6 @@
 package com.medieninformatik.patientcare.userManagement.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.shared.Note;
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
 import jakarta.persistence.*;
@@ -14,7 +15,7 @@ import static com.medieninformatik.patientcare.userManagement.domain.model.share
 public class Patient extends User {
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
-    private List<Note> notes;
+	private List<Note> notes;
 
    /* // Getter and Setter for 'insuranceNumber'
     @Setter

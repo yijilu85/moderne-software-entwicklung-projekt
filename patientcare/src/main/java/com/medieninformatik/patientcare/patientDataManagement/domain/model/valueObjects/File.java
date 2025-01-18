@@ -14,9 +14,11 @@ public class File {
     private Date timestamp;
     private String url;
     private String description;
+    private String mimeType;
+
 
     @ManyToOne
-    @JoinColumn(name = "note")
+    @JoinColumn(name = "note_id")
     private Note note;
 
     @Id
@@ -26,10 +28,11 @@ public class File {
     public File() {
     }
 
-    public File(Date timestamp, String url, String description) {
+    public File(Date timestamp, String url, String description, String mimeType) {
         this.timestamp = timestamp;
         this.description = description;
         this.url = url;
+        this.mimeType = mimeType;
     }
 
 

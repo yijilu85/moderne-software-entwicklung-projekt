@@ -43,3 +43,8 @@ export const sendBookingAppointment = async (payload: {
   const response = await axios.post(`/appointments/book`, payload);
   return response.data as Appointment;
 };
+
+export const sendNoteForAppointment = async (appointment: Appointment) => {
+  const response = await axios.post(`/appointments/book`, appointment);
+  return response.data as Appointment;
+};

@@ -135,6 +135,9 @@ public class AppointmentService {
         return appointments;
     };
 
+    public List<Appointment> getAllAppointmentsForUserInTimeRange(Long userId, String timeRange) {
+        return getAllAppointmentsForUser(userId);
+    };
 
     public Appointment parseJSONBookAppointmentSlot(String payload) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -155,6 +158,9 @@ public class AppointmentService {
         }
     }
 
+    public Appointment saveAppointment(Appointment appointment) {
+        return appointmentRepo.save(appointment);
+    }
 
     public Appointment parseJSONCreateAppointmentSlot(String payload) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();

@@ -1,9 +1,16 @@
 package com.medieninformatik.patientcare.patientDataManagement.services;
+
 import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appointment;
 
 
+import com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Diagnosis;
+import com.medieninformatik.patientcare.patientDataManagement.domain.model.Measurement;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Treatment;
+import com.medieninformatik.patientcare.patientDataManagement.domain.model.shared.Note;
+import com.medieninformatik.patientcare.patientDataManagement.domain.model.valueObjects.File;
+import com.medieninformatik.patientcare.patientDataManagement.infrastructure.repositories.NoteRepo;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.DoctorRepo;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.PatientRepo;
 import com.medieninformatik.patientcare.shared.services.HelperService;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
@@ -11,16 +18,21 @@ import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.Optional;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
-import java.util.Set;
 import java.util.regex.Pattern;
 
 @Service
 public class NoteService {
 
     private PatientRepo patientRepo;
+    private NoteRepo noteRepo;
+    private AppointmentService appointmentService;
+    private DoctorRepo doctorRepo;
     private HelperService helperService;
     private static final Set<String> VALID_MIME_TYPES = Set.of(
             "text/plain",
@@ -32,25 +44,77 @@ public class NoteService {
             "audio/mpeg"
     );
 
-    public NoteService(PatientRepo patientRepo, HelperService helperService) {
+    public NoteService(PatientRepo patientRepo, HelperService helperService, AppointmentService appointmentService,
+                       NoteRepo noteRepo,
+                       DoctorRepo doctorRepo) {
         this.patientRepo = patientRepo;
         this.helperService = helperService;
+        this.appointmentService = appointmentService;
+        this.noteRepo = noteRepo;
+        this.doctorRepo = doctorRepo;
     }
 
     public Optional<Patient> getPatient(Long personId) {
         return patientRepo.findById(personId);
     }
 
-    public Diagnosis createDiagnosis(Patient patient, Doctor doctor, Date date, User creator, String icdCode, String recommendation) {
-        return new Diagnosis(patient, doctor, creator, date, icdCode, recommendation);
+    public Optional<Doctor> getDoctor(Long personId) {
+        return doctorRepo.findById(personId);
     }
 
-    public Treatment createTreatment(Patient patient, Doctor doctor, Date date, User creator, Diagnosis diagnosis, String action) {
-        if (patient == null || doctor == null || date == null || creator == null || diagnosis == null || action == null) {
+    public Note addFilesNote(Patient patient, Doctor doctor, Appointment appointment, List<File> files) {
+        if (appointment == null || files == null) {
+            throw new IllegalArgumentException("Appointment und Files dürfen nicht null sein.");
+        }
+        Note note = new Note(patient, doctor, appointment, files);
+
+        return note;
+    }
+    public Diagnosis createDiagnosis(Patient patient, Doctor doctor, Appointment appointment, Date date,
+                                     String icdCode, String recommendation) {
+        if (patient == null || doctor == null) {
+            throw new IllegalArgumentException("Patient and Doctor must not be null when creating a Diagnosis.");
+        }
+
+        System.out.println("Creating Diagnosis for Patient ID: " + patient.getId() + ", Doctor ID: " + doctor.getId());
+
+        Diagnosis diagnosis =  new Diagnosis(icdCode, recommendation);
+        diagnosis.setPatient(patient);
+        diagnosis.setDoctor(doctor);
+        diagnosis.setAppointment(appointment);
+        diagnosis.setTimestamp(date);
+        return diagnosis;
+    }
+
+    public Treatment createTreatment(Patient patient, Doctor doctor, Appointment appointment, Date date,
+                                     String icdCode,String recommendation,
+                                     String action) {
+        if (patient == null || doctor == null || date == null || icdCode == null || icdCode == null || action == null) {
             throw new IllegalArgumentException("Keiner der Eingabewerte darf null sein.");
         }
 
-        return new Treatment(patient, doctor, creator, date, diagnosis, action);
+        Treatment treatment = new Treatment(icdCode, recommendation, action);
+        treatment.setPatient(patient);
+        treatment.setDoctor(doctor);
+        treatment.setAppointment(appointment); // Set the appointment
+        treatment.setTimestamp(date);
+
+        return treatment;
+    }
+
+    public Measurement createMeasurement(Patient patient, Doctor doctor, Appointment appointment, Date date, User creator,
+                                         Measurement.Type type, double value) {
+        if (patient == null || doctor == null || appointment == null || date == null || creator == null || type == null) {
+            throw new IllegalArgumentException("None of the input values can be null.");
+        }
+
+        Measurement measurement = new Measurement(type, value);
+        measurement.setPatient(patient);
+        measurement.setDoctor(doctor);
+        measurement.setAppointment(appointment); // Set the appointment
+        measurement.setTimestamp(date);
+
+        return measurement; // Save it to the database where needed
     }
 
     public boolean isValidIcdCode(String icdCode) {
@@ -68,7 +132,7 @@ public class NoteService {
         return action.length() >= 10;
     }
 
-    public void addNoteToAppointment(Appointment appointment, Diagnosis diagnosis) {
+    public void addDiagnosisToAppointment(Appointment appointment, Diagnosis diagnosis) {
         if (appointment == null || diagnosis == null) {
             throw new IllegalArgumentException("Appointment und Diagnosis dürfen nicht null sein.");
         }
@@ -77,8 +141,27 @@ public class NoteService {
             throw new IllegalArgumentException("Die Benutzer des Termins stimmen nicht mit denen der Notiz überein.");
         }
 
-        appointment.addNote(diagnosis);
+        appointmentService.addNote(appointment, diagnosis);
     }
+
+    public void addMeasurementToAppointment(Patient patient, Doctor doctor, Appointment appointment,
+                                            Measurement measurement) {
+        if (appointment == null || measurement == null) {
+            throw new IllegalArgumentException("Appointment and Measurement must not be null.");
+        }
+
+        measurement.setAppointment(appointment);
+        appointmentService.addNote(appointment, measurement);
+        noteRepo.save(measurement);
+    }
+
+    public void addTreatmentToAppointment(Appointment appointment, Treatment treatment) {
+        if (appointment == null || treatment == null) {
+            throw new IllegalArgumentException("Appointment und Measurement dürfen nicht null sein.");
+        }
+        appointmentService.addNote(appointment, treatment);
+    }
+
 
     public boolean noteFileTypeIsValidMime(String mimeType) {
         return this.VALID_MIME_TYPES.contains(mimeType);
@@ -89,6 +172,17 @@ public class NoteService {
         if (appointment == null || diagnosis == null) {
             return false;
         }
+
+        Patient appointmentPatient = appointment.getPatient();
+        Doctor appointmentDoctor = appointment.getDoctor();
+        Patient notePatient = diagnosis.getPatient();
+        Doctor noteDoctor = diagnosis.getDoctor();
+
+        // Debugging Logs
+        System.out.println("Appointment Patient ID: " + (appointmentPatient != null ? appointmentPatient.getId() : "null"));
+        System.out.println("Note Patient ID: " + (notePatient != null ? notePatient.getId() : "null"));
+        System.out.println("Appointment Doctor ID: " + (appointmentDoctor != null ? appointmentDoctor.getId() : "null"));
+        System.out.println("Note Doctor ID: " + (noteDoctor != null ? noteDoctor.getId() : "null"));
 
         // Überprüfen, ob der Patient und der Arzt in der Diagnose mit denen des Termins übereinstimmen
         boolean patientMatches = appointment.getPatient() != null &&
@@ -101,5 +195,37 @@ public class NoteService {
 
         // Rückgabe true, wenn sowohl Patient als auch Arzt übereinstimmen, sonst false
         return patientMatches && doctorMatches;
+    }
+
+    public List<Note> getAllNotes(Appointment appointment) {
+        return appointment.getNotes();
+    }
+
+    public File createFile(String mimeType, byte[] fileData, String description) {
+        if (mimeType == null || fileData == null) {
+            throw new IllegalArgumentException("Mime type and file data must not be null.");
+        }
+
+        if (!this.noteFileTypeIsValidMime(mimeType)) {
+            throw new IllegalArgumentException("The mime type is not valid.");
+        }
+
+        // Generate a unique filename (consider a better approach)
+        String fileName = "file_" + System.currentTimeMillis(); // Simplified
+        Path filePath = Paths.get("path/to/save", fileName); // Adjust the path accordingly
+
+        // Write the file to disk
+        try (FileOutputStream fos = new FileOutputStream(filePath.toFile())) {
+            fos.write(fileData);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save file.", e);
+        }
+
+        // Generate the file URL
+        String fileUrl = "http://yourserver.com/files/" + fileName; // Adjust accordingly
+
+        // Create a new File instance
+        File newFile = new File(new Date(), mimeType, fileUrl, description);
+        return newFile;
     }
 }

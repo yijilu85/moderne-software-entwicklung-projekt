@@ -53,8 +53,43 @@ export interface AppointmentNote {
   appointmentId?: number | undefined;
   doctorId: number | undefined;
   patientId: number | undefined;
-  files?: string;
-  type?: string;
+  creator: "Patient" | "Doctor";
+  file: NoteFile;
   body?: string;
-  type: "DIAGNOSIS" | "MEASUREMENT" | "TREATMENT" | "FILE" | undefined;
+  type: string | undefined;
+  payload?: Measurement | Treatment | Diagnosis | FILE[];
+  noteType: "MEASUREMENT" | "DIAGNOSIS" | "TREATMENT" | "FILE" undefined;
+  value?: number;
+  icdCode?: string;
+  recommendation?: string;
+  action?: string;
+  description?: string;
+}
+
+export interface Diagnosis {
+  icdCode: string;
+  recommendation: string;
+}
+
+export interface Measurement {
+  type:
+    | "BLOOD_SUGAR"
+    | "BLOOD_PRESSURE"
+    | "HEART_RATE"
+    | "BODY_FAT"
+    | "OXYGEN_BLOOD_SATURATION"
+    | "BODY_TEMPERATURE"
+    | "BODY_WEIGHT"
+    | "BODY_HEIGHT"
+    | undefined;
+  value: number | null;
+}
+export interface Treatment {
+  action: string;
+  diagnosis: Diagnosis | null;
+}
+export interface NoteFile {
+  file: File;
+  description: string;
+  base64Data: string;
 }

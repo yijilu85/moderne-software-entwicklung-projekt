@@ -48,8 +48,8 @@ public class StartupRunner implements ApplicationRunner {
 //        doctorRepo.save(doctor);
 
         FakerService fakerService = new FakerService(doctorRepo, patientRepo);
-//        fakerService.createDoctors(20);
-//        fakerService.createPatients(20);
+        fakerService.createDoctors(20);
+        fakerService.createPatients(20);
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startDateTime = LocalDateTime.of(2024, Month.NOVEMBER, 25, 12, 0);

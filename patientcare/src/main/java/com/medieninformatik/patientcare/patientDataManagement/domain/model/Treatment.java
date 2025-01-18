@@ -1,8 +1,17 @@
 package com.medieninformatik.patientcare.patientDataManagement.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.medieninformatik.patientcare.patientDataManagement.domain.model.shared.Note;
+import com.medieninformatik.patientcare.patientDataManagement.domain.model.valueObjects.IcdCode;
+import com.medieninformatik.patientcare.patientDataManagement.domain.model.valueObjects.Recommendation;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,44 +19,51 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class Treatment {
+@Entity
+public class Treatment extends Note {
 
-    private Patient patient;
-    private Doctor doctor;
+    @ManyToOne
+    @JoinColumn(name = "creator_id")
+    @JsonIgnore // Ignore this field for serialization
     private User creator;
+
     private Date date;
-    private Diagnosis diagnosis;
+
+    @Embedded
+    private Recommendation recommendation;
+    @Embedded
+    private IcdCode icdCode;
+
     private String action;
 
+    public Treatment() {
+    }
+
     // Konstruktor
-    public Treatment(Patient patient, Doctor doctor, User creator, Date date, Diagnosis diagnosis, String action) {
-        this.patient = patient;
-        this.doctor = doctor;
-        this.creator = creator;
-        this.date = date;
-        this.diagnosis = diagnosis;
+    public Treatment(String icdCode,
+                     String recommendation, String action) {
+
+        this.icdCode = new IcdCode(icdCode);
+        this.recommendation = new Recommendation(recommendation);
         this.action = action;
+        this.setNoteType(this.getClass().getSimpleName().toUpperCase());
     }
 
     // Getter und Setter (optional, falls du sie benötigst)
     public Patient getPatient() {
-        return this.patient;
+        return this.getPatient();
     }
 
     public Doctor getDoctor() {
-        return this.doctor;
+        return this.getDoctor();
     }
 
-    public User getCreator() {
-        return this.creator;
+    public String getIcdCode() {
+        return this.icdCode.getCode();
     }
 
-    public Date getDate() {
-        return this.date;
-    }
-
-    public Diagnosis getDiagnosis() {
-        return this.diagnosis;
+    public String getRecommendation() {
+        return this.recommendation.getText();
     }
 
     public String getAction() {

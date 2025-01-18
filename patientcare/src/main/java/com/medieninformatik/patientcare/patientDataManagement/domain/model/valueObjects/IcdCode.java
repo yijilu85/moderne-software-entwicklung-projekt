@@ -1,23 +1,35 @@
 package com.medieninformatik.patientcare.patientDataManagement.domain.model.valueObjects;
+import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Embeddable
 public class IcdCode {
+
     private String code;
 
-    public IcdCode (String code){
+    // Default no-argument constructor
+    public IcdCode() {}
+
+    // Constructor to initialize the code
+    public IcdCode(String code) {
         this.code = code;
     }
 
+    // Getter and Setter
     public String getCode() {
         return code;
     }
 
     public void setCode(String code) {
-         this.code = code;
+        this.code = code;
+    }
+
+    @Override
+    public String toString() {
+        return "IcdCode{" +
+                "code='" + code + '\'' +
+                '}';
     }
 }
-
 
