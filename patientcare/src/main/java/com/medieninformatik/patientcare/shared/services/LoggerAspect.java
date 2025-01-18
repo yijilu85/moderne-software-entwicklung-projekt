@@ -1,6 +1,9 @@
 package com.medieninformatik.patientcare.shared.services;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
@@ -22,11 +25,11 @@ import java.util.logging.SimpleFormatter;
 public class LoggerAspect {
 
     private static final Logger logger = Logger.getLogger(LoggerAspect.class.getName());
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     static {
         try {
-            // Set up FileHandler to write logs to a file
-            FileHandler fileHandler = new FileHandler("application.log", true);
+            FileHandler fileHandler = new FileHandler("applicationLog.log", true);
             fileHandler.setFormatter(new SimpleFormatter());
             logger.addHandler(fileHandler);
         } catch (IOException e) {
@@ -96,46 +99,52 @@ public class LoggerAspect {
 
     // Gemeinsame Logging-Methoden
     private void logBefore(JoinPoint joinPoint, String operation) {
-        logger.info("Before " + operation + " - Method: " + joinPoint.getSignature().getName());
+        String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
-        if (args.length > 0) {
-            StringBuilder argsLog = new StringBuilder("Arguments: ");
-            for (Object arg : args) {
-                argsLog.append("- ").append(arg).append("\n");
+
+        StringBuilder logMessage = new StringBuilder();
+        logMessage.append("Before ").append(operation)
+                .append(" - Method: ").append(methodName)
+                .append(" - User: ");
+
+        try {
+            // Extrahiere User-ID basierend auf der Operation
+            if (args.length > 0) {
+                String userId = extractUserId(args[0], operation);
+                logMessage.append(userId);
             }
-            logger.info(argsLog.toString());
+        } catch (Exception e) {
+            logMessage.append("Unknown User");
+            logger.warning("Failed to extract user information: " + e.getMessage());
         }
+
+        logger.info(logMessage.toString());
+    }
+
+    private String extractUserId(Object arg, String operation) throws JsonProcessingException {
+        if (arg instanceof String && operation.contains("Create")) {
+            JsonNode rootNode = objectMapper.readTree((String) arg);
+            JsonNode creatorNode = rootNode.get("creator");
+            return creatorNode != null ? "Creator ID: " + creatorNode.get("id").asLong() : "Unknown Creator";
+        }
+        else if (arg instanceof String && operation.contains("Book")) {
+            JsonNode rootNode = objectMapper.readTree((String) arg);
+            JsonNode patientId = rootNode.get("patientId");
+            return patientId != null ? "Patient ID: " + patientId.asLong() : "Unknown Patient";
+        }
+        else if (arg instanceof String && operation.contains("Cancel")) {
+            JsonNode rootNode = objectMapper.readTree((String) arg);
+            JsonNode userId = rootNode.get("userId");
+            return userId != null ? "User ID: " + userId.asLong() : "Unknown User";
+        }
+        else if (arg instanceof Long && operation.contains("Delete")) {
+            return "User ID: " + arg;
+        }
+        return "Unknown User";
     }
 
     private void logAfter(JoinPoint joinPoint, String operation) {
-        logger.info("After " + operation + " - Method: " + joinPoint.getSignature().getName());
-    }
-    /*
-
-    // Pointcut für die Methode in AppointmentService
-    @Pointcut("execution(* com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService.parseJSONCreateAppointmentSlot(..))")
-    public void createAppointmentPointcut() {}
-
-
-    // Logging vor der Methode
-    @Before("createAppointmentPointcut()")
-    public void logBefore(JoinPoint joinPoint) {
-        System.out.println("Before executing method: " + joinPoint.getSignature().getName());
-        Object[] args = joinPoint.getArgs();
-        if (args.length > 0) {
-            System.out.println("Arguments: ");
-            for (Object arg : args) {
-                System.out.println("- " + arg);
-            }
-        }
+        logger.info("After " + operation + " - Method: " + joinPoint.getSignature().getName() + " completed");
     }
 
-
-    // Logging nach der Methode
-    @After("createAppointmentPointcut()")
-    public void logAfter(JoinPoint joinPoint) {
-        System.out.println("After executing method: " + joinPoint.getSignature().getName());
-    }
-
-    */
 }
