@@ -25,5 +25,5 @@ app.use(createPinia());
 
 app.use(router);
 app.use(vuetify);
-useUserStore().fakeLogIn("doctor", 1);
+useUserStore().fakeLogIn("patient", 21);
 app.mount("#app");

@@ -120,4 +120,11 @@ public class Note {
         this.noteType = noteType;
     }
 
+    public void setAppointment(Appointment appointment) {
+        this.appointment = appointment;
+    }
+
+    public Appointment getAppointment() {
+        return appointment;
+    }
 }

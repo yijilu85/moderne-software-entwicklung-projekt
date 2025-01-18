@@ -270,7 +270,7 @@ const closeNoteDetailModal = () => {
 };
 
 onMounted(async () => {
-  useUserStore().fakeLogIn("patient", 26);
+  useUserStore().fakeLogIn("doctor", 1);
   fetchAppointment();
 });
 </script>
