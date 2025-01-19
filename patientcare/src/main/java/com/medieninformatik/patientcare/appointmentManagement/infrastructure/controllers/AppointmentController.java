@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.context.annotation.Bean;
@@ -41,17 +42,18 @@ public class AppointmentController {
 
     @CrossOrigin
     @GetMapping
-    public List<Appointment> findAllAppointments(@RequestParam(required = false) Long userId, @RequestParam(required
-            = false) String timeRange) {
+    public List<Appointment> findAllAppointments(@RequestParam(required = false) Long userId){
         if (userId == null) {
             return appointmentService.getAllAppointments();
         } else {
-            if (timeRange != null) {
-                return appointmentService.getAllAppointmentsForUser(userId, timeRange);
-            } else {
             return appointmentService.getAllAppointmentsForUser(userId);
-            }
         }
+    }
+
+    @CrossOrigin
+    @GetMapping(path = "/timeranges")
+    public Map<String, List<Appointment>> findAllAppointmentsWithTimeranges(@RequestParam(required = false) Long userId){
+                return appointmentService.getAllAppointmentsForUserWithTimeranges(userId);
     }
 
     @CrossOrigin

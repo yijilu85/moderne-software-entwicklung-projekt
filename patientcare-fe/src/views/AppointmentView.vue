@@ -495,6 +495,6 @@ onMounted(async () => {
 .note-button {
   margin-top: 1.1em;
   margin-left: 1em;
-  color: hsla(160, 100%, 37%, 1);
+  color: var(--primary-color);
 }
 </style>
