@@ -11,8 +11,10 @@ import {
   getAllPastAppointmentsForUser,
   getAllFutureAppointmentsForUser,
   getAllTodayAppointmentsForUser,
+  getAllTodayAppointmentsForUserWithTimeranges,
 } from "@/api/appointmentController";
 import { authenticate } from "@/api/authentificationController";
+import LoadingSpinner from "@/components/LoadingSpinner.vue";
 
 import {
   useAppointmentHelpers,
@@ -36,60 +38,58 @@ const pastAppointments = ref<Appointment[]>([]);
 const futureAppointments = ref<Appointment[]>([]);
 
 const fetchAppointments = async () => {
+  if (!loggedInUser.value) {
+    return;
+  }
+  const data = await getAllTodayAppointmentsForUserWithTimeranges(
+    loggedInUser.value.id
+  );
+
   finishedLoading.value = false;
 
   const mapping = [
     {
       list: pastAppointments,
-      function: getAllPastAppointmentsForUser,
+      listKey: "past",
       descriptor: "vergangenen",
     },
     {
       list: todayAppointments,
-      function: getAllTodayAppointmentsForUser,
+      listKey: "today",
       descriptor: "heutigen",
     },
     {
       list: futureAppointments,
-      function: getAllFutureAppointmentsForUser,
+      listKey: "future",
       descriptor: "zukünftigen",
     },
   ];
 
-  for (const { list, function: fetchFunction, descriptor } of mapping) {
-    fetchFunction(loggedInUser.value.id)
-      .then((data) => {
-        if (!data || data.length === 0) {
-          console.log(`Keine ${descriptor} Termine gefunden.`);
-          return;
+  Object.entries(data).forEach(([key, value]) => {
+    for (const item of value) {
+      let mapped = item as any as BackendAppointment;
+      const appointment = {
+        id: mapped.id,
+        start: parseDate(mapped.startDateTime),
+        end: parseDate(mapped.endDateTime),
+        patient: mapped.patient,
+        title: mapped.title,
+        doctor: mapped.doctor,
+        notes: mapped.notes,
+        type: mapped.type,
+      } as Appointment;
+
+      for (const mappingItem of mapping) {
+        if (mappingItem.listKey === key) {
+          console.log(
+            `Termine zur ${mappingItem.descriptor} Liste hinzugefügt`
+          );
+          mappingItem.list.value.push(appointment);
         }
-
-        for (const event of data) {
-          if (!event) continue;
-
-          let mapped = event as any as BackendAppointment;
-          const appointment = {
-            id: mapped.id,
-            start: parseDate(mapped.startDateTime),
-            end: parseDate(mapped.endDateTime),
-            patient: mapped.patient,
-            title: mapped.title,
-            doctor: mapped.doctor,
-            notes: mapped.notes,
-            type: mapped.type,
-          } as Appointment;
-
-          list.value.push(appointment);
-        }
-      })
-      .catch((error) => {
-        console.error("Fehler beim Abrufen der Termine:", error);
-        setSnackBar("Fehler beim Abrufen der Termine!", "error");
-      })
-      .finally(() => {
-        finishedLoading.value = true;
-      });
-  }
+      }
+    }
+  });
+  finishedLoading.value = true;
 };
 
 onMounted(async () => {
@@ -218,6 +218,7 @@ const formattedAppointmentPatient = (appointment: Appointment) => {
         </v-list>
       </v-card>
     </div>
+    <LoadingSpinner v-if="!finishedLoading" />
   </main>
 </template>
 

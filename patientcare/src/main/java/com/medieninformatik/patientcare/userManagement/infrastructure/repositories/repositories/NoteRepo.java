@@ -1,4 +1,4 @@
-package com.medieninformatik.patientcare.patientDataManagement.infrastructure.repositories;
+package com.medieninformatik.patientcare.userManagement.infrastructure.repositories.repositories;
 
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.shared.Note;
 import com.medieninformatik.patientcare.userManagement.domain.model.Patient;

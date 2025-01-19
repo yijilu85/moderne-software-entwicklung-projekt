@@ -22,6 +22,8 @@ import {
   appointmentHasPatient,
 } from "@/helpers/appointmentHelpers";
 
+import LoadingSpinner from "@/components/LoadingSpinner.vue";
+
 const {
   delAppointment,
   bookAppointment,
@@ -442,6 +444,7 @@ onMounted(async () => {
     :color="snackbar.color"
     @update:show="snackbar.show = $event"
   />
+  <LoadingSpinner v-if="!finishedLoading" />
 </template>
 
 <style scoped>

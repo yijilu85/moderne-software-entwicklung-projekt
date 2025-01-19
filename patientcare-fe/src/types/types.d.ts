@@ -58,7 +58,7 @@ export interface AppointmentNote {
   body?: string;
   type: string | undefined;
   payload?: Measurement | Treatment | Diagnosis | FILE[];
-  noteType: "MEASUREMENT" | "DIAGNOSIS" | "TREATMENT" | "FILE" undefined;
+  noteType: "MEASUREMENT" | "DIAGNOSIS" | "TREATMENT" | "NOTEFILE" undefined;
   value?: number;
   icdCode?: string;
   recommendation?: string;
@@ -91,5 +91,5 @@ export interface Treatment {
 export interface NoteFile {
   file: File;
   description: string;
-  base64Data: string;
+  appointmentId: number;
 }
