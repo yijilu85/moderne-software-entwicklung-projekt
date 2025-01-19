@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from "vue-router";
-import HelloWorld from "./components/HelloWorld.vue";
-import PatientList from "./components/PatientList.vue";
 
 import { useAuthStore } from '@/stores';
 
@@ -12,25 +10,25 @@ const authStore = useAuthStore();
   <header>
     <div class="wrapper">
       <nav>
-        <RouterLink to="/">Dashboard</RouterLink>
-        <RouterLink to="/doctors">Ärztesuche</RouterLink>
+
       </nav>
     </div>
   </header>
-  <div class="app-container bg-light">
+  <div class="app-container bg-dark">
     <nav v-show="authStore.user" class="navbar navbar-expand navbar-dark bg-dark">
       <div class="navbar-nav">
         <RouterLink to="/" class="nav-item nav-link">Home</RouterLink>
+        <RouterLink to="/" class="nav-item nav-link">Dashboard</RouterLink>
+        <RouterLink to="/doctors" class="nav-item nav-link">Ärztesuche</RouterLink>
         <a @click="authStore.logout()" class="nav-item nav-link">Logout</a>
       </div>
     </nav>
     <div class="container pt-4 pb-4">
-      <RouterView />
+     <RouterView />
     </div>
   </div>
 </template>
 
-<style scoped></style>
 <style scoped>
 @import '@/assets/base.css';
 header {
@@ -38,10 +36,7 @@ header {
   max-height: 100vh;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
+
 
 nav {
   width: 100%;
@@ -73,10 +68,6 @@ nav a:first-of-type {
     display: flex;
     place-items: center;
     padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
   }
 
   header .wrapper {

@@ -1,21 +1,16 @@
-<script setup>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia';
 
-import { useAuthStore, useUsersStore } from '@/stores';
+import { useAuthStore } from '@/stores';
 
 const authStore = useAuthStore();
 const { user: authUser } = storeToRefs(authStore);
 
-const usersStore = useUsersStore();
-const { users } = storeToRefs(usersStore);
 
-usersStore.getAll();
-<script setup lang="ts">
 import { ref, watch, computed } from "vue";
 import type {
   Appointment,
   BackendAppointment,
-  Doctor,
   User,
 } from "@/types/types";
 import {
@@ -24,7 +19,6 @@ import {
   getAllFutureAppointmentsForUser,
   getAllTodayAppointmentsForUser,
 } from "@/api/appointmentController";
-import { authenticate } from "@/api/authentificationController";
 
 import {
   useAppointmentHelpers,
@@ -96,7 +90,7 @@ const fetchAppointments = async () => {
       })
       .catch((error) => {
         console.error("Fehler beim Abrufen der Termine:", error);
-        setSnackBar("Fehler beim Abrufen der Termine!", "error");
+        //setSnackBar("Fehler beim Abrufen der Termine!", "error");
       })
       .finally(() => {
         finishedLoading.value = true;
@@ -175,81 +169,78 @@ const formattedAppointmentPatient = (appointment: Appointment) => {
      <div>
     <h1>Hi {{authUser?.firstName}}!</h1>
     <p>You're logged in with Vue 3 + Pinia & JWT!!</p>
-    <h3>Users from secure api end point:</h3>
-    <ul v-if="users.length">
-      <li v-for="user in users" :key="user.id">{{user.firstName}} {{user.lastName}}</li>
-    </ul>
-    <div v-if="users.loading" class="spinner-border spinner-border-sm"></div>
-    <div v-if="users.error" class="text-danger">Error loading users: {{users.error}}</div>
-  </div>
-    <div class="mt-10">
-      <div class="today-future">
-        <v-card title="Heute" class="mr-10 pa-3" width="500">
-          <v-list lines="two">
-            <v-list-item
-              v-for="item in todayAppointments"
-              :title="formatTitle(item, true)"
-              :subtitle="formatSubTitle(item, true)"
-            >
-              <template v-slot:append>
-                <v-icon>
-                  <a :href="`/appointment/${item.id}`" class="card-link">
-                    <img
-                      src="@/assets/icons/edit.svg"
-                      class="clear-icon ml-4 align-self-center" /></a
-                ></v-icon>
-              </template>
-            </v-list-item>
-          </v-list>
-        </v-card>
-        <v-card title="Zukünftige" class="pa-3" width="500">
-          <v-list lines="two">
-            <v-list-item
-              v-for="item in futureAppointments"
-              :title="formatTitle(item, false)"
-              :subtitle="formatSubTitle(item, false)"
-            >
-              <template v-slot:append>
-                <v-icon>
-                  <a :href="`/appointment/${item.id}`" class="card-link">
-                    <img
-                      src="@/assets/icons/edit.svg"
-                      class="clear-icon ml-4 align-self-center" /></a
-                ></v-icon>
-              </template>
-            </v-list-item>
-          </v-list>
-        </v-card>
-      </div>
-      <v-card title="Vergangene" class="mt-10 pa-3" width="500">
-        <v-list lines="two">
-          <v-list-item
-            v-for="item in pastAppointments"
-            :title="formatTitle(item, false)"
-            :subtitle="formatSubTitle(item, false)"
-          >
-            <template v-slot:append>
-              <v-icon>
-                <a :href="`/appointment/${item.id}`" class="card-link">
-                  <img
-                    src="@/assets/icons/edit.svg"
-                    class="clear-icon ml-4 align-self-center" /></a
-              ></v-icon>
-            </template>
-          </v-list-item>
-        </v-list>
-      </v-card>
-    </div>
-  </main>
- 
-</template>
+        </div>
+          <div class="mt-10">
+            <div class="today-future">
+              <v-card title="Heute" class="mr-10 pa-3" width="500">
+                <v-list lines="two">
+                  <v-list-item
+                    v-for="item in todayAppointments"
+                    :title="formatTitle(item, true)"
+                    :subtitle="formatSubTitle(item, true)"
+                  >
+                    <template v-slot:append>
+                      <v-icon>
+                        <a :href="`/appointment/${item.id}`" class="card-link">
+                          <img
+                            src="@/assets/icons/edit.svg"
+                            class="clear-icon ml-4 align-self-center"
+                          alt=""/></a
+                      ></v-icon>
+                    </template>
+                  </v-list-item>
+                </v-list>
+              </v-card>
+              <v-card title="Zukünftige" class="pa-3" width="500">
+                <v-list lines="two">
+                  <v-list-item
+                    v-for="item in futureAppointments"
+                    :title="formatTitle(item, false)"
+                    :subtitle="formatSubTitle(item, false)"
+                  >
+                    <template v-slot:append>
+                      <v-icon>
+                        <a :href="`/appointment/${item.id}`" class="card-link">
+                          <img
+                            src="@/assets/icons/edit.svg"
+                            class="clear-icon ml-4 align-self-center"
+                          alt=""/></a
+                      ></v-icon>
+                    </template>
+                  </v-list-item>
+                </v-list>
+              </v-card>
+            </div>
+            <v-card title="Vergangene" class="mt-10 pa-3" width="500">
+              <v-list lines="two">
+                <v-list-item
+                  v-for="item in pastAppointments"
+                  :title="formatTitle(item, false)"
+                  :subtitle="formatSubTitle(item, false)"
+                >
+                  <template v-slot:append>
+                    <v-icon>
+                      <a :href="`/appointment/${item.id}`" class="card-link">
+                        <img
+                          src="@/assets/icons/edit.svg"
+                          class="clear-icon ml-4 align-self-center"
+                        alt=""/></a
+                    ></v-icon>
+                  </template>
+                </v-list-item>
+              </v-list>
+            </v-card>
+          </div>
+        </main>
 
-<style scoped>
-.card-link {
-  margin-top: 15px;
-}
-.today-future {
-  display: flex;
-  flex-flow: row nowrap;
-}
-</style>
+      </template>
+
+      <style scoped>
+      .card-link {
+        margin-top: 15px;
+      }
+      .today-future {
+        display: flex;
+        flex-flow: row nowrap;
+      }
+      </style>

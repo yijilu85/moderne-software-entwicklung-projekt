@@ -58,7 +58,7 @@ export interface AppointmentNote {
   body?: string;
   type: string | undefined;
   payload?: Measurement | Treatment | Diagnosis | FILE[];
-  noteType: "MEASUREMENT" | "DIAGNOSIS" | "TREATMENT" | "FILE" undefined;
+  noteType: "MEASUREMENT" | "DIAGNOSIS" | "TREATMENT" | "FILE" | undefined;
   value?: number;
   icdCode?: string;
   recommendation?: string;

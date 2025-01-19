@@ -19,13 +19,12 @@ function onSubmit(values, { setErrors }) {
 </script>
 
 <template>
-  <div>
-    <div class="alert alert-info">
-      Username: test<br />
-      Password: test
-    </div>
-    <h2>Login</h2>
-    <Form @submit="onSubmit" :validation-schema="schema" v-slot="{ errors, isSubmitting }">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous"/>
+<div>
+<h2>Login</h2>
+<Form @submit="onSubmit" :validation-schema="schema" v-slot="{ errors, isSubmitting }">
       <div class="form-group">
         <label>Username</label>
         <Field name="username" type="text" class="form-control" :class="{ 'is-invalid': errors.username }" />
