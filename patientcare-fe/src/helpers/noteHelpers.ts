@@ -11,7 +11,7 @@ export function lookupNoteType(noteType: string | undefined): string {
     MEASUREMENT: "Messung",
     TREATMENT: "Behandlung",
     DIAGNOSIS: "Diagnose",
-    FILE: "Datei",
+    NOTEFILE: "Datei",
   } as const;
 
   return MAPPING[noteType as keyof typeof MAPPING] ?? "unbekannt";

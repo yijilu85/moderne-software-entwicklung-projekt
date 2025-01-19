@@ -8,8 +8,8 @@ import com.medieninformatik.patientcare.patientDataManagement.domain.model.Diagn
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Measurement;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Treatment;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.shared.Note;
-import com.medieninformatik.patientcare.patientDataManagement.domain.model.valueObjects.File;
-import com.medieninformatik.patientcare.patientDataManagement.infrastructure.repositories.NoteRepo;
+import com.medieninformatik.patientcare.patientDataManagement.domain.model.NoteFile;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.repositories.NoteRepo;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.DoctorRepo;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.PatientRepo;
 import com.medieninformatik.patientcare.shared.services.HelperService;
@@ -62,11 +62,9 @@ public class NoteService {
         return doctorRepo.findById(personId);
     }
 
-    public Note addFilesNote(Patient patient, Doctor doctor, Appointment appointment, List<File> files) {
-        if (appointment == null || files == null) {
-            throw new IllegalArgumentException("Appointment und Files dürfen nicht null sein.");
-        }
-        Note note = new Note(patient, doctor, appointment, files);
+    public Note addFilesNote(Patient patient, Doctor doctor, Appointment appointment) {
+
+        Note note = new Note(patient, doctor, appointment);
 
         return note;
     }
@@ -117,6 +115,25 @@ public class NoteService {
         return measurement; // Save it to the database where needed
     }
 
+    public NoteFile createNoteFile(Patient patient, Doctor doctor, Appointment appointment, String url,
+                                   String description, String mimeType) {
+        if (mimeType == null || url == null || description == null) {
+            throw new IllegalArgumentException("Mime type, url and data must not be null when creating a NoteFile.");
+        }
+
+        if (!VALID_MIME_TYPES.contains(mimeType)) {
+            throw new IllegalArgumentException("Invalid mime type: " + mimeType);
+        }
+
+        NoteFile noteFile = new NoteFile(url, description, mimeType);
+        noteFile.setPatient(patient);
+        noteFile.setDoctor(doctor);
+        noteFile.setAppointment(appointment);
+        noteFile.setTimestamp(new Date());
+
+        return noteFile;
+    }
+
     public boolean isValidIcdCode(String icdCode) {
         // Muster für ICD-10 (Beispiel: J45.0) und ICD-11 (Beispiel: 5A11)
         String icd10Pattern = "^[A-Z][0-9]{2}\\.[0-9]$"; // Beispiel: J45.0
@@ -162,6 +179,13 @@ public class NoteService {
         appointmentService.addNote(appointment, treatment);
     }
 
+    public void addNoteFileToAppointment(Appointment appointment, NoteFile notefile) {
+        if (appointment == null || notefile == null) {
+            throw new IllegalArgumentException("Appointment und NoteFile dürfen nicht null sein.");
+        }
+
+        appointmentService.addNote(appointment, notefile);
+    }
 
     public boolean noteFileTypeIsValidMime(String mimeType) {
         return this.VALID_MIME_TYPES.contains(mimeType);
@@ -201,7 +225,7 @@ public class NoteService {
         return appointment.getNotes();
     }
 
-    public File createFile(String mimeType, byte[] fileData, String description) {
+    public NoteFile createFile(String mimeType, byte[] fileData, String description) {
         if (mimeType == null || fileData == null) {
             throw new IllegalArgumentException("Mime type and file data must not be null.");
         }
@@ -225,7 +249,7 @@ public class NoteService {
         String fileUrl = "http://yourserver.com/files/" + fileName; // Adjust accordingly
 
         // Create a new File instance
-        File newFile = new File(new Date(), mimeType, fileUrl, description);
-        return newFile;
+        NoteFile newNoteFile = new NoteFile(mimeType, fileUrl, description);
+        return newNoteFile;
     }
 }

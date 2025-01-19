@@ -83,6 +83,7 @@ public class AppointmentService {
     }
 
     public void addNote(Appointment appointment, Note note) {
+        System.out.println("Note: " + note.toString());
         appointment.addNote(note);
     }
 
