@@ -39,6 +39,7 @@ import {
 
 import { lookupNoteType } from "@/helpers/noteHelpers";
 import { useUserStore } from "@/stores/userStore";
+import LoadingSpinner from "@/components/LoadingSpinner.vue";
 
 const measurement = ref<Measurement>({
   type: undefined,
@@ -489,6 +490,7 @@ onMounted(async () => {
       </v-card-actions>
     </v-card>
   </v-dialog>
+  <LoadingSpinner v-if="!finishedLoading" />
 </template>
 
 <style scoped>

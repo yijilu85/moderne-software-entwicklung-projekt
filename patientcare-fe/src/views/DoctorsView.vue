@@ -50,6 +50,7 @@ const populateCities = () => {
 };
 
 const fetchDoctors = async () => {
+  finishedLoading.value = false;
   const data = await getAllDoctors();
   doctors.value = data;
   finishedLoading.value = true;
