@@ -20,7 +20,12 @@ import {
   cancelAppointment,
   getAppointment,
 } from "@/api/appointmentController";
-import { createNote, uploadFile } from "@/api/noteController";
+import {
+  createNote,
+  uploadFile,
+  requestNoteFileDownload,
+  constructNoteFileUrl,
+} from "@/api/noteController";
 import { watch } from "vue";
 import { getPatient } from "@/api/patientController";
 import { getDoctor } from "@/api/doctorController";
@@ -39,6 +44,7 @@ import {
 
 import { lookupNoteType } from "@/helpers/noteHelpers";
 import { useUserStore } from "@/stores/userStore";
+import LoadingSpinner from "@/components/LoadingSpinner.vue";
 
 const measurement = ref<Measurement>({
   type: undefined,
@@ -65,6 +71,11 @@ const {
   createAppointment,
 } = useAppointmentHelpers();
 const event = ref<Appointment>();
+const selectedFile = ref<NoteFile>({
+  file: null,
+  description: "",
+  appointmentId: undefined,
+});
 
 const newNote = ref<AppointmentNote>({
   id: undefined,
@@ -80,7 +91,6 @@ const newNote = ref<AppointmentNote>({
   type: undefined,
 });
 
-const fileDescriptions = ref<string[]>([]);
 const showNoteDetails = ref(false);
 const detailNote = ref<AppointmentNote | null>(null);
 
@@ -209,15 +219,22 @@ const onSaveNote = async () => {
         break;
 
       case "FILE":
-        console.log("file");
+        if (!selectedFile.value) {
+          showSnackbar("Keine Datei ausgewählt", "error");
+          return;
+        }
+
         break;
       default:
         console.error("Unsupported note type");
         showSnackbar("Ungültiger Notiztyp", "error");
         return;
     }
+    let response =
+      newNote.value.noteType === "FILE"
+        ? await uploadFile(selectedFile.value)
+        : await createNote(newNote.value);
 
-    const response = await createNote(newNote.value);
     if (response) {
       showSnackbar("Notiz erfolgreich gespeichert");
       showCreateNoteDialog.value = false;
@@ -249,15 +266,9 @@ const closeSaveNoteScreen = () => {
   };
 };
 
-const onFileChange = async (selectedFile: File) => {
-  console.log("hallo", selectedFile);
-  const response = await uploadFile(
-    selectedFile,
-    newNote.value.appointmentId,
-    newNote.value.doctorId,
-    newNote.value.patientId
-  );
-  console.log("response", response);
+const onFileChange = async (fileSelection: File) => {
+  selectedFile.value.file = fileSelection.target.files[0];
+  selectedFile.value.appointmentId = event.value?.id;
 };
 
 const openNoteDetailModal = (note: AppointmentNote) => {
@@ -268,6 +279,10 @@ const openNoteDetailModal = (note: AppointmentNote) => {
 const closeNoteDetailModal = () => {
   showNoteDetails.value = false;
 };
+
+const notefileUrl = computed(() => {
+  return constructNoteFileUrl(detailNote.value);
+});
 
 onMounted(async () => {
   useUserStore().fakeLogIn("doctor", 1);
@@ -453,7 +468,10 @@ onMounted(async () => {
             accept="image/*,application/pdf"
             @change="onFileChange"
           ></v-file-input>
-          <v-text-field placeholder="Beschreibung hinzufügen"></v-text-field>
+          <v-text-field
+            v-model="selectedFile.description"
+            placeholder="Beschreibung hinzufügen"
+          ></v-text-field>
         </div>
       </v-card-text>
       <v-card-actions>
@@ -483,18 +501,44 @@ onMounted(async () => {
           <p>Maßnahme: {{ detailNote.action }}</p>
           <p>Empfehlung: {{ detailNote.recommendation }}</p>
         </div>
+        <div v-if="detailNote?.noteType === 'NOTEFILE'">
+          <p>Beschreibung: {{ detailNote.description }}</p>
+          <p>Dateityp: {{ detailNote.mimeType.split("/")[1] }}</p>
+
+          <a :href="notefileUrl" class="notefile-download" target="_blank">
+            <img src="@/assets/icons/file-plus.svg" />
+            <span>Datei herunterladen</span>
+          </a>
+        </div>
       </v-card-text>
       <v-card-actions>
         <v-btn color="primary" @click="closeNoteDetailModal">Schließen</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
+  <LoadingSpinner v-if="!finishedLoading" />
 </template>
 
 <style scoped>
 .note-button {
   margin-top: 1.1em;
   margin-left: 1em;
-  color: hsla(160, 100%, 37%, 1);
+  color: var(--primary-color);
+}
+.notefile-download {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  cursor: pointer;
+  color: var(--primary-color);
+}
+.notefile-download img {
+  width: 20px;
+  margin-right: 5px;
+  color: (var(--primary-color));
+}
+.notefile-download span {
+  color: (var(--primary-color));
 }
 </style>

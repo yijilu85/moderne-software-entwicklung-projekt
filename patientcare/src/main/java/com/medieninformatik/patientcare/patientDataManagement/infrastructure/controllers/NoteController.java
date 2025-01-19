@@ -9,20 +9,30 @@ import com.medieninformatik.patientcare.appointmentManagement.services.Appointme
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Diagnosis;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Measurement;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Treatment;
-import com.medieninformatik.patientcare.patientDataManagement.domain.model.shared.Note;
-import com.medieninformatik.patientcare.patientDataManagement.domain.model.valueObjects.File;
+import com.medieninformatik.patientcare.patientDataManagement.domain.model.NoteFile;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.repositories.NoteFileRepo;
 import com.medieninformatik.patientcare.patientDataManagement.services.NoteService;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.data.jpa.domain.JpaSort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
+
 import java.util.*;
 
 
@@ -33,12 +43,17 @@ public class NoteController {
     private final AppointmentService appointmentService;
     private final NoteService noteService;
     private final UserRepo userRepo;
+    private final NoteFileRepo noteFileRepo;
+    @Value("${upload.dir}")
+    private String uploadDir;
+
 
     @Autowired
-    public NoteController(AppointmentService appointmentService, NoteService noteService, UserRepo userRepo) {
+    public NoteController(AppointmentService appointmentService, NoteService noteService, UserRepo userRepo, NoteFileRepo noteFileRepo) {
         this.appointmentService = appointmentService;
         this.noteService = noteService;
         this.userRepo = userRepo;
+        this.noteFileRepo = noteFileRepo;
     }
 
     @CrossOrigin
@@ -99,24 +114,20 @@ public class NoteController {
                     break;
 
                 case "MEASUREMENT":
-                    // Validate presence of required fields in payload
                     if (!payloadNode.has("type") || !payloadNode.has("value")) {
                         return ResponseEntity.badRequest().body("Missing fields in payload for MEASUREMENT.");
                     }
 
-                    // Get the measurement type and value
                     String measurementTypeString = payloadNode.get("type").asText();
                     String valueString = payloadNode.get("value").asText();
 
-                    // Ensure that the value is a valid number
                     double value;
                     try {
-                        value = Double.parseDouble(valueString); // Using Double.parseDouble for better error handling
+                        value = Double.parseDouble(valueString);
                     } catch (NumberFormatException e) {
                         return ResponseEntity.badRequest().body("Value must be a valid number.");
                     }
 
-                    // Convert the string to the Measurement.Type enum
                     Measurement.Type measurementType;
                     try {
                         measurementType = Measurement.Type.valueOf(measurementTypeString.toUpperCase());
@@ -124,7 +135,6 @@ public class NoteController {
                         return ResponseEntity.badRequest().body("Invalid measurement type: " + measurementTypeString);
                     }
 
-                    // Create the measurement using the NoteService
                     Measurement measurement = noteService.createMeasurement(patient, doctor, appointment, new Date(),
                             creator,
                             measurementType, value);
@@ -143,42 +153,12 @@ public class NoteController {
                     Treatment treatment = noteService.createTreatment(patient, doctor, appointment, new Date(),
                             treatmentIcdCode, treatmentRecommendation, action);
                     noteService.addTreatmentToAppointment(appointment, treatment);
-
-                    break;
-
-                case "FILE":
-                    if (!payloadNode.has("files")) {
-                        return ResponseEntity.badRequest().body("Missing files array in payload for FILE.");
-                    }
-                    ArrayNode filesNode = (ArrayNode) payloadNode.get("files");
-                    List<File> files = new ArrayList<>();
-                    for (JsonNode fileNode : filesNode) {
-                        if (!fileNode.has("fileName") || !fileNode.has("mimeType") || !fileNode.has("fileData")) {
-                            return ResponseEntity.badRequest().body("Missing fields in file node.");
-                        }
-                        String fileName = fileNode.get("fileName").asText();
-                        String mimeType = fileNode.get("mimeType").asText();
-                        String base64FileData = fileNode.get("fileData").asText(); // Assuming file data is sent as a base64 string
-
-                        // Decode the base64 string to byte array
-                        byte[] fileData = Base64.getDecoder().decode(base64FileData);
-
-                        if (!noteService.noteFileTypeIsValidMime(mimeType)) {
-                            return ResponseEntity.badRequest().body("Unsupported file type: " + mimeType);
-                        }
-
-                        // Create the File instance
-                        File file = noteService.createFile(mimeType, fileData, fileNode.get("description").asText());
-                        files.add(file);
-                    }
-                    noteService.addFilesNote(patient, doctor, appointment, files);
                     break;
 
                 default:
                     return ResponseEntity.badRequest().body("Invalid note type.");
             }
 
-            // Save the updated appointment
             Appointment updatedAppointment = appointmentService.saveAppointment(appointment);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(updatedAppointment);
@@ -193,57 +173,94 @@ public class NoteController {
         }
     }
 
+    @Transactional
     @CrossOrigin
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file,
-                                        @RequestParam("appointmentId") Long appointmentId,
-                                        @RequestParam("doctorId") Long doctorId,
-                                        @RequestParam("patientId") Long patientId) {
+                                        @RequestParam("description") String description,
+                                        @RequestParam("appointmentId") Long appointmentId) {
+        System.out.println("File received: " + file.getOriginalFilename());
+        System.out.println("Content Type: " + file.getContentType());
+
+        Optional<Appointment> optionalAppointment = appointmentService.getAppointment(appointmentId);
+        if (optionalAppointment.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Appointment not found.");
+        }
+        Appointment appointment = optionalAppointment.get();
+
         try {
-            // Validate the file
+            // Validate file
             if (file.isEmpty()) {
                 return ResponseEntity.badRequest().body("No file uploaded.");
             }
 
-            // Validate appointment
-            Optional<Appointment> optionalAppointment = appointmentService.getAppointment(appointmentId);
-            if (optionalAppointment.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Appointment not found.");
-            }
-            Appointment appointment = optionalAppointment.get();
-
-            // Validate doctor
-            Optional<Doctor> optionalDoctor = noteService.getDoctor(doctorId);
-            if (optionalDoctor.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Doctor not found.");
-            }
-            Doctor doctor = optionalDoctor.get();
-
-            // Validate patient
-            Optional<Patient> optionalPatient = noteService.getPatient(patientId);
-            if (optionalPatient.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Patient not found.");
-            }
-            Patient patient = optionalPatient.get();
-
-            // Check file type validity
+            // Validate MIME type
             String mimeType = file.getContentType();
             if (!noteService.noteFileTypeIsValidMime(mimeType)) {
                 return ResponseEntity.badRequest().body("Unsupported file type: " + mimeType);
             }
 
-            // Create a File instance
-            File noteFile = noteService.createFile(mimeType, file.getBytes(), file.getOriginalFilename());
+            // Define the upload directory
+            File directory = new File(uploadDir);
+            File absoluteDirectory = directory.getAbsoluteFile();
+            System.out.println("Absolute directory path: " + absoluteDirectory.getAbsolutePath());
+            if (!absoluteDirectory.exists()) {
+                if (!absoluteDirectory.mkdirs()) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Failed to create upload directory.");
+                }
+            }
 
-            // Add the file note
-            noteService.addFilesNote(patient, doctor, appointment, Collections.singletonList(noteFile));
+            String originalFileName = file.getOriginalFilename();
+            String fileName = UUID.randomUUID() + "_" + originalFileName;
+            File targetFile = new File(absoluteDirectory, fileName);
 
-            // Prepare a response (you can customize what you want to return)
-            return ResponseEntity.status(HttpStatus.CREATED).body("File uploaded successfully.");
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload file: " + e.getMessage());
+            System.out.println("Target file path: " + targetFile.getAbsolutePath());
+
+            file.transferTo(targetFile);
+
+            String relativeUrl = "/uploads/" + fileName;
+
+            NoteFile noteFile = noteService.createNoteFile(appointment.getPatient(), appointment.getDoctor(),
+                    appointment,
+                    relativeUrl,
+                    description,
+                    mimeType);
+            noteService.addNoteFileToAppointment(appointment, noteFile);
+            appointmentService.saveAppointment(appointment);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body("File uploaded successfully");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to upload file: " + e.getMessage());
         }
     }
+        @CrossOrigin
+        @GetMapping("/download/{id}")
+        public ResponseEntity<Resource> serveFile(@PathVariable Long id) {
+            Optional<NoteFile> optionalNoteFile = noteFileRepo.findById(id);
+
+            if (optionalNoteFile.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+
+            NoteFile noteFile = optionalNoteFile.get();
+            String relativeUrl = noteFile.getUrl();
+            String fileName = relativeUrl.substring(relativeUrl.lastIndexOf("/") + 1);
+            File file = new File(uploadDir, fileName);
+
+            if (!file.exists()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+
+            Resource resource = new FileSystemResource(file);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName());
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(resource);
+        }
 }

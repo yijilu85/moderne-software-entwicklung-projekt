@@ -7,7 +7,7 @@ import java.util.Date;
 import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appointment;
 import com.medieninformatik.patientcare.appointmentManagement.infrastructure.repositories.AppointmentRepo;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Diagnosis;
-import com.medieninformatik.patientcare.patientDataManagement.infrastructure.repositories.NoteRepo;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.repositories.NoteRepo;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.DoctorRepo;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.PatientRepo;
 import com.medieninformatik.patientcare.shared.services.HelperService;

@@ -7,18 +7,26 @@ export const createNote = async (note: AppointmentNote) => {
   return response.data as AppointmentNote;
 };
 
-export const uploadFile = async (file, appointmentId, doctorId, patientId) => {
+export const uploadFile = async (file: NoteFile) => {
   const formData = new FormData();
-  formData.append("file", file);
-  formData.append("appointmentId", appointmentId);
-  formData.append("doctorId", doctorId);
-  formData.append("patientId", patientId);
+  formData.append("file", file.file);
+  formData.append("description", file.description);
+  formData.append("appointmentId", file.appointmentId);
 
-  const response = await axios.post("/notes/upload", formData);
-
-  if (!response.ok) {
-    throw new Error("File upload failed");
+  console.log("formdata", formData);
+  try {
+    const response = await axios.post("/notes/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    throw error;
   }
+};
 
-  return await response.json();
+export const constructNoteFileUrl = (note: AppointmentNote) => {
+  return `${axios.defaults.baseURL}/notes/download/${note.id}`;
 };

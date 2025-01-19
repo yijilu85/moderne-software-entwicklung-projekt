@@ -19,6 +19,7 @@ import java.nio.file.AccessDeniedException;
 import java.sql.Array;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AppointmentService {
@@ -82,6 +83,7 @@ public class AppointmentService {
     }
 
     public void addNote(Appointment appointment, Note note) {
+        System.out.println("Note: " + note.toString());
         appointment.addNote(note);
     }
 
@@ -149,7 +151,7 @@ public class AppointmentService {
             appointment.getStartDateTime().toLocalDate().isAfter(LocalDateTime.now().toLocalDate());
 
 
-    public List<Appointment> getAllAppointmentsForUser(Long userId, String timeRange) {
+    public Map<String, List<Appointment>> getAllAppointmentsForUserWithTimeranges(Long userId) {
         List<Appointment> allAppointments = appointmentRepo.findAll();
         Optional<User> user = userRepo.findById(userId);
 
@@ -167,21 +169,19 @@ public class AppointmentService {
             return false;
         };
 
-        Map<String, AppointmentValidator> validators = Map.of(
-                "past", pastValidator,
-                "today", todayValidator,
-                "future", futureValidator
-        );
-
-        AppointmentValidator timeRangeValidator = validators.get(timeRange);
-        if (timeRangeValidator == null) {
-            throw new IllegalArgumentException("Ungültiger Zeitraum: " + timeRange);
-        }
-
         return allAppointments.stream()
-                .filter(timeRangeValidator::isValid)
                 .filter(userValidator::isValid)
-                .toList();
+                .collect(Collectors.groupingBy(appointment -> {
+                    if (pastValidator.isValid(appointment)) {
+                        return "past";
+                    } else if (todayValidator.isValid(appointment)) {
+                        return "today";
+                    } else if (futureValidator.isValid(appointment)) {
+                        return "future";
+                    } else {
+                        throw new IllegalStateException("Invalid time range for appointment");
+                    }
+                }));
     }
 
     public Appointment parseJSONBookAppointmentSlot(String payload) throws JsonProcessingException {

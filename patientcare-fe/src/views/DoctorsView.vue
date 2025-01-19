@@ -4,6 +4,7 @@ import { onMounted, ref, computed, watch } from "vue";
 import type { Ref } from "vue";
 import { getAllDoctors } from "@/api/doctorController";
 import { useRouter } from "vue-router";
+import LoadingSpinner from "@/components/LoadingSpinner.vue";
 
 const specialities = ref<string[]>([]);
 const cities = ref<string[]>([]);
@@ -11,6 +12,7 @@ const doctors = ref<Doctor[]>([]);
 const cityFilter = ref<string | null>(null);
 const specialtyFilter = ref<string | null>(null);
 const router = useRouter();
+const finishedLoading = ref(false);
 
 const filteredDoctorList = computed(() => {
   let filteredList = doctors.value;
@@ -48,8 +50,10 @@ const populateCities = () => {
 };
 
 const fetchDoctors = async () => {
+  finishedLoading.value = false;
   const data = await getAllDoctors();
   doctors.value = data;
+  finishedLoading.value = true;
 };
 
 const doctorCardTitle = (doctor: Doctor) => {
@@ -166,6 +170,7 @@ onMounted(async () => {
       </v-col>
     </v-row>
   </div>
+  <LoadingSpinner v-if="!finishedLoading" />
 </template>
 
 <style scoped>

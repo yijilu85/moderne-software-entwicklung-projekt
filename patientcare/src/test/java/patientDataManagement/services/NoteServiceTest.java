@@ -2,7 +2,7 @@ package patientDataManagement.services;
 
 import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appointment;
 import com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService;
-import com.medieninformatik.patientcare.patientDataManagement.infrastructure.repositories.NoteRepo;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.repositories.NoteRepo;
 import com.medieninformatik.patientcare.shared.services.HelperService;
 
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Diagnosis;

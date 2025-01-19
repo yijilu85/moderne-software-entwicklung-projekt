@@ -1,4 +1,4 @@
-package com.medieninformatik.patientcare.patientDataManagement.domain.model.valueObjects;
+package com.medieninformatik.patientcare.patientDataManagement.domain.model;
 
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.shared.Note;
 import jakarta.persistence.*;
@@ -10,29 +10,20 @@ import java.util.Date;
 @Entity
 @Getter
 @Setter
-public class File {
-    private Date timestamp;
+public class NoteFile extends Note {
     private String url;
     private String description;
     private String mimeType;
 
 
-    @ManyToOne
-    @JoinColumn(name = "note_id")
-    private Note note;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates the ID
-    private Long id;
-
-    public File() {
+    public NoteFile() {
     }
 
-    public File(Date timestamp, String url, String description, String mimeType) {
-        this.timestamp = timestamp;
+    public NoteFile(String url, String description, String mimeType) {
         this.description = description;
         this.url = url;
         this.mimeType = mimeType;
+        this.setNoteType(this.getClass().getSimpleName().toUpperCase());
     }
 
 
@@ -52,11 +43,7 @@ public class File {
         return url;
     }
 
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public Date getTimestamp() {
-        return timestamp;
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
     }
 }

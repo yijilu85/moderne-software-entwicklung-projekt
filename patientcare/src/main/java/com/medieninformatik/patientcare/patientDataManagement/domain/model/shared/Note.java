@@ -5,7 +5,6 @@ import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appoi
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Diagnosis;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Measurement;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Treatment;
-import com.medieninformatik.patientcare.patientDataManagement.domain.model.valueObjects.File;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import jakarta.persistence.*;
@@ -39,10 +38,6 @@ public class Note {
     @JsonIgnore // Ignore this field for serialization
     private Doctor doctor;
 
-    @OneToMany(mappedBy = "note", cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("note")
-    private List<File> files;
-
     @ManyToOne
     @JoinColumn(name = "appointment")
     @JsonIgnore // Ignore this field for serialization
@@ -59,12 +54,11 @@ public class Note {
     private String noteType;
 
     // Constructor with parameters
-    public Note(Patient patient, Doctor doctor, Appointment appointment, List<File> files) {
+    public Note(Patient patient, Doctor doctor, Appointment appointment) {
         this.timestamp = new Date(); // Default to current timestamp
         this.patient = patient;
         this.doctor = doctor;
         this.appointment = appointment;
-        this.files = files != null ? files : new ArrayList<>();
     }
 
     public void setId(Long id) {
@@ -90,19 +84,6 @@ public class Note {
     public void setPatient(Patient patient) {
         this.patient = patient;
     }
-
-    public List<File> getFiles() {
-        return this.files;
-    }
-
-    public void addFile(File file) {
-        this.files.add(file);
-    }
-
-    public void removeFile(File file) {
-        this.files.remove(file);
-    }
-
 
     public Doctor getDoctor() {
         return this.doctor;
