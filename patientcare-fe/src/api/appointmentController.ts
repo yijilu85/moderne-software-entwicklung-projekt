@@ -45,7 +45,7 @@ export const createAppointmentSlot = async (payload: Appointment) => {
   return response.data as Appointment;
 };
 
-export const deleteAppointment = async (id: number, userId: number) => {
+export const deleteAppointment = async (id: number, userId: number | undefined) => {
   const response = await axios.delete(`/appointments/${id}`, {
     params: { userId },
   });
@@ -60,10 +60,7 @@ export const cancelAppointment = async (payload: {
   return response.data;
 };
 
-export const sendBookingAppointment = async (payload: {
-  appointmentId: number;
-  patientId: number;
-}) => {
+export const sendBookingAppointment = async (payload: { appointmentId: number; patientId: number | undefined }) => {
   const response = await axios.post(`/appointments/book`, payload);
   return response.data as Appointment;
 };

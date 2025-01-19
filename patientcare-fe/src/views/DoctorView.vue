@@ -3,7 +3,6 @@ import type {
   Appointment,
   BackendAppointment,
   Doctor,
-  User,
 } from "@/types/types";
 import { ref, onMounted, computed } from "vue";
 import { getAllAppointmentsForUser } from "@/api/appointmentController";
@@ -323,7 +322,6 @@ const filterAppointmentsVisibility = computed(() => {
 onMounted(async () => {
   generateTimeOptions();
   await loadInitialData();
-  useUserStore().fakeLogIn("doctor", 1);
 });
 </script>
 
@@ -333,6 +331,7 @@ onMounted(async () => {
     <img
       class="doctor-img"
       :src="doctor.profileImg || 'https://cdn.vuetifyjs.com/images/john.png'"
+      alt="Doctor profile image"
     />
     <p>{{ doctor.speciality }}</p>
     <p>{{ doctor.licenseId }}</p>

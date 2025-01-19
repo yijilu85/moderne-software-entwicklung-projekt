@@ -125,10 +125,14 @@ export const useAppointmentHelpers = () => {
 
       const payload = {
         appointmentId: appointment.id,
-        userId: loggedInUser?.id,
+        userId: loggedInUser?.id as number, // Explicit assertion to number
       };
 
-      await cancelAppointment(payload);
+      if (payload.userId !== undefined) {
+        await cancelAppointment(payload);
+      } else {
+        console.error("Fehlender Benutzer-ID für die Termin-Stornierung");
+      }
       showSnackbar("Termin erfolgreich storniert!", "success");
     } catch (error) {
       console.error("Fehler beim Stornieren des Termins:", error);

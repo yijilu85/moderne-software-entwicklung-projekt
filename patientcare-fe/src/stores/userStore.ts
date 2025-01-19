@@ -1,11 +1,12 @@
 import { defineStore } from "pinia";
-import type { Patient, Doctor, User } from "@/types/types";
+import type { User } from "@/types/types";
 import { getPatient } from "@/api/patientController";
 import { getDoctor } from "@/api/doctorController";
+import {useAuthStore} from "@/stores/auth.store";
 
 export const useUserStore = defineStore("user", {
   state: () => ({
-    loggedInUser: null as User | null,
+    loggedInUser: useAuthStore().user as User | null,
   }),
 
   getters: {

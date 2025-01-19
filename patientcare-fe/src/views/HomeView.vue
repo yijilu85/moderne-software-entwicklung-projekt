@@ -1,9 +1,16 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
+
+import { useAuthStore } from '@/stores';
+
+const authStore = useAuthStore();
+const { user: authUser } = storeToRefs(authStore);
+
+
 import { ref, watch, computed } from "vue";
 import type {
   Appointment,
   BackendAppointment,
-  Doctor,
   User,
 } from "@/types/types";
 import {
@@ -13,7 +20,7 @@ import {
   getAllTodayAppointmentsForUser,
   getAllTodayAppointmentsForUserWithTimeranges,
 } from "@/api/appointmentController";
-import { authenticate } from "@/api/authentificationController";
+
 import LoadingSpinner from "@/components/LoadingSpinner.vue";
 
 import {
@@ -86,6 +93,7 @@ const fetchAppointments = async () => {
           );
           mappingItem.list.value.push(appointment);
         }
+
       }
     }
   });
@@ -160,6 +168,11 @@ const formattedAppointmentPatient = (appointment: Appointment) => {
     <h2>
       {{ welcomeMessage }}
     </h2>
+     <div>
+    <h1>Hi {{authUser?.firstName}}!</h1>
+    <p>You're logged in with Vue 3 + Pinia & JWT!!</p>
+        </div>
+
     <div class="mt-10">
       <div class="today-future">
         <v-card title="Heute" class="mr-10 pa-3" width="500">
