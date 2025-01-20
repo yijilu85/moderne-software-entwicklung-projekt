@@ -22,7 +22,7 @@ public class PatientService {
         return patientRepo.findById(personId);
     }
 
-    public List<Patient> getAllPatients(){
+    public List<Patient> getAllPatients() {
         return patientRepo.findAll();
     }
 }

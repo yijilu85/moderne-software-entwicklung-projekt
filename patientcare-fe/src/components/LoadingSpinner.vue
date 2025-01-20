@@ -1,4 +1,4 @@
-<script setup lang="ts"></script>
+<script lang="ts" setup></script>
 <template>
   <div class="overlay"></div>
   <div class="loading-container">
@@ -18,6 +18,7 @@
   backdrop-filter: blur(5px);
   z-index: 1000;
 }
+
 .loading-container {
   width: 30%;
   height: 30%;
@@ -33,6 +34,7 @@
   border-radius: var(--border-radius);
   z-index: 1001;
 }
+
 .loader {
   width: 100px;
   padding: 8px;
@@ -46,6 +48,7 @@
   mask-composite: subtract;
   animation: l3 1s infinite linear;
 }
+
 @keyframes l3 {
   to {
     transform: rotate(1turn);

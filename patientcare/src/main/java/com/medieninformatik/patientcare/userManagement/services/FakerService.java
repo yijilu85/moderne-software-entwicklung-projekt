@@ -1,15 +1,13 @@
 package com.medieninformatik.patientcare.userManagement.services;
 
+import com.github.javafaker.Faker;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
-import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
+import com.medieninformatik.patientcare.userManagement.domain.model.valueObjects.MedicalSpeciality;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.DoctorRepo;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.PatientRepo;
-import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.UserRepo;
-import com.medieninformatik.patientcare.userManagement.domain.model.valueObjects.MedicalSpeciality;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.github.javafaker.Faker;
 
 import java.util.*;
 
@@ -19,7 +17,7 @@ public class FakerService {
 
     private final DoctorRepo doctorRepo;
     private final PatientRepo patientRepo;
-
+    Map<String, List<Map<String, String>>> cityData = new HashMap<>();
 
     @Autowired
     public FakerService(DoctorRepo doctorRepo, PatientRepo patientRepo) {
@@ -27,8 +25,6 @@ public class FakerService {
         this.doctorRepo = doctorRepo;
         this.patientRepo = patientRepo;
     }
-
-    Map<String, List<Map<String, String>>> cityData = new HashMap<>();
 
     public void createDoctors(int amount) {
         Faker faker = new Faker();
@@ -58,7 +54,7 @@ public class FakerService {
             String street = streetData.get("street");
             String zipCode = streetData.get("zipCode");
 
-            String houseNumber = (random.nextInt(100) + 1) + "";;
+            String houseNumber = (random.nextInt(100) + 1) + "";
 
             doctor.setStreet(street);
             doctor.setHouseNumber(houseNumber);
@@ -72,17 +68,7 @@ public class FakerService {
         }
     }
 
-    /*public void createDoctors(int amount) {
-        Faker faker = new Faker();
-        for (int i = 0; i < amount; i++) {
-            Doctor doctor = new Doctor();
-            populateUserFields(doctor, faker);
-            doctor.setLicenseId("A" + faker.number().digits(5) + "-D" + faker.number().digits(5));
-            doctorRepo.save(doctor);
-        }
-    }*/
-
-    public void populateCityData(){
+    public void populateCityData() {
         List<Map<String, String>> berlinStreets = new ArrayList<>();
         berlinStreets.add(createStreetData("Unter den Linden", "10115"));
         berlinStreets.add(createStreetData("Friedrichstraße", "10117"));
@@ -150,8 +136,6 @@ public class FakerService {
             patientRepo.save(patient);
         }
     }
-
-
 
 
 }

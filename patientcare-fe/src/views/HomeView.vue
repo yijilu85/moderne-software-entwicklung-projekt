@@ -1,42 +1,14 @@
-<script setup lang="ts">
-import { storeToRefs } from 'pinia';
+<script lang="ts" setup>
 
-import { useAuthStore } from '@/stores';
-
-const authStore = useAuthStore();
-const { user: authUser } = storeToRefs(authStore);
-
-
-import { ref, watch, computed } from "vue";
-import type {
-  Appointment,
-  BackendAppointment,
-  User,
-} from "@/types/types";
-import {
-  getAllAppointmentsForUser,
-  getAllPastAppointmentsForUser,
-  getAllFutureAppointmentsForUser,
-  getAllTodayAppointmentsForUser,
-  getAllTodayAppointmentsForUserWithTimeranges,
-} from "@/api/appointmentController";
+import {computed, onMounted, ref, watch} from "vue";
+import type {Appointment, BackendAppointment, User,} from "@/types/types";
+import {getAllTodayAppointmentsForUserWithTimeranges,} from "@/api/appointmentController";
 
 import LoadingSpinner from "@/components/LoadingSpinner.vue";
 
-import {
-  useAppointmentHelpers,
-  parseDate,
-  roundToQuarterHour,
-  checkCanCancelAppointment,
-  checkCanSeeAppointment,
-  calculateEndTime,
-  formatDate,
-  mapBackendToFrontend,
-  appointmentHasPatient,
-} from "@/helpers/appointmentHelpers";
+import {formatDate, parseDate,} from "@/helpers/appointmentHelpers";
 
-import { useUserStore } from "@/stores/userStore";
-import { onMounted } from "vue";
+import {useUserStore} from "@/stores/userStore";
 
 const loggedInUser = ref<User | null>(null);
 const finishedLoading = ref(false);
@@ -48,9 +20,9 @@ const fetchAppointments = async () => {
   if (!loggedInUser.value) {
     return;
   }
-  const data = await getAllTodayAppointmentsForUserWithTimeranges(
-    loggedInUser.value.id
-  );
+  const data = loggedInUser.value.id
+      ? await getAllTodayAppointmentsForUserWithTimeranges(loggedInUser.value.id)
+      : [];
 
   finishedLoading.value = false;
 
@@ -73,44 +45,45 @@ const fetchAppointments = async () => {
   ];
 
   Object.entries(data).forEach(([key, value]) => {
-    for (const item of value) {
-      let mapped = item as any as BackendAppointment;
-      const appointment = {
-        id: mapped.id,
-        start: parseDate(mapped.startDateTime),
-        end: parseDate(mapped.endDateTime),
-        patient: mapped.patient,
-        title: mapped.title,
-        doctor: mapped.doctor,
-        notes: mapped.notes,
-        type: mapped.type,
-      } as Appointment;
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        let mapped = item as any as BackendAppointment;
+        const appointment = {
+          id: mapped.id,
+          start: parseDate(mapped.startDateTime),
+          end: parseDate(mapped.endDateTime),
+          patient: mapped.patient,
+          title: mapped.title,
+          doctor: mapped.doctor,
+          notes: mapped.notes,
+          type: mapped.type,
+        } as Appointment;
 
-      for (const mappingItem of mapping) {
-        if (mappingItem.listKey === key) {
-          console.log(
-            `Termine zur ${mappingItem.descriptor} Liste hinzugefügt`
-          );
-          mappingItem.list.value.push(appointment);
+        for (const mappingItem of mapping) {
+          if (mappingItem.listKey === key) {
+            console.log(
+                `Termine zur ${mappingItem.descriptor} Liste hinzugefügt`
+            );
+            mappingItem.list.value.push(appointment);
+          }
         }
-
-      }
+      });
     }
   });
   finishedLoading.value = true;
 };
 
 onMounted(async () => {
-  loggedInUser.value = useUserStore().getLoggedInUser;
+  loggedInUser.value = JSON.parse(localStorage.getItem('user') || 'null') as User | null;
   fetchAppointments();
 });
 
 watch(
-  () => useUserStore().getLoggedInUser,
-  (newUser) => {
-    loggedInUser.value = newUser;
-    fetchAppointments();
-  }
+    () => useUserStore().getLoggedInUser,
+    (newUser) => {
+      loggedInUser.value = newUser;
+      fetchAppointments();
+    }
 );
 
 const welcomeMessage = computed(() => {
@@ -127,14 +100,14 @@ const welcomeMessage = computed(() => {
 const formatTitle = (appointment: Appointment, today: boolean) => {
   if (today) {
     return `${formattedAppointmentTime(
-      appointment
+        appointment
     )}: ${formattedAppointmentPatient(appointment)}`;
   } else {
     return `${formatDate(
-      appointment.start,
-      "date"
+        appointment.start,
+        "date"
     )} um ${formattedAppointmentTime(
-      appointment
+        appointment
     )}: ${formattedAppointmentPatient(appointment)}`;
   }
 };
@@ -148,8 +121,8 @@ const formatSubTitle = (appointment: Appointment, today: boolean) => {
 
 const formattedAppointmentTime = (appointment: Appointment) => {
   return `${formatDate(appointment.start, "time")} - ${formatDate(
-    appointment.end,
-    "time"
+      appointment.end,
+      "time"
   )}`;
 };
 
@@ -168,70 +141,66 @@ const formattedAppointmentPatient = (appointment: Appointment) => {
     <h2>
       {{ welcomeMessage }}
     </h2>
-     <div>
-    <h1>Hi {{authUser?.firstName}}!</h1>
-    <p>You're logged in with Vue 3 + Pinia & JWT!!</p>
-        </div>
 
     <div class="mt-10">
       <div class="today-future">
-        <v-card title="Heute" class="mr-10 pa-3" width="500">
+        <v-card class="mr-10 pa-3" title="Heute" width="500">
           <v-list lines="two">
             <v-list-item
-              v-for="item in todayAppointments"
-              :title="formatTitle(item, true)"
-              :subtitle="formatSubTitle(item, true)"
+                v-for="item in todayAppointments"
+                :subtitle="formatSubTitle(item, true)"
+                :title="formatTitle(item, true)"
             >
               <template v-slot:append>
                 <v-icon>
                   <a :href="`/appointment/${item.id}`" class="card-link">
                     <img
-                      src="@/assets/icons/edit.svg"
-                      class="clear-icon ml-4 align-self-center" /></a
-                ></v-icon>
+                        alt=""
+                        class="clear-icon ml-4 align-self-center" src="@/assets/icons/edit.svg"/></a
+                  ></v-icon>
               </template>
             </v-list-item>
           </v-list>
         </v-card>
-        <v-card title="Zukünftige" class="pa-3" width="500">
+        <v-card class="pa-3" title="Zukünftige" width="500">
           <v-list lines="two">
             <v-list-item
-              v-for="item in futureAppointments"
-              :title="formatTitle(item, false)"
-              :subtitle="formatSubTitle(item, false)"
+                v-for="item in futureAppointments"
+                :subtitle="formatSubTitle(item, false)"
+                :title="formatTitle(item, false)"
             >
               <template v-slot:append>
                 <v-icon>
                   <a :href="`/appointment/${item.id}`" class="card-link">
                     <img
-                      src="@/assets/icons/edit.svg"
-                      class="clear-icon ml-4 align-self-center" /></a
-                ></v-icon>
+                        alt=""
+                        class="clear-icon ml-4 align-self-center" src="@/assets/icons/edit.svg"/></a
+                  ></v-icon>
               </template>
             </v-list-item>
           </v-list>
         </v-card>
       </div>
-      <v-card title="Vergangene" class="mt-10 pa-3" width="500">
+      <v-card class="mt-10 pa-3" title="Vergangene" width="500">
         <v-list lines="two">
           <v-list-item
-            v-for="item in pastAppointments"
-            :title="formatTitle(item, false)"
-            :subtitle="formatSubTitle(item, false)"
+              v-for="item in pastAppointments"
+              :subtitle="formatSubTitle(item, false)"
+              :title="formatTitle(item, false)"
           >
             <template v-slot:append>
               <v-icon>
                 <a :href="`/appointment/${item.id}`" class="card-link">
                   <img
-                    src="@/assets/icons/edit.svg"
-                    class="clear-icon ml-4 align-self-center" /></a
-              ></v-icon>
+                      alt=""
+                      class="clear-icon ml-4 align-self-center" src="@/assets/icons/edit.svg"/></a
+                ></v-icon>
             </template>
           </v-list-item>
         </v-list>
       </v-card>
     </div>
-    <LoadingSpinner v-if="!finishedLoading" />
+    <LoadingSpinner v-if="!finishedLoading"/>
   </main>
 </template>
 
@@ -239,6 +208,7 @@ const formattedAppointmentPatient = (appointment: Appointment) => {
 .card-link {
   margin-top: 15px;
 }
+
 .today-future {
   display: flex;
   flex-flow: row nowrap;

@@ -1,39 +1,34 @@
 package com.medieninformatik.patientcare.patientDataManagement.services;
 
 import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appointment;
-
-
 import com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Diagnosis;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Measurement;
+import com.medieninformatik.patientcare.patientDataManagement.domain.model.NoteFile;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Treatment;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.shared.Note;
-import com.medieninformatik.patientcare.patientDataManagement.domain.model.NoteFile;
-import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.repositories.NoteRepo;
-import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.DoctorRepo;
-import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.PatientRepo;
 import com.medieninformatik.patientcare.shared.services.HelperService;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.DoctorRepo;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.PatientRepo;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.repositories.NoteRepo;
 import org.springframework.stereotype.Service;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
-
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @Service
 public class NoteService {
 
-    private PatientRepo patientRepo;
-    private NoteRepo noteRepo;
-    private AppointmentService appointmentService;
-    private DoctorRepo doctorRepo;
-    private HelperService helperService;
     private static final Set<String> VALID_MIME_TYPES = Set.of(
             "text/plain",
             "application/pdf",
@@ -43,6 +38,11 @@ public class NoteService {
             "video/mp4",
             "audio/mpeg"
     );
+    private final PatientRepo patientRepo;
+    private final NoteRepo noteRepo;
+    private final AppointmentService appointmentService;
+    private final DoctorRepo doctorRepo;
+    private final HelperService helperService;
 
     public NoteService(PatientRepo patientRepo, HelperService helperService, AppointmentService appointmentService,
                        NoteRepo noteRepo,
@@ -68,6 +68,7 @@ public class NoteService {
 
         return note;
     }
+
     public Diagnosis createDiagnosis(Patient patient, Doctor doctor, Appointment appointment, Date date,
                                      String icdCode, String recommendation) {
         if (patient == null || doctor == null) {
@@ -76,7 +77,7 @@ public class NoteService {
 
         System.out.println("Creating Diagnosis for Patient ID: " + patient.getId() + ", Doctor ID: " + doctor.getId());
 
-        Diagnosis diagnosis =  new Diagnosis(icdCode, recommendation);
+        Diagnosis diagnosis = new Diagnosis(icdCode, recommendation);
         diagnosis.setPatient(patient);
         diagnosis.setDoctor(doctor);
         diagnosis.setAppointment(appointment);
@@ -85,7 +86,7 @@ public class NoteService {
     }
 
     public Treatment createTreatment(Patient patient, Doctor doctor, Appointment appointment, Date date,
-                                     String icdCode,String recommendation,
+                                     String icdCode, String recommendation,
                                      String action) {
         if (patient == null || doctor == null || date == null || icdCode == null || icdCode == null || action == null) {
             throw new IllegalArgumentException("Keiner der Eingabewerte darf null sein.");
@@ -188,7 +189,7 @@ public class NoteService {
     }
 
     public boolean noteFileTypeIsValidMime(String mimeType) {
-        return this.VALID_MIME_TYPES.contains(mimeType);
+        return VALID_MIME_TYPES.contains(mimeType);
     }
 
     public boolean noteUsersEqualsAppointmentUsers(Appointment appointment, Diagnosis diagnosis) {

@@ -1,49 +1,31 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import type {
   Appointment,
-  BackendAppointment,
-  Doctor,
-  Patient,
-  User,
   AppointmentNote,
-  Measurement,
+  BackendAppointment,
   Diagnosis,
-  Treatment,
+  Doctor,
+  Measurement,
   NoteFile,
+  Patient,
+  Treatment,
 } from "@/types/types";
-import { ref, onMounted, computed } from "vue";
+import {computed, onMounted, ref} from "vue";
+import {getAppointment,} from "@/api/appointmentController";
+import {constructNoteFileUrl, createNote, uploadFile,} from "@/api/noteController";
+import {getPatient} from "@/api/patientController";
+import {getDoctor} from "@/api/doctorController";
+import {useRoute, useRouter} from "vue-router";
 import {
-  createAppointmentSlot,
-  getAllAppointmentsForUser,
-  sendBookingAppointment,
-  deleteAppointment,
-  cancelAppointment,
-  getAppointment,
-} from "@/api/appointmentController";
-import {
-  createNote,
-  uploadFile,
-  requestNoteFileDownload,
-  constructNoteFileUrl,
-} from "@/api/noteController";
-import { watch } from "vue";
-import { getPatient } from "@/api/patientController";
-import { getDoctor } from "@/api/doctorController";
-import { useRouter, useRoute } from "vue-router";
-import {
-  useAppointmentHelpers,
-  parseDate,
-  roundToQuarterHour,
+  appointmentHasPatient,
   checkCanCancelAppointment,
-  checkCanSeeAppointment,
-  calculateEndTime,
   formatDate,
   mapBackendToFrontend,
-  appointmentHasPatient,
+  useAppointmentHelpers,
 } from "@/helpers/appointmentHelpers";
 
-import { lookupNoteType } from "@/helpers/noteHelpers";
-import { useUserStore } from "@/stores/userStore";
+import {lookupNoteType} from "@/helpers/noteHelpers";
+import {useUserStore} from "@/stores/userStore";
 import LoadingSpinner from "@/components/LoadingSpinner.vue";
 
 const measurement = ref<Measurement>({
@@ -116,7 +98,7 @@ const fetchAppointment = async () => {
   }
   finishedLoading.value = false;
   const appointment = (await getAppointment(
-    Number(routeId)
+      Number(routeId)
   )) as any as BackendAppointment;
 
   if (appointment) {
@@ -157,18 +139,18 @@ const deleteSelectedAppointment = async () => {
     return;
   }
   await delAppointment(
-    event.value.id,
-    useUserStore().getLoggedInUser?.id,
-    showSnackbar
+      event.value.id,
+      useUserStore().getLoggedInUser?.id,
+      showSnackbar
   );
 };
 
 const onCancelSelectedAppointment = async () => {
   if (event.value) {
     await cancelSelectedAppointment(
-      event.value,
-      useUserStore().getLoggedInUser?.id,
-      showSnackbar
+        event.value,
+        useUserStore().getLoggedInUser?.id,
+        showSnackbar
     );
 
     fetchAppointment();
@@ -218,7 +200,7 @@ const onSaveNote = async () => {
         };
         break;
 
-      case "FILE":
+      case "NOTEFILE":
         if (!selectedFile.value) {
           showSnackbar("Keine Datei ausgewählt", "error");
           return;
@@ -231,9 +213,9 @@ const onSaveNote = async () => {
         return;
     }
     let response =
-      newNote.value.noteType === "FILE"
-        ? await uploadFile(selectedFile.value)
-        : await createNote(newNote.value);
+        newNote.value.noteType === "NOTEFILE"
+            ? await uploadFile(selectedFile.value)
+            : await createNote(newNote.value);
 
     if (response) {
       showSnackbar("Notiz erfolgreich gespeichert");
@@ -258,7 +240,7 @@ const closeSaveNoteScreen = () => {
     doctorId: undefined,
     patientId: undefined,
     creator: "Doctor",
-    file: null,
+    file: undefined,
     body: undefined,
     noteType: "DIAGNOSIS",
     payload: undefined,
@@ -281,11 +263,10 @@ const closeNoteDetailModal = () => {
 };
 
 const notefileUrl = computed(() => {
-  return constructNoteFileUrl(detailNote.value);
+  return detailNote.value ? constructNoteFileUrl(detailNote.value) : "";
 });
 
 onMounted(async () => {
-  useUserStore().fakeLogIn("doctor", 1);
   fetchAppointment();
 });
 </script>
@@ -299,9 +280,9 @@ onMounted(async () => {
       {{ formatDate(event?.end, "time") }}
     </h3>
     <v-btn
-      v-if="event?.doctor?.id === useUserStore().getLoggedInUser?.id"
-      color="red"
-      @click="deleteSelectedAppointment"
+        v-if="event?.doctor?.id === useUserStore().getLoggedInUser?.id"
+        color="red"
+        @click="deleteSelectedAppointment"
     >
       Termin löschen
     </v-btn>
@@ -309,20 +290,20 @@ onMounted(async () => {
   <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
     {{ snackbar.message }}
   </v-snackbar>
-  <v-row justify="start" dense>
-    <v-col cols="12" md="4" class="doctor-card">
+  <v-row dense justify="start">
+    <v-col class="doctor-card" cols="12" md="4">
       <v-card
-        class="mx-auto"
-        variant="text"
-        :subtitle="doctorCardSubtitle(doctor)"
-        :title="doctorCardTitle(doctor)"
-        v-if="doctor"
+          v-if="doctor"
+          :subtitle="doctorCardSubtitle(doctor)"
+          :title="doctorCardTitle(doctor)"
+          class="mx-auto"
+          variant="text"
       >
         <template v-slot:append>
           <v-avatar size="60">
             <v-img
-              alt="John"
-              src="https://cdn.vuetifyjs.com/images/john.png"
+                alt="John"
+                src="https://cdn.vuetifyjs.com/images/john.png"
             ></v-img>
           </v-avatar>
         </template>
@@ -335,19 +316,19 @@ onMounted(async () => {
       </v-card>
     </v-col>
     <v-divider vertical></v-divider>
-    <v-col cols="12" md="4" class="doctor-card">
+    <v-col class="doctor-card" cols="12" md="4">
       <v-card
-        variant="text"
-        class="mx-auto"
-        title="Patient"
-        :subtitle="patientCardTitle(patient)"
-        v-if="patient"
+          v-if="patient"
+          :subtitle="patientCardTitle(patient)"
+          class="mx-auto"
+          title="Patient"
+          variant="text"
       >
         <template v-slot:append>
           <v-avatar size="60">
             <v-img
-              alt="John"
-              src="https://cdn.vuetifyjs.com/images/john.png"
+                alt="John"
+                src="https://cdn.vuetifyjs.com/images/john.png"
             ></v-img>
           </v-avatar>
         </template>
@@ -358,46 +339,48 @@ onMounted(async () => {
           <p>{{ patient.email }}</p>
         </v-card-text>
         <v-btn v-if="!appointmentHasPatient(event!)" @click="onBookAppointment"
-          >Termin buchen</v-btn
+        >Termin buchen
+        </v-btn
         >
         <v-btn
-          v-if="canCancelAppointment"
-          color="red-lighten-2"
-          @click="onCancelSelectedAppointment"
+            v-if="canCancelAppointment"
+            color="red-lighten-2"
+            @click="onCancelSelectedAppointment"
         >
-          Termin stornieren</v-btn
+          Termin stornieren
+        </v-btn
         >
       </v-card>
     </v-col>
   </v-row>
-  <v-row justify="start" dense>
+  <v-row dense justify="start">
     <h2>Terminanhänge</h2>
     <div class="d-flex ml-4 cursor-pointer" @click="onAddNote">
       <img
-        src="@/assets/icons/file-plus.svg"
-        class="clear-icon ml-4 align-self-center"
+          class="clear-icon ml-4 align-self-center"
+          src="@/assets/icons/file-plus.svg"
       /><span class="mt-2 ml-1">hinzufügen</span>
     </div>
   </v-row>
   <v-row dense>
     <v-table>
       <thead>
-        <tr>
-          <th class="text-left">Datum</th>
-          <th class="text-left">Notiztyp</th>
-          <th class="text-left">Titel</th>
-          <th class="text-left"></th>
-        </tr>
+      <tr>
+        <th class="text-left">Datum</th>
+        <th class="text-left">Notiztyp</th>
+        <th class="text-left">Titel</th>
+        <th class="text-left"></th>
+      </tr>
       </thead>
       <tbody>
-        <tr v-for="item in event?.notes" :key="item.id" class="note-row">
-          <td>{{ formatDate(item.timestamp!, "dateTime") }}</td>
-          <td>{{ lookupNoteType(item.noteType) }}</td>
-          <td>{{ item.type }}</td>
-          <button class="note-button" @click="openNoteDetailModal(item)">
-            Details
-          </button>
-        </tr>
+      <tr v-for="item in event?.notes" :key="item.id" class="note-row">
+        <td>{{ formatDate(item.timestamp!, "dateTime") }}</td>
+        <td>{{ lookupNoteType(item.noteType) }}</td>
+        <td>{{ item.type }}</td>
+        <button class="note-button" @click="openNoteDetailModal(item)">
+          Details
+        </button>
+      </tr>
       </tbody>
     </v-table>
   </v-row>
@@ -406,15 +389,14 @@ onMounted(async () => {
       <v-card-title>Terminanhang erstellen</v-card-title>
       <v-card-text>
         <v-select
-          label="Notiztyp"
-          :items="noteTypes"
-          v-model="newNote.noteType"
+            v-model="newNote.noteType"
+            :items="noteTypes"
+            label="Notiztyp"
         ></v-select>
         <div v-if="newNote.noteType == 'MEASUREMENT'">
           <v-select
-            v-model="measurement.type"
-            label="Messtyp"
-            :items="[
+              v-model="measurement.type"
+              :items="[
               'BLOOD_SUGAR',
               'BLOOD_PRESSURE',
               'HEART_RATE',
@@ -424,53 +406,54 @@ onMounted(async () => {
               'BODY_WEIGHT',
               'BODY_HEIGHT',
             ]"
+              label="Messtyp"
           ></v-select>
           <v-text-field
-            label="Wert"
-            v-model="measurement.value"
-            hide-details
-            single-line
-            type="number"
+              v-model="measurement.value"
+              hide-details
+              label="Wert"
+              single-line
+              type="number"
           />
         </div>
         <div
-          v-if="
+            v-if="
             newNote.noteType == 'DIAGNOSIS' || newNote.noteType == 'TREATMENT'
           "
         >
           <v-text-field
-            label="Icd Code"
-            v-model="diagnosis.icdCode"
-            hide-details
-            single-line
-            type="text"
+              v-model="diagnosis.icdCode"
+              hide-details
+              label="Icd Code"
+              single-line
+              type="text"
           />
           <v-textarea
-            label="Empfehlung"
-            v-model="diagnosis.recommendation"
-            hide-details
-            single-line
-            type="text"
+              v-model="diagnosis.recommendation"
+              hide-details
+              label="Empfehlung"
+              single-line
+              type="text"
           />
         </div>
         <div v-if="newNote.noteType == 'TREATMENT'">
           <v-text-field
-            label="Action"
-            v-model="treatment.action"
-            hide-details
-            single-line
-            type="text"
+              v-model="treatment.action"
+              hide-details
+              label="Action"
+              single-line
+              type="text"
           />
         </div>
-        <div v-if="newNote.noteType == 'FILE'">
+        <div v-if="newNote.noteType == 'NOTEFILE'">
           <v-file-input
-            label="Datei hochladen"
-            accept="image/*,application/pdf"
-            @change="onFileChange"
+              accept="image/*,application/pdf"
+              label="Datei hochladen"
+              @change="onFileChange"
           ></v-file-input>
           <v-text-field
-            v-model="selectedFile.description"
-            placeholder="Beschreibung hinzufügen"
+              v-model="selectedFile.description"
+              placeholder="Beschreibung hinzufügen"
           ></v-text-field>
         </div>
       </v-card-text>
@@ -484,9 +467,10 @@ onMounted(async () => {
     <v-card>
       <v-card-title>Notizdetails</v-card-title>
       <v-card-subtitle
-        >{{ lookupNoteType(detailNote?.noteType) }} erstellt am
+      >{{ lookupNoteType(detailNote?.noteType) }} erstellt am
         {{ formatDate(detailNote?.timestamp!, "date") }} um
-        {{ formatDate(detailNote?.timestamp!, "time") }}</v-card-subtitle
+        {{ formatDate(detailNote?.timestamp!, "time") }}
+      </v-card-subtitle
       >
       <v-card-text>
         <div v-if="detailNote?.noteType === 'MEASUREMENT'">
@@ -506,7 +490,7 @@ onMounted(async () => {
           <p>Dateityp: {{ detailNote.mimeType.split("/")[1] }}</p>
 
           <a :href="notefileUrl" class="notefile-download" target="_blank">
-            <img src="@/assets/icons/file-plus.svg" />
+            <img src="@/assets/icons/file-plus.svg"/>
             <span>Datei herunterladen</span>
           </a>
         </div>
@@ -516,7 +500,7 @@ onMounted(async () => {
       </v-card-actions>
     </v-card>
   </v-dialog>
-  <LoadingSpinner v-if="!finishedLoading" />
+  <LoadingSpinner v-if="!finishedLoading"/>
 </template>
 
 <style scoped>
@@ -525,6 +509,7 @@ onMounted(async () => {
   margin-left: 1em;
   color: var(--primary-color);
 }
+
 .notefile-download {
   margin-top: 20px;
   display: flex;
@@ -533,12 +518,14 @@ onMounted(async () => {
   cursor: pointer;
   color: var(--primary-color);
 }
+
 .notefile-download img {
   width: 20px;
   margin-right: 5px;
-  color: (var(--primary-color));
+  color: var(--primary-color);
 }
+
 .notefile-download span {
-  color: (var(--primary-color));
+  color: var(--primary-color);
 }
 </style>

@@ -1,11 +1,9 @@
 package com.medieninformatik.patientcare.patientDataManagement.domain.model;
 
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.shared.Note;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Date;
 
 @Entity
 @Getter
@@ -26,21 +24,20 @@ public class NoteFile extends Note {
         this.setNoteType(this.getClass().getSimpleName().toUpperCase());
     }
 
+    public String getDescription() {
+        return description;
+    }
 
     public void setDescription(String description) {
         this.description = description;
     }
 
-    public String getDescription() {
-        return description;
+    public String getUrl() {
+        return url;
     }
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public String getUrl() {
-        return url;
     }
 
     public void setMimeType(String mimeType) {

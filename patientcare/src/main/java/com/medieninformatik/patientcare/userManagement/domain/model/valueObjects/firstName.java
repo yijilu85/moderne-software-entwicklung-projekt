@@ -1,4 +1,5 @@
 package com.medieninformatik.patientcare.userManagement.domain.model.valueObjects;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,6 +8,8 @@ import lombok.Setter;
 public class firstName {
     private String firstName;
 
-    public firstName(String firstName) { this.firstName = firstName; }
+    public firstName(String firstName) {
+        this.firstName = firstName;
+    }
 }
 

@@ -1,29 +1,29 @@
 package appointmentManagement.services;
 
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.util.Date;
-
 import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appointment;
 import com.medieninformatik.patientcare.appointmentManagement.infrastructure.repositories.AppointmentRepo;
+import com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Diagnosis;
-import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.repositories.NoteRepo;
-import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.DoctorRepo;
-import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.PatientRepo;
-import com.medieninformatik.patientcare.shared.services.HelperService;
 import com.medieninformatik.patientcare.patientDataManagement.services.NoteService;
+import com.medieninformatik.patientcare.shared.services.HelperService;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.DoctorRepo;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.PatientRepo;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.repositories.NoteRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService;
+
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 public class AppointmentServiceTest {
 
@@ -136,7 +136,7 @@ public class AppointmentServiceTest {
     void testAddNote() {
         PatientRepo patientRepo = mock(PatientRepo.class);
         HelperService helperService = new HelperService();
-        NoteService noteService = new NoteService(patientRepo, helperService, appointmentService,noteRepo, doctorRepo);
+        NoteService noteService = new NoteService(patientRepo, helperService, appointmentService, noteRepo, doctorRepo);
 
         Patient patient = mock(Patient.class);
         Doctor doctor = mock(Doctor.class);

@@ -1,13 +1,14 @@
 package shared.services;
 
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.medieninformatik.patientcare.shared.services.HelperService;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HelperServiceTest {
 
-    private HelperService helperService = new HelperService();
+    private final HelperService helperService = new HelperService();
 
     @Test
     void validateDate() {

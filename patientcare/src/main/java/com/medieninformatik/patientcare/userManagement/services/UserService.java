@@ -1,9 +1,7 @@
 package com.medieninformatik.patientcare.userManagement.services;
 
-import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
 import com.medieninformatik.patientcare.userManagement.infrastructure.Exceptions.InvalidCredentialsException;
-import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.PatientRepo;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +23,7 @@ public class UserService {
         return userRepo.findById(userId);
     }
 
-    public List<User> getAllUsers(){
+    public List<User> getAllUsers() {
         return userRepo.findAll();
     }
 

@@ -5,26 +5,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appointment;
 import com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService;
-import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.UserRepo;
-import com.medieninformatik.patientcare.userManagement.services.DoctorService;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.AccessDeniedException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
 @RestController
@@ -42,7 +32,7 @@ public class AppointmentController {
 
     @CrossOrigin
     @GetMapping
-    public List<Appointment> findAllAppointments(@RequestParam(required = false) Long userId){
+    public List<Appointment> findAllAppointments(@RequestParam(required = false) Long userId) {
         if (userId == null) {
             return appointmentService.getAllAppointments();
         } else {
@@ -52,8 +42,8 @@ public class AppointmentController {
 
     @CrossOrigin
     @GetMapping(path = "/timeranges")
-    public Map<String, List<Appointment>> findAllAppointmentsWithTimeranges(@RequestParam(required = false) Long userId){
-                return appointmentService.getAllAppointmentsForUserWithTimeranges(userId);
+    public Map<String, List<Appointment>> findAllAppointmentsWithTimeranges(@RequestParam(required = false) Long userId) {
+        return appointmentService.getAllAppointmentsForUserWithTimeranges(userId);
     }
 
     @CrossOrigin

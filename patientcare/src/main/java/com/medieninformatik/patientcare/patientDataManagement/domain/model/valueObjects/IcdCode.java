@@ -1,7 +1,6 @@
 package com.medieninformatik.patientcare.patientDataManagement.domain.model.valueObjects;
+
 import jakarta.persistence.Embeddable;
-import lombok.Getter;
-import lombok.Setter;
 
 @Embeddable
 public class IcdCode {
@@ -9,7 +8,8 @@ public class IcdCode {
     private String code;
 
     // Default no-argument constructor
-    public IcdCode() {}
+    public IcdCode() {
+    }
 
     // Constructor to initialize the code
     public IcdCode(String code) {

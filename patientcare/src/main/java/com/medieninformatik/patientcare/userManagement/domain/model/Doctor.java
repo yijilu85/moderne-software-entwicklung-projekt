@@ -2,7 +2,7 @@ package com.medieninformatik.patientcare.userManagement.domain.model;
 
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
 import com.medieninformatik.patientcare.userManagement.domain.model.valueObjects.MedicalSpeciality;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 
 import static com.medieninformatik.patientcare.userManagement.domain.model.shared.User.UserType.DOCTOR;
 
@@ -103,19 +103,19 @@ public class Doctor
 
     @Override
     public String toString() {
-     return "Doctor{" +
-             "id=" + super.getId() +
-             ", title='" + title + '\'' +
-             ", firstName='" + super.getFirstName() + '\'' +
-             ", lastName='" + super.getLastName() + '\'' +
-             ", speciality='" + speciality + '\'' +
-             ", phoneNumber='" + phoneNumber + '\'' +
-             ", street='" + street + '\'' +
-             ", houseNumber='" + houseNumber + '\'' +
-             ", zipCode='" + zipCode + '\'' +
-             ", city='" + city + '\'' +
-             ", licenseId='" + licenseId + '\'' +
-             '}';
+        return "Doctor{" +
+                "id=" + super.getId() +
+                ", title='" + title + '\'' +
+                ", firstName='" + super.getFirstName() + '\'' +
+                ", lastName='" + super.getLastName() + '\'' +
+                ", speciality='" + speciality + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", street='" + street + '\'' +
+                ", houseNumber='" + houseNumber + '\'' +
+                ", zipCode='" + zipCode + '\'' +
+                ", city='" + city + '\'' +
+                ", licenseId='" + licenseId + '\'' +
+                '}';
     }
 
 }
