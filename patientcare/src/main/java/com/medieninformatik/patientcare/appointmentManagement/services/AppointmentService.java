@@ -12,24 +12,28 @@ import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.UserRepo;
 import jakarta.persistence.EntityNotFoundException;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.file.AccessDeniedException;
-import java.sql.Array;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.stream.Collectors;
 
 @Service
 public class AppointmentService {
 
-    private AppointmentRepo appointmentRepo;
-    private UserRepo userRepo;
-    private HelperService helperService;
-
+    private final AppointmentRepo appointmentRepo;
+    private final UserRepo userRepo;
+    private final HelperService helperService;
+    private final AppointmentValidator pastValidator = appointment ->
+            appointment.getStartDateTime().toLocalDate().isBefore(LocalDateTime.now().toLocalDate());
+    private final AppointmentValidator todayValidator = appointment -> appointment.getStartDateTime().toLocalDate().isEqual(LocalDateTime.now().toLocalDate());
+    private final AppointmentValidator futureValidator = appointment ->
+            appointment.getStartDateTime().toLocalDate().isAfter(LocalDateTime.now().toLocalDate());
 
     public AppointmentService(AppointmentRepo appointmentRepo, UserRepo userRepo, HelperService helperService) {
         this.appointmentRepo = appointmentRepo;
@@ -49,7 +53,7 @@ public class AppointmentService {
             , LocalDateTime createdAt) {
         Appointment appointment = new Appointment(doctor, creator, startDateTime, endDateTime, createdAt);
         appointmentRepo.save(appointment);
-        System.out.println(appointment.toString());
+        System.out.println(appointment);
 
         return appointment;
     }
@@ -85,6 +89,7 @@ public class AppointmentService {
     }
 
     public void addNote(Appointment appointment, Note note) {
+        System.out.println("Note: " + note.toString());
         appointment.addNote(note);
     }
 
@@ -133,8 +138,51 @@ public class AppointmentService {
         }
         System.out.println("USER TYPE: " + type);
         return appointments;
-    };
+    }
 
+    public boolean belongsToPatient(Appointment appointment, Long patientId) {
+        return appointment.getPatient().getId().equals(patientId);
+    }
+
+    public boolean belongsToDoctor(Appointment appointment, Long doctorId) {
+        return appointment.getDoctor().getId().equals(doctorId);
+    }
+
+    public Map<String, List<Appointment>> getAllAppointmentsForUserWithTimeranges(Long userId) {
+        List<Appointment> allAppointments = appointmentRepo.findAll();
+        Optional<User> user = userRepo.findById(userId);
+
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("User mit ID " + userId + " nicht gefunden");
+        }
+
+        AppointmentValidator userValidator = appointment -> {
+            User.UserType type = user.get().getUserType();
+            if (type.equals(User.UserType.PATIENT)) {
+                if( appointment.getPatient() == null ){
+                    return false;
+                }
+                return belongsToPatient(appointment, userId);
+            } else if (type.equals(User.UserType.DOCTOR)) {
+                return belongsToDoctor(appointment, userId);
+            }
+            return false;
+        };
+
+        return allAppointments.stream()
+                .filter(userValidator::isValid)
+                .collect(Collectors.groupingBy(appointment -> {
+                    if (pastValidator.isValid(appointment)) {
+                        return "past";
+                    } else if (todayValidator.isValid(appointment)) {
+                        return "today";
+                    } else if (futureValidator.isValid(appointment)) {
+                        return "future";
+                    } else {
+                        throw new IllegalStateException("Invalid time range for appointment");
+                    }
+                }));
+    }
 
     public Appointment parseJSONBookAppointmentSlot(String payload) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -146,7 +194,7 @@ public class AppointmentService {
         Optional<User> patient = userRepo.findById(patientId);
         Optional<Appointment> appointment = appointmentRepo.findById(appointmentid);
 
-        if (patient != null && appointment!=null) {
+        if (patient != null && appointment != null) {
             appointment.get().setPatient((Patient) patient.get());
             appointmentRepo.save(appointment.get());
             return appointment.get();
@@ -155,6 +203,9 @@ public class AppointmentService {
         }
     }
 
+    public Appointment saveAppointment(Appointment appointment) {
+        return appointmentRepo.save(appointment);
+    }
 
     public Appointment parseJSONCreateAppointmentSlot(String payload) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -189,11 +240,7 @@ public class AppointmentService {
         LocalDateTime endDate = helperService.parseDateFromJSON(rootNode.get("endDateTime").asText());
         LocalDateTime createdAt = LocalDateTime.now();
 
-        boolean valid = false;
-
-        if (isDateInFuture(startDate) && !isEndAppointmentBeforeStartAppointment(startDate, endDate)) {
-            valid = true;
-        }
+        boolean valid = isDateInFuture(startDate) && !isEndAppointmentBeforeStartAppointment(startDate, endDate);
 
         if (valid) {
             Appointment appointment = createAppointmentSlot(doctorEntity, creatorEntity, startDate, endDate, createdAt);
@@ -209,7 +256,7 @@ public class AppointmentService {
             }
 
             appointmentRepo.save(appointment);
-            System.out.println(appointment.toString());
+            System.out.println(appointment);
             return appointment;
         } else {
             return null;

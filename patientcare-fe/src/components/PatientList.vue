@@ -1,8 +1,8 @@
-<script setup lang="ts">
-import { onMounted, ref } from "vue";
-import type { Patient } from "@/types/types";
+<script lang="ts" setup>
+import {onMounted, ref} from "vue";
+import type {Patient} from "@/types/types";
+import {getPatient} from "@/api/patientController";
 import axios from "axios";
-import { getPatient } from "@/api/patientController";
 
 const ROOT_URL = "http://localhost";
 const SERVERPORT = 8080;

@@ -1,26 +1,22 @@
-<script setup lang="ts">
-import type {
-  Appointment,
-  BackendAppointment,
-  Doctor,
-  User,
-} from "@/types/types";
-import { ref, onMounted, computed } from "vue";
-import { getAllAppointmentsForUser } from "@/api/appointmentController";
-import { watch } from "vue";
-import { getDoctor } from "@/api/doctorController";
-import { useRoute } from "vue-router";
-import { useUserStore } from "@/stores/userStore";
+<script lang="ts" setup>
+import type {Appointment, BackendAppointment, Doctor,} from "@/types/types";
+import {computed, onMounted, ref, watch} from "vue";
+import {getAllAppointmentsForUser} from "@/api/appointmentController";
+import {getDoctor} from "@/api/doctorController";
+import {useRoute} from "vue-router";
+import {useUserStore} from "@/stores/userStore";
 import Snackbar from "@/components/Snackbar.vue";
 import {
-  useAppointmentHelpers,
-  parseDate,
-  roundToQuarterHour,
+  appointmentHasPatient,
+  calculateEndTime,
   checkCanCancelAppointment,
   checkCanSeeAppointment,
-  calculateEndTime,
-  appointmentHasPatient,
+  parseDate,
+  roundToQuarterHour,
+  useAppointmentHelpers,
 } from "@/helpers/appointmentHelpers";
+
+import LoadingSpinner from "@/components/LoadingSpinner.vue";
 
 const {
   delAppointment,
@@ -58,17 +54,17 @@ const loadDoctor = async (doctorId: number) => {
 };
 
 watch(
-  () => route.params.id,
-  async (newId) => {
-    console.log("Route ID geändert:", newId);
-    const doctorId = Number(newId);
-    if (!isNaN(doctorId)) {
-      console.log("Validierte Doktor-ID:", doctorId);
-      await loadDoctor(doctorId);
-    } else {
-      console.error("Ungültige ID aus Route:", newId);
+    () => route.params.id,
+    async (newId) => {
+      console.log("Route ID geändert:", newId);
+      const doctorId = Number(newId);
+      if (!isNaN(doctorId)) {
+        console.log("Validierte Doktor-ID:", doctorId);
+        await loadDoctor(doctorId);
+      } else {
+        console.error("Ungültige ID aus Route:", newId);
+      }
     }
-  }
 );
 
 const newEvent = ref<Appointment>({
@@ -101,7 +97,7 @@ const onEventClick = (appointment: Appointment, mouseevent: MouseEvent) => {
 
 const onCreateAppointment = async () => {
   const startDateTime = new Date(
-    `${newEvent.value.date}T${selectedStartTime.value}`
+      `${newEvent.value.date}T${selectedStartTime.value}`
   );
   const endDateTime = new Date(`${newEvent.value.date}T${newEvent.value.end}`);
   const payload = {
@@ -121,7 +117,7 @@ const onCreateAppointment = async () => {
 
   await createAppointment(payload, showSnackbar);
   showCreateDialog.value = false;
-  newEvent.value = { id: 0, title: "", start: "", end: "", date: "" };
+  newEvent.value = {id: 0, title: "", start: "", end: "", date: ""};
   selectedDuration.value = minDuration.value;
   fetchAppointments();
 };
@@ -149,7 +145,7 @@ watch(selectedStartTime, (newStartTime) => {
     startDate.setHours(hours, minutes, 0, 0);
 
     const endDate = new Date(
-      startDate.getTime() + selectedDuration.value * 60 * 1000
+        startDate.getTime() + selectedDuration.value * 60 * 1000
     );
 
     newEvent.value.start = newStartTime;
@@ -163,7 +159,7 @@ watch(selectedDuration, (newDuration) => {
     startDate.setHours(hours, minutes, 0, 0);
 
     const endDate = new Date(
-      startDate.getTime() + selectedDuration.value * 60 * 1000
+        startDate.getTime() + selectedDuration.value * 60 * 1000
     );
 
     newEvent.value.start = selectedStartTime.value;
@@ -190,7 +186,7 @@ const onCellClick = (date: Date) => {
   }
 
   const endTime = new Date(
-    startTime.getTime() + selectedDuration.value * 60 * 1000
+      startTime.getTime() + selectedDuration.value * 60 * 1000
   );
 
   newEvent.value.date = startTime.toISOString().split("T")[0];
@@ -260,9 +256,9 @@ const deleteSelectedAppointment = async () => {
     return;
   }
   await delAppointment(
-    selectedEvent.value.id,
-    useUserStore().getLoggedInUser?.id,
-    showSnackbar
+      selectedEvent.value.id,
+      useUserStore().getLoggedInUser?.id,
+      showSnackbar
   );
   fetchAppointments();
   showDialog.value = false;
@@ -275,8 +271,8 @@ const generateTimeOptions = () => {
   for (let hour = 7; hour < 18; hour++) {
     for (let minutes = 0; minutes < 60; minutes += 15) {
       const time = `${hour.toString().padStart(2, "0")}:${minutes
-        .toString()
-        .padStart(2, "0")}`;
+          .toString()
+          .padStart(2, "0")}`;
       startTimes.value.push(time);
     }
   }
@@ -305,32 +301,31 @@ const canCancelAppointment = computed(() => {
 
 const onCancelSelectedAppointment = async () => {
   await cancelSelectedAppointment(
-    selectedEvent.value,
-    useUserStore().getLoggedInUser?.id,
-    showSnackbar
+      selectedEvent.value,
+      useUserStore().getLoggedInUser?.id,
+      showSnackbar
   );
   fetchAppointments();
   showDialog.value = false;
 };
 
 const filterAppointmentsVisibility = computed(() => {
-  const filteredAppointments = events.value.filter(checkCanSeeAppointment);
-  return filteredAppointments;
+  return events.value.filter(checkCanSeeAppointment);
 });
 
 onMounted(async () => {
   generateTimeOptions();
   await loadInitialData();
-  useUserStore().fakeLogIn("doctor", 1);
 });
 </script>
 
 <template>
-  <div class="doctor-detail" v-if="doctor">
+  <div v-if="doctor" class="doctor-detail">
     <h1>{{ doctor.title }} {{ doctor.firstName }} {{ doctor.lastName }}</h1>
     <img
-      class="doctor-img"
-      :src="doctor.profileImg || 'https://cdn.vuetifyjs.com/images/john.png'"
+        :src="doctor.profileImg || 'https://cdn.vuetifyjs.com/images/john.png'"
+        alt="Doctor profile image"
+        class="doctor-img"
     />
     <p>{{ doctor.speciality }}</p>
     <p>{{ doctor.licenseId }}</p>
@@ -342,24 +337,24 @@ onMounted(async () => {
   </div>
   <h2 class="mt-8">Termin buchen</h2>
   <vue-cal
-    v-if="finishedLoading"
-    style="height: 850px"
-    :time-cell-height="80"
-    :events="filterAppointmentsVisibility"
-    :on-event-click="onEventClick"
-    @cell-click="onCellClick"
+      v-if="finishedLoading"
+      :events="filterAppointmentsVisibility"
+      :on-event-click="onEventClick"
+      :time-cell-height="80"
+      style="height: 850px"
+      @cell-click="onCellClick"
   />
   <v-dialog v-model="showDialog" style="width: 500px">
     <v-card>
       <v-card-title>
         <span>{{ selectedEvent.title }}</span>
-        <v-spacer />
+        <v-spacer/>
         <strong>{{
-          selectedEvent.start && selectedEvent.start.format("DD/MM/YYYY")
-        }}</strong>
+            selectedEvent.start && selectedEvent.start.format("DD/MM/YYYY")
+          }}</strong>
       </v-card-title>
       <v-card-text>
-        <p v-html="selectedEvent.contentFull" />
+        <p v-html="selectedEvent.contentFull"/>
         <strong>Termindetails</strong> -
         <a :href="`/appointment/${selectedEvent.id}`">Termin öffnen</a>
         <ul>
@@ -378,28 +373,29 @@ onMounted(async () => {
         </ul>
       </v-card-text>
       <v-btn v-if="!checkAppointmentHasPatient" @click="onBookAppointment"
-        >Termin buchen</v-btn
+      >Termin buchen
+      </v-btn
       >
 
       <v-btn
-        v-if="canCancelAppointment"
-        color="red-lighten-2"
-        @click="onCancelSelectedAppointment"
+          v-if="canCancelAppointment"
+          color="red-lighten-2"
+          @click="onCancelSelectedAppointment"
       >
-        Termin stornieren</v-btn
+        Termin stornieren
+      </v-btn
       >
 
       <v-btn
-        v-if="selectedEvent?.doctor?.id === useUserStore().getLoggedInUser?.id"
-        color="red"
-        @click="deleteSelectedAppointment"
+          v-if="selectedEvent?.doctor?.id === useUserStore().getLoggedInUser?.id"
+          color="red"
+          @click="deleteSelectedAppointment"
       >
         Termin löschen
       </v-btn>
     </v-card>
   </v-dialog>
 
-  <!-- @TODO: implement timepicker, appointment duration and calculate endtime -->
   <v-dialog v-model="showCreateDialog" style="width: 500px">
     <v-card>
       <v-card-title>Neuen Termin erstellen</v-card-title>
@@ -407,41 +403,43 @@ onMounted(async () => {
         <v-text-field v-model="newEvent.title" label="Titel"></v-text-field>
 
         <v-select
-          label="Termintyp"
-          :items="['OFFLINE', 'ONLINE']"
-          v-model="newEvent.type"
+            v-model="newEvent.type"
+            :items="['OFFLINE', 'ONLINE']"
+            label="Termintyp"
         ></v-select>
 
         <v-select
-          v-model="selectedStartTime"
-          :items="startTimes"
-          label="Startzeit"
+            v-model="selectedStartTime"
+            :items="startTimes"
+            label="Startzeit"
         ></v-select>
 
         <v-select
-          v-model="selectedDuration"
-          :items="durations"
-          label="Termindauer (Minuten)"
-          item-text="value"
-          item-value="value"
+            v-model="selectedDuration"
+            :items="durations"
+            item-text="value"
+            item-value="value"
+            label="Termindauer (Minuten)"
         ></v-select>
         <p>Ende: {{ calculateEndTime(newEvent.start, selectedDuration) }}</p>
       </v-card-text>
       <v-card-actions>
         <v-btn color="primary" @click="onCreateAppointment">Speichern</v-btn>
         <v-btn color="secondary" @click="showCreateDialog = false"
-          >Abbrechen</v-btn
+        >Abbrechen
+        </v-btn
         >
       </v-card-actions>
     </v-card>
   </v-dialog>
 
   <Snackbar
-    :show="snackbar.show"
-    :message="snackbar.message"
-    :color="snackbar.color"
-    @update:show="snackbar.show = $event"
+      :color="snackbar.color"
+      :message="snackbar.message"
+      :show="snackbar.show"
+      @update:show="snackbar.show = $event"
   />
+  <LoadingSpinner v-if="!finishedLoading"/>
 </template>
 
 <style scoped>
@@ -449,6 +447,7 @@ onMounted(async () => {
   width: 150px;
   height: 150px;
 }
+
 .vuecal__event {
   cursor: pointer;
 }

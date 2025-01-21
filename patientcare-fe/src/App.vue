@@ -1,33 +1,42 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { RouterLink, RouterView } from "vue-router";
-import HelloWorld from "./components/HelloWorld.vue";
-import PatientList from "./components/PatientList.vue";
+
+import { useAuthStore } from "@/stores";
+
+const authStore = useAuthStore();
 </script>
 
 <template>
   <header>
     <div class="wrapper">
-      <nav>
-        <RouterLink to="/">Dashboard</RouterLink>
-        <RouterLink to="/doctors">Ärztesuche</RouterLink>
-        <RouterLink to="#">Meine Patientenakte</RouterLink>
-        <RouterLink to="#">Meine Praxisseite</RouterLink>
-      </nav>
+      <nav></nav>
     </div>
   </header>
-
-  <RouterView />
+  <div class="app-container bg-dark">
+    <nav
+      v-show="authStore.user"
+      class="navbar navbar-expand navbar-dark bg-dark"
+    >
+      <div class="navbar-nav">
+        <RouterLink class="nav-item nav-link" to="/">Home</RouterLink>
+        <RouterLink class="nav-item nav-link" to="/doctors"
+          >Ärztesuche</RouterLink
+        >
+        <a class="nav-item nav-link" @click="authStore.logout()">Logout</a>
+      </div>
+    </nav>
+    <div class="container pt-4 pb-4">
+      <RouterView />
+    </div>
+  </div>
 </template>
 
 <style scoped>
-/* header {
+@import "@/assets/base.css";
+
+header {
   line-height: 1.5;
   max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
 }
 
 nav {
@@ -62,10 +71,6 @@ nav a:first-of-type {
     padding-right: calc(var(--section-gap) / 2);
   }
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
   header .wrapper {
     display: flex;
     place-items: flex-start;
@@ -80,5 +85,5 @@ nav a:first-of-type {
     padding: 1rem 0;
     margin-top: 1rem;
   }
-} */
+}
 </style>

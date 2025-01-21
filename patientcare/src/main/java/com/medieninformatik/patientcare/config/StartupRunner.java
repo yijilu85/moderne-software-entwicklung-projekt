@@ -1,12 +1,9 @@
 package com.medieninformatik.patientcare.config;
 
-import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appointment;
-import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
-import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import com.medieninformatik.patientcare.appointmentManagement.infrastructure.repositories.AppointmentRepo;
+import com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.DoctorRepo;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.PatientRepo;
-import com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService;
 import com.medieninformatik.patientcare.userManagement.services.FakerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -48,8 +45,8 @@ public class StartupRunner implements ApplicationRunner {
 //        doctorRepo.save(doctor);
 
         FakerService fakerService = new FakerService(doctorRepo, patientRepo);
-        fakerService.createDoctors(20);
-        fakerService.createPatients(20);
+//        fakerService.createDoctors(20);
+//        fakerService.createPatients(20);
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startDateTime = LocalDateTime.of(2024, Month.NOVEMBER, 25, 12, 0);

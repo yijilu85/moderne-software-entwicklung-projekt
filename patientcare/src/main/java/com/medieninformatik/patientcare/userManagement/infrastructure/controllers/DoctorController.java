@@ -1,8 +1,6 @@
 package com.medieninformatik.patientcare.userManagement.infrastructure.controllers;
 
 import com.medieninformatik.patientcare.userManagement.domain.model.DTO.DoctorResponseDTO;
-import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
-import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import com.medieninformatik.patientcare.userManagement.services.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

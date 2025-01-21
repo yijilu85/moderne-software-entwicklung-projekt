@@ -14,96 +14,91 @@ import java.time.LocalDate;
 @Setter
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@Table(name= "users")
+@Table(name = "users")
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "userType", visible = true)
 @JsonSubTypes({
-		@JsonSubTypes.Type(value = Patient.class, name = "PATIENT"),
-		@JsonSubTypes.Type(value = Doctor.class, name = "DOCTOR")
+        @JsonSubTypes.Type(value = Patient.class, name = "PATIENT"),
+        @JsonSubTypes.Type(value = Doctor.class, name = "DOCTOR")
 })
 public abstract class User {
 
-	public enum UserType{
-		PATIENT,
-		DOCTOR
-	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates the ID
+    private Long id;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
+    @Column(name = "user_type", nullable = false)
+    private UserType userType;
+    @Column(name = "email", unique = true, nullable = false)
+    private String email;
+    @Column(name = "password", nullable = false)
+    private String password;
+    @Column(name = "date_of_birth", nullable = true)
+    private LocalDate dateOfBirth;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates the ID
-	private Long id;
+    // Getter and Setter for 'id'
+    public Long getId() {
+        return id;
+    }
 
-	@Column(name = "first_name", nullable = false)
-	private String firstName;
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	@Column(name = "last_name", nullable = false)
-	private String lastName;
+    // Getter and Setter for 'firstName'
+    public String getFirstName() {
+        return firstName;
+    }
 
-	@Column(name = "user_type", nullable = false)
-	private UserType userType;
-	@Column(name = "email", nullable = true)
-	private String email;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-	@Column(name = "password", nullable = true)
-	private String password;
-	
-	@Column(name = "date_of_birth", nullable = true)
-	private LocalDate dateOfBirth;
+    // Getter and Setter for 'lastName'
+    public String getLastName() {
+        return lastName;
+    }
 
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
-	// Getter and Setter for 'id'
-	public Long getId() {
-		return id;
-	}
+    public void setUsertype(UserType userType) {
+        this.userType = userType;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
-	// Getter and Setter for 'firstName'
-	public String getFirstName() {
-		return firstName;
-	}
+    public UserType getUserType() {
+        return this.userType;
+    }
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
 
-	// Getter and Setter for 'lastName'
-	public String getLastName() {
-		return lastName;
-	}
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
 
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+    public String getEmail() {
+        return this.email;
+    }
 
-	public void setUsertype(UserType userType){
-		this.userType = userType;
-	}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-	public UserType getUserType(){
-		return this.userType;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public LocalDate getDateOfBirth() {
-		return dateOfBirth;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-	public void setDateOfBirth(LocalDate dateOfBirth) {
-		this.dateOfBirth = dateOfBirth;
-	}
-
-	public String getEmail(){
-		return this.email;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setEmail(String email){
-		this.email = email;
-	}
-
-	public void setPassword(String password){
-		this.password = password;
-	}
+    public enum UserType {
+        PATIENT,
+        DOCTOR
+    }
 }
