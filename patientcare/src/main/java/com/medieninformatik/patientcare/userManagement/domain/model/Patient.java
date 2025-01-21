@@ -1,11 +1,10 @@
 package com.medieninformatik.patientcare.userManagement.domain.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.shared.Note;
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 
 import java.util.List;
 

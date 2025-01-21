@@ -1,6 +1,5 @@
 package com.medieninformatik.patientcare.patientDataManagement.domain.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.shared.Note;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.valueObjects.IcdCode;
@@ -34,6 +33,7 @@ public class Treatment extends Note {
     @Embedded
     private IcdCode icdCode;
 
+    @Getter
     private String action;
 
     public Treatment() {
@@ -50,13 +50,6 @@ public class Treatment extends Note {
     }
 
     // Getter und Setter (optional, falls du sie benötigst)
-    public Patient getPatient() {
-        return this.getPatient();
-    }
-
-    public Doctor getDoctor() {
-        return this.getDoctor();
-    }
 
     public String getIcdCode() {
         return this.icdCode.getCode();
@@ -66,7 +59,4 @@ public class Treatment extends Note {
         return this.recommendation.getText();
     }
 
-    public String getAction() {
-        return this.action;
-    }
 }

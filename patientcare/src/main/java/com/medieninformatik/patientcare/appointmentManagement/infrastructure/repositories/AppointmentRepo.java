@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface AppointmentRepo extends JpaRepository<Appointment, Long>{
+public interface AppointmentRepo extends JpaRepository<Appointment, Long> {
 
     @Query("SELECT a FROM Appointment a WHERE a.patient.id = :userId")
     List<Appointment> findByPatient(@Param("userId") Long userId);

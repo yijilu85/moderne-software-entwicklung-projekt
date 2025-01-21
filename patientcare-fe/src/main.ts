@@ -1,22 +1,21 @@
 import "./assets/main.css";
 
-import { createApp } from "vue";
-import { createPinia } from "pinia";
+import {createApp} from "vue";
+import {createPinia} from "pinia";
 
 import App from "./App.vue";
 import VueCal from "vue-cal";
 import "vue-cal/dist/vuecal.css";
 import "vuetify/styles";
-import { createVuetify } from "vuetify";
+import {createVuetify} from "vuetify";
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 
-import { router } from './helpers';
+import {router} from './helpers';
 
 const app = createApp(App);
 const vuetify = createVuetify({
-  components,
-  directives,
+    components, directives,
 });
 
 app.component("VueCal", VueCal);

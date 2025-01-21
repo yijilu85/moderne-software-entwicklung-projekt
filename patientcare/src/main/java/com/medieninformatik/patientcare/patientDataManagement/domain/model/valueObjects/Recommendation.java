@@ -11,7 +11,8 @@ public class Recommendation {
 
     private String text;
 
-    public Recommendation() {}
+    public Recommendation() {
+    }
 
     public Recommendation(String text) {
         this.text = text;

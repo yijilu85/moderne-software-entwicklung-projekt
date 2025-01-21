@@ -3,37 +3,33 @@ package com.medieninformatik.patientcare.patientDataManagement.infrastructure.co
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appointment;
 import com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Diagnosis;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Measurement;
-import com.medieninformatik.patientcare.patientDataManagement.domain.model.Treatment;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.NoteFile;
-import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.repositories.NoteFileRepo;
+import com.medieninformatik.patientcare.patientDataManagement.domain.model.Treatment;
 import com.medieninformatik.patientcare.patientDataManagement.services.NoteService;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.UserRepo;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.repositories.NoteFileRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
-
-import java.util.*;
+import java.util.Date;
+import java.util.Optional;
+import java.util.UUID;
 
 
 @RestController
@@ -237,30 +233,31 @@ public class NoteController {
                     .body("Failed to upload file: " + e.getMessage());
         }
     }
-        @CrossOrigin
-        @GetMapping("/download/{id}")
-        public ResponseEntity<Resource> serveFile(@PathVariable Long id) {
-            Optional<NoteFile> optionalNoteFile = noteFileRepo.findById(id);
 
-            if (optionalNoteFile.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
+    @CrossOrigin
+    @GetMapping("/download/{id}")
+    public ResponseEntity<Resource> serveFile(@PathVariable Long id) {
+        Optional<NoteFile> optionalNoteFile = noteFileRepo.findById(id);
 
-            NoteFile noteFile = optionalNoteFile.get();
-            String relativeUrl = noteFile.getUrl();
-            String fileName = relativeUrl.substring(relativeUrl.lastIndexOf("/") + 1);
-            File file = new File(uploadDir, fileName);
-
-            if (!file.exists()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
-
-            Resource resource = new FileSystemResource(file);
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName());
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(resource);
+        if (optionalNoteFile.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
+
+        NoteFile noteFile = optionalNoteFile.get();
+        String relativeUrl = noteFile.getUrl();
+        String fileName = relativeUrl.substring(relativeUrl.lastIndexOf("/") + 1);
+        File file = new File(uploadDir, fileName);
+
+        if (!file.exists()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        Resource resource = new FileSystemResource(file);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(resource);
+    }
 }

@@ -12,22 +12,28 @@ import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
 import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.UserRepo;
 import jakarta.persistence.EntityNotFoundException;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.file.AccessDeniedException;
-import java.sql.Array;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class AppointmentService {
 
-    private AppointmentRepo appointmentRepo;
-    private UserRepo userRepo;
-    private HelperService helperService;
-
+    private final AppointmentRepo appointmentRepo;
+    private final UserRepo userRepo;
+    private final HelperService helperService;
+    private final AppointmentValidator pastValidator = appointment ->
+            appointment.getStartDateTime().toLocalDate().isBefore(LocalDateTime.now().toLocalDate());
+    private final AppointmentValidator todayValidator = appointment -> appointment.getStartDateTime().toLocalDate().isEqual(LocalDateTime.now().toLocalDate());
+    private final AppointmentValidator futureValidator = appointment ->
+            appointment.getStartDateTime().toLocalDate().isAfter(LocalDateTime.now().toLocalDate());
 
     public AppointmentService(AppointmentRepo appointmentRepo, UserRepo userRepo, HelperService helperService) {
         this.appointmentRepo = appointmentRepo;
@@ -47,7 +53,7 @@ public class AppointmentService {
             , LocalDateTime createdAt) {
         Appointment appointment = new Appointment(doctor, creator, startDateTime, endDateTime, createdAt);
         appointmentRepo.save(appointment);
-        System.out.println(appointment.toString());
+        System.out.println(appointment);
 
         return appointment;
     }
@@ -142,15 +148,6 @@ public class AppointmentService {
         return appointment.getDoctor().getId().equals(doctorId);
     }
 
-    private final AppointmentValidator pastValidator = appointment ->
-        appointment.getStartDateTime().toLocalDate().isBefore(LocalDateTime.now().toLocalDate());
-
-    private final AppointmentValidator todayValidator = appointment -> appointment.getStartDateTime().toLocalDate().isEqual(LocalDateTime.now().toLocalDate());
-
-    private final AppointmentValidator futureValidator = appointment ->
-            appointment.getStartDateTime().toLocalDate().isAfter(LocalDateTime.now().toLocalDate());
-
-
     public Map<String, List<Appointment>> getAllAppointmentsForUserWithTimeranges(Long userId) {
         List<Appointment> allAppointments = appointmentRepo.findAll();
         Optional<User> user = userRepo.findById(userId);
@@ -162,6 +159,8 @@ public class AppointmentService {
         AppointmentValidator userValidator = appointment -> {
             User.UserType type = user.get().getUserType();
             if (type.equals(User.UserType.PATIENT)) {
+                if( appointment.getPatient() == null )
+                    return false;
                 return belongsToPatient(appointment, userId);
             } else if (type.equals(User.UserType.DOCTOR)) {
                 return belongsToDoctor(appointment, userId);
@@ -240,11 +239,7 @@ public class AppointmentService {
         LocalDateTime endDate = helperService.parseDateFromJSON(rootNode.get("endDateTime").asText());
         LocalDateTime createdAt = LocalDateTime.now();
 
-        boolean valid = false;
-
-        if (isDateInFuture(startDate) && !isEndAppointmentBeforeStartAppointment(startDate, endDate)) {
-            valid = true;
-        }
+        boolean valid = isDateInFuture(startDate) && !isEndAppointmentBeforeStartAppointment(startDate, endDate);
 
         if (valid) {
             Appointment appointment = createAppointmentSlot(doctorEntity, creatorEntity, startDate, endDate, createdAt);
@@ -260,7 +255,7 @@ public class AppointmentService {
             }
 
             appointmentRepo.save(appointment);
-            System.out.println(appointment.toString());
+            System.out.println(appointment);
             return appointment;
         } else {
             return null;

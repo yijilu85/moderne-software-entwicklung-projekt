@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import { ref, watch } from "vue";
+<script lang="ts" setup>
+import {watch} from "vue";
 
 const props = defineProps({
   show: Boolean,
@@ -17,12 +17,12 @@ const hideSnackbar = () => {
 };
 
 watch(
-  () => props.show,
-  (newVal) => {
-    if (newVal) {
-      setTimeout(() => emit("update:show", false), 3000);
+    () => props.show,
+    (newVal) => {
+      if (newVal) {
+        setTimeout(() => emit("update:show", false), 3000);
+      }
     }
-  }
 );
 </script>
 

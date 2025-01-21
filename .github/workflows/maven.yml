@@ -12,7 +12,7 @@ on:
     branches:
       - main
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [ opened, synchronize, reopened ]
 
 jobs:
   build:
@@ -37,7 +37,7 @@ jobs:
         run: mvn -B clean install
       - name: Run unit tests with maven
         working-directory: patientcare
-        run:  mvn -B test -X --file pom.xml
+        run: mvn -B test -X --file pom.xml
       - name: Cache SonarQube Cloud packages
         uses: actions/cache@v4
         with:

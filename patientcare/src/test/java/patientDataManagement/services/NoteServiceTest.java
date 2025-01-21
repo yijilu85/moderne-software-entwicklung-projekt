@@ -2,18 +2,16 @@ package patientDataManagement.services;
 
 import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appointment;
 import com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService;
-import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.repositories.NoteRepo;
-import com.medieninformatik.patientcare.shared.services.HelperService;
-
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Diagnosis;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Treatment;
-
-import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.DoctorRepo;
-import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.PatientRepo;
 import com.medieninformatik.patientcare.patientDataManagement.services.NoteService;
+import com.medieninformatik.patientcare.shared.services.HelperService;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import com.medieninformatik.patientcare.userManagement.domain.model.Patient;
 import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.DoctorRepo;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.PatientRepo;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.repositories.NoteRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -21,7 +19,8 @@ import org.mockito.Mock;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class NoteServiceTest {
 
@@ -115,7 +114,7 @@ class NoteServiceTest {
                 icdCode, recommendation, action));
         assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(patient, doctor, appointment,
                 null,
-                icdCode,recommendation, action));
+                icdCode, recommendation, action));
         assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(patient, doctor, appointment, null,
                 icdCode, recommendation, action));
         assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(patient, doctor, appointment,
@@ -124,7 +123,7 @@ class NoteServiceTest {
         assertThrows(IllegalArgumentException.class, () -> noteService.createTreatment(patient, doctor, appointment,
                 date,
                 icdCode, null,
-                 null));
+                null));
     }
 
     @Test

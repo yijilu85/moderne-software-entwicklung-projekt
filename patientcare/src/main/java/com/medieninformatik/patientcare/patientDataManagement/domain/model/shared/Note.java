@@ -1,6 +1,7 @@
 package com.medieninformatik.patientcare.patientDataManagement.domain.model.shared;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appointment;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Diagnosis;
 import com.medieninformatik.patientcare.patientDataManagement.domain.model.Measurement;
@@ -11,9 +12,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Getter
@@ -46,12 +45,11 @@ public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String noteType;
 
     public Note() {
         this.timestamp = new Date(); // Set timestamp to current date by default
     }
-
-    private String noteType;
 
     // Constructor with parameters
     public Note(Patient patient, Doctor doctor, Appointment appointment) {
@@ -61,12 +59,12 @@ public class Note {
         this.appointment = appointment;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Date getTimestamp() {
@@ -101,11 +99,11 @@ public class Note {
         this.noteType = noteType;
     }
 
-    public void setAppointment(Appointment appointment) {
-        this.appointment = appointment;
-    }
-
     public Appointment getAppointment() {
         return appointment;
+    }
+
+    public void setAppointment(Appointment appointment) {
+        this.appointment = appointment;
     }
 }

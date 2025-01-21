@@ -1,4 +1,5 @@
 package com.medieninformatik.patientcare.userManagement.domain.model.valueObjects;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -6,6 +7,19 @@ import lombok.Setter;
 @Setter
 public class MedicalSpeciality {
     private final Speciality speciality;
+
+    public MedicalSpeciality(Speciality speciality) {
+        this.speciality = speciality;
+    }
+
+    public Speciality getSpeciality() {
+        return this.speciality;
+    }
+
+    @Override
+    public String toString() {
+        return "Fachgebiet: " + this.speciality.getLabel();
+    }
 
     public enum Speciality {
         ALLGEMEINMEDIZIN("Allgemeinmedizin"),
@@ -42,17 +56,6 @@ public class MedicalSpeciality {
         public String toString() {
             return label;
         }
-    }
-
-    public MedicalSpeciality(Speciality speciality) {this.speciality = speciality;}
-
-    public Speciality getSpeciality() {
-        return this.speciality;
-    }
-
-    @Override
-    public String toString() {
-        return "Fachgebiet: " + this.speciality.getLabel();
     }
 }
 

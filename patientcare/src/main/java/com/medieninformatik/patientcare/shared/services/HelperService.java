@@ -1,7 +1,5 @@
 package com.medieninformatik.patientcare.shared.services;
 
-import com.medieninformatik.patientcare.appointmentManagement.domain.model.Appointment;
-import com.medieninformatik.patientcare.patientDataManagement.domain.model.Diagnosis;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

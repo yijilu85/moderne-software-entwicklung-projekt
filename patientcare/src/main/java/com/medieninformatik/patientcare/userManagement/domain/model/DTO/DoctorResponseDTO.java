@@ -1,15 +1,14 @@
 package com.medieninformatik.patientcare.userManagement.domain.model.DTO;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.medieninformatik.patientcare.userManagement.domain.model.Doctor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 @Getter
 @AllArgsConstructor
-public class DoctorResponseDTO{
+public class DoctorResponseDTO {
 
     @JsonProperty("userType")
     private String userType;
