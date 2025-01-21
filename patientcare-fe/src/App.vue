@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import {RouterLink, RouterView} from "vue-router";
+import { RouterLink, RouterView } from "vue-router";
 
-import {useAuthStore} from '@/stores';
+import { useAuthStore } from "@/stores";
 
 const authStore = useAuthStore();
 </script>
@@ -9,34 +9,35 @@ const authStore = useAuthStore();
 <template>
   <header>
     <div class="wrapper">
-      <nav>
-
-      </nav>
+      <nav></nav>
     </div>
   </header>
   <div class="app-container bg-dark">
-    <nav v-show="authStore.user" class="navbar navbar-expand navbar-dark bg-dark">
+    <nav
+      v-show="authStore.user"
+      class="navbar navbar-expand navbar-dark bg-dark"
+    >
       <div class="navbar-nav">
         <RouterLink class="nav-item nav-link" to="/">Home</RouterLink>
-        <RouterLink class="nav-item nav-link" to="/">Dashboard</RouterLink>
-        <RouterLink class="nav-item nav-link" to="/doctors">Ärztesuche</RouterLink>
+        <RouterLink class="nav-item nav-link" to="/doctors"
+          >Ärztesuche</RouterLink
+        >
         <a class="nav-item nav-link" @click="authStore.logout()">Logout</a>
       </div>
     </nav>
     <div class="container pt-4 pb-4">
-      <RouterView/>
+      <RouterView />
     </div>
   </div>
 </template>
 
 <style scoped>
-@import '@/assets/base.css';
+@import "@/assets/base.css";
 
 header {
   line-height: 1.5;
   max-height: 100vh;
 }
-
 
 nav {
   width: 100%;

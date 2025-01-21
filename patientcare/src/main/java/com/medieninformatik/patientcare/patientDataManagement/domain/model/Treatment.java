@@ -23,7 +23,7 @@ public class Treatment extends Note {
 
     @ManyToOne
     @JoinColumn(name = "creator_id")
-    @JsonIgnore // Ignore this field for serialization
+    @JsonIgnore
     private User creator;
 
     private Date date;

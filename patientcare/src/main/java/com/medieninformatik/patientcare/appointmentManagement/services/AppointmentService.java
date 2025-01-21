@@ -159,8 +159,9 @@ public class AppointmentService {
         AppointmentValidator userValidator = appointment -> {
             User.UserType type = user.get().getUserType();
             if (type.equals(User.UserType.PATIENT)) {
-                if( appointment.getPatient() == null )
+                if( appointment.getPatient() == null ){
                     return false;
+                }
                 return belongsToPatient(appointment, userId);
             } else if (type.equals(User.UserType.DOCTOR)) {
                 return belongsToDoctor(appointment, userId);
