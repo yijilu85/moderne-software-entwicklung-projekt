@@ -1,18 +1,20 @@
 package com.medieninformatik.patientcare.shared.services;
 
-
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.medieninformatik.patientcare.userManagement.domain.model.shared.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.medieninformatik.patientcare.userManagement.infrastructure.repositories.UserRepo;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -20,12 +22,13 @@ import java.util.logging.SimpleFormatter;
 @Component
 @Aspect
 @EnableAspectJAutoProxy
-
-
 public class LoggerAspect {
 
     private static final Logger logger = Logger.getLogger(LoggerAspect.class.getName());
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Autowired
+    private UserRepo userRepo;
 
     static {
         try {
@@ -37,8 +40,7 @@ public class LoggerAspect {
         }
     }
 
-
-    //Pointcut für die Methode in AppointmentService
+    // Pointcuts
     @Pointcut("execution(* com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService.parseJSONCreateAppointmentSlot(..))")
     public void createAppointmentPointcut() {}
 
@@ -51,8 +53,7 @@ public class LoggerAspect {
     @Pointcut("execution(* com.medieninformatik.patientcare.appointmentManagement.services.AppointmentService.cancelAppointment(..))")
     public void cancelAppointmentPointcut() {}
 
-
-    // Logging vor den Methoden
+    // Before Logging
     @Before("createAppointmentPointcut()")
     public void logBeforeCreate(JoinPoint joinPoint) {
         logBefore(joinPoint, "Create Appointment");
@@ -73,8 +74,7 @@ public class LoggerAspect {
         logBefore(joinPoint, "Cancel Appointment");
     }
 
-
-    // Logging nach den Methoden
+    // After Logging
     @After("createAppointmentPointcut()")
     public void logAfterCreate(JoinPoint joinPoint) {
         logAfter(joinPoint, "Create Appointment");
@@ -95,9 +95,12 @@ public class LoggerAspect {
         logAfter(joinPoint, "Cancel Appointment");
     }
 
+    private void logSeparator() {
+        logger.info("\n----------------------------------------\n");
+    }
 
 
-    // Gemeinsame Logging-Methoden
+    // Core Logging Logic
     private void logBefore(JoinPoint joinPoint, String operation) {
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
@@ -108,10 +111,11 @@ public class LoggerAspect {
                 .append(" - User: ");
 
         try {
-            // Extrahiere User-ID basierend auf der Operation
             if (args.length > 0) {
-                String userId = extractUserId(args[0], operation);
-                logMessage.append(userId);
+                String userInfo = extractUserInfo(args[0], operation);
+                logMessage.append(userInfo);
+            } else {
+                logMessage.append("Unknown User");
             }
         } catch (Exception e) {
             logMessage.append("Unknown User");
@@ -119,32 +123,60 @@ public class LoggerAspect {
         }
 
         logger.info(logMessage.toString());
+        logSeparator();
     }
 
-    private String extractUserId(Object arg, String operation) throws JsonProcessingException {
-        if (arg instanceof String && operation.contains("Create")) {
-            JsonNode rootNode = objectMapper.readTree((String) arg);
-            JsonNode creatorNode = rootNode.get("creator");
-            return creatorNode != null ? "Creator ID: " + creatorNode.get("id").asLong() : "Unknown Creator";
+    private String extractUserInfo(Object arg, String operation) {
+        if (arg instanceof String) {
+            try {
+                JsonNode rootNode = objectMapper.readTree((String) arg);
+                Long userId = null;
+
+                if (operation.contains("Create")) {
+                    userId = extractIdFromJson(rootNode, "creator", "id");
+                } else if (operation.contains("Book")) {
+                    userId = extractIdFromJson(rootNode, null, "patientId");
+                } else if (operation.contains("Cancel")) {
+                    userId = extractIdFromJson(rootNode, null, "userId");
+                }
+
+                if (userId != null) {
+                    final Long finalUserId = userId; // Explizit final deklarieren
+                    Optional<User> user = userRepo.findById(finalUserId);
+                    return user.map(u -> u.getUserType() + " ID: " + finalUserId)
+                            .orElse("Unknown User ID: " + finalUserId);
+                }
+
+
+            } catch (Exception e) {
+                logger.warning("Error parsing JSON for user info: " + e.getMessage());
+            }
+        } else if (arg instanceof Long && operation.contains("Delete")) {
+            Long userId = (Long) arg;
+            Optional<User> user = userRepo.findById(userId);
+            return user.map(u -> u.getUserType() + " ID: " + userId).orElse("Unknown User ID: " + userId);
         }
-        else if (arg instanceof String && operation.contains("Book")) {
-            JsonNode rootNode = objectMapper.readTree((String) arg);
-            JsonNode patientId = rootNode.get("patientId");
-            return patientId != null ? "Patient ID: " + patientId.asLong() : "Unknown Patient";
-        }
-        else if (arg instanceof String && operation.contains("Cancel")) {
-            JsonNode rootNode = objectMapper.readTree((String) arg);
-            JsonNode userId = rootNode.get("userId");
-            return userId != null ? "User ID: " + userId.asLong() : "Unknown User";
-        }
-        else if (arg instanceof Long && operation.contains("Delete")) {
-            return "User ID: " + arg;
-        }
+
         return "Unknown User";
+    }
+
+    private Long extractIdFromJson(JsonNode rootNode, String parentNodeName, String fieldName) {
+        if (parentNodeName != null) {
+            JsonNode parentNode = rootNode.get(parentNodeName);
+            if (parentNode != null) {
+                return parentNode.get(fieldName).asLong();
+            }
+        } else {
+            JsonNode fieldNode = rootNode.get(fieldName);
+            if (fieldNode != null) {
+                return fieldNode.asLong();
+            }
+        }
+        return null;
     }
 
     private void logAfter(JoinPoint joinPoint, String operation) {
         logger.info("After " + operation + " - Method: " + joinPoint.getSignature().getName() + " completed");
+        logSeparator();
     }
-
 }
