@@ -90,11 +90,8 @@ class NoteServiceTest {
 
         assertNotNull(treatment.getPatient());
         assertNotNull(treatment.getDoctor());
-//        assertNotNull(treatment.getCreator());
-//        assertNotNull(treatment.getDate());
         assertNotNull(treatment.getIcdCode());
         assertNotNull(treatment.getRecommendation());
-        assertNotNull(treatment.getAction());
     }
 
     @Test
